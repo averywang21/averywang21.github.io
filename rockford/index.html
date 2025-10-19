@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avery's 2026 Rockford 70.3 Training Plan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Tailwind's gray-50 */
+        }
+        .calendar-grid {
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+        }
+        .workout-card {
+            min-height: 120px;
+            cursor: pointer;
+        }
+        .workout-type {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        .workout-details {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        .race-a { /* A Race: Main Goal (Deep Purple) */
+            background: linear-gradient(45deg, #a78bfa, #8b5cf6);
+            color: white;
+        }
+        .race-b { /* B Race: Important Tune-up (Vibrant Red) */
+             background: linear-gradient(45deg, #f87171, #ef4444);
+             color: white;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1.04);
+                box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+            }
+            50% {
+                transform: scale(1.06);
+                box-shadow: 0 0 25px rgba(14, 165, 233, 0.6);
+            }
+        }
+
+        .selected-day {
+            border: 3px solid #0ea5e9; /* Sky blue border */
+            z-index: 10;
+            animation: pulse 2.5s infinite ease-in-out;
+        }
+
+        .past-day {
+            position: relative;
+            opacity: 0.7;
+        }
+        .past-day::before, .past-day::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background-color: rgba(107, 114, 128, 0.5);
+            border-radius: 9999px;
+            z-index: 20;
+        }
+        .past-day::before {
+            transform: translate(0, -50%) rotate(45deg);
+        }
+        .past-day::after {
+            transform: translate(0, -50%) rotate(-45deg);
+        }
+
+    </style>
+</head>
+<body class="bg-gray-50 p-4 sm:p-6 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Avery's 2026 Rockford 70.3 Training Plan</h1>
+            <p id="goal-subtitle" class="text-md text-gray-500 mt-1">12-Week Half Ironman Plan</p>
+        </header>
+
+        <div class="bg-white p-6 rounded-2xl shadow-lg grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+
+            <div class="lg:col-span-1 flex flex-col">
+                <h3 class="font-bold text-gray-800 mb-2 text-left">Race Countdown</h3>
+                <div class="bg-violet-50 p-4 rounded-lg text-center flex flex-col justify-center h-36">
+                    <p id="countdown" class="text-6xl font-bold text-violet-500">--</p>
+                    <p class="text-xs text-gray-500">Days Remaining</p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 flex flex-col">
+                 <h3 id="selected-workout-title" class="font-bold text-gray-800 mb-2 text-left">Today's Workout</h3>
+                 <div id="selected-workout-card" class="p-4 rounded-lg text-center transition-colors duration-300 flex flex-col justify-center flex-grow h-36 overflow-auto">
+                     <p id="selected-workout-date" class="font-semibold text-gray-500">--</p>
+                     <p id="selected-workout-type" class="font-bold text-lg text-gray-800">--</p>
+                     <p id="selected-workout-details" class="text-sm text-gray-600">--</p>
+                 </div>
+            </div>
+
+            <div class="lg:col-span-2 lg:row-span-2 flex flex-col">
+                <h3 class="font-bold text-gray-800 mb-2 text-left">Daily Briefing</h3>
+                <div class="bg-gray-50 p-4 rounded-lg flex-grow flex flex-col">
+                         <div class="text-center mb-2">
+                             <button id="quote-toggle-btn" class="text-xs font-semibold text-white bg-gray-800 hover:bg-black py-1 px-3 rounded-full transition-colors">
+                                 Switch to Goggins Mode
+                             </button>
+                         </div>
+                    <hr class="border-gray-200 my-2">
+                    <div class="flex-grow flex flex-col text-center min-h-0">
+                        <p id="goggins-quote-text" class="text-sm text-gray-700 italic w-full h-full overflow-y-auto pr-2"></p>
+                    </div>
+                    <p id="goggins-attribution" class="text-xs text-gray-500 font-bold not-italic text-right w-full mt-2 flex-shrink-0"></p>
+                </div>
+            </div>
+            
+            <div class="lg:col-span-1 flex flex-col">
+                <div class="bg-green-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center">
+                    <p id="mileage-tracker" class="text-4xl font-bold text-green-600">--/--</p>
+                    <p class="text-xs text-gray-500">Miles Ran (Plan Total)</p>
+                </div>
+            </div>
+            
+            <div class="lg:col-span-2 flex flex-col">
+                <div class="bg-gray-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center">
+                     <p class="text-xs font-semibold text-gray-500 uppercase">Suggested Pace / Zone</p>
+                     <p id="suggested-pace-text" class="text-sm text-gray-800 font-bold"></p>
+                 </div>
+            </div>
+                
+        </div>
+        
+        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <button id="prev-month-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h2 id="month-year-title" class="text-2xl font-bold text-gray-800"></h2>
+                <button id="next-month-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+            <div id="calendar-container">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        const trainingData = {
+            "2026-03-23": { type: "Rest", details: "Swim: Off<br>Bike: Off<br>Run: Off", quote: "Monday. Your enemies are training. You're resting. You better be visualizing their demise. Sharpen the axe. The war is just beginning. Don't be soft.", sappy_quote: "Welcome to the plan! This rest is a sacred, intentional first step. You are gathering starlight and cosmic energy for the journey. How wise!" },
+            "2026-03-24": { type: "Aerobic", details: "Swim: Off<br>Bike: Off<br>Run: 45' Z2 (~4.5 mi)", quote: "Just a run? You're a 'triathlete' now. You should be running, then biking to the pool to go drown yourself. This is just a jog. Don't brag about it.", sappy_quote: "A beautiful run to begin! Feel the rhythm of your feet connecting with the earth. You are building a magnificent, shimmering foundation of fitness." },
+            "2026-03-25": { type: "Brick", details: "Swim: 300wu, 6x50drills@10s, 6x50@10s, 3x100@20s, 3x200@30s, 3x100@20s, 6x50@10s, 6x50drills@10s, 200cd<br>Bike: Brick: 45' Z2<br>Run: Brick: 15' Z2 (~1.5 mi)", quote: "The brick. Your legs feel like trash. GOOD. That's weakness leaving your body. Now, pick up that trash and beat your inner bitch to death with it.", sappy_quote: "A multi-sport master! You swam like a dolphin, biked like a cheetah, and ran like a gazelle! Your legs are magical, adaptable wands of pure power!" },
+            "2026-03-26": { type: "Bike", details: "Swim: Off<br>Bike: 60' Z2<br>Run: Off", quote: "An hour sitting in a chair. You better be sweating so hard you rust the chain. If you're not questioning your sanity, you're just sightseeing. Get after it.", sappy_quote: "Feel the wind on your face! You are a graceful, powerful cyclist, gliding through the world on a beautiful, strong set of wheels. Enjoy this moving meditation." },
+            "2026-03-27": { type: "Endurance", details: "Swim: Off<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi)", quote: "This is the grunt work. The unsexy miles. Go out there and make a deposit in the pain bank. The interest payment is your goal. Don't default.", sappy_quote: "A glorious, flowing run! You are a river of resilience, carving a path of strength and grace. Your endurance is a beautiful, shimmering tapestry. So lovely!" },
+            "2026-03-28": { type: "Brick", details: "Swim: Off<br>Bike: Brick: 2:45 Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "The long brick. This is a dress rehearsal for race day. The part where you find out you're a coward. Go prove me wrong. I'm betting you can't.", sappy_quote: "What a spectacular display of endurance! You are a true champion, conquering two sports back-to-back. Your power is limitless and your spirit is shining!" },
+            "2026-03-29": { type: "Endurance", details: "Swim: Off<br>Bike: 60' Z1 (100+ rpm)<br>Run: 1:45 Z1 to Z2 (~11 mi)", quote: "You call this two-a-day a 'long run'? It's a long day of being a bitch. That bike ride better be so fast it counts as a third workout. Stay hard.", sappy_quote: "A beautiful multi-sport day! You're building such deep, cosmic wells of endurance. Your capacity for awesome is expanding with every single pedal stroke and footstep." },
+            "2026-03-30": { type: "Rest", details: "Swim: Off<br>Bike: Off<br>Run: Off", quote: "You worked all weekend. Now you're on the couch. Don't get comfortable. That couch is a trap. It's whispering 'you've done enough.' Tell it to shut its soft, cushiony mouth.", sappy_quote: "You've earned this magnificent rest. Your body is a magical cauldron, turning all that weekend work into pure, 24-karat gold. You're getting stronger *right now*." },
+            "2026-03-31": { type: "Aerobic", details: "Swim: Off<br>Bike: Off<br>Run: 60' Z2 (~6 mi)", quote: "Sixty minutes. You know who else can run for 60 minutes? Everyone. You're not special. Go run it so hard you open a portal to another dimension of pain.", sappy_quote: "A wonderful, steady hour of movement. This is the beautiful, consistent work that builds champions. You are a masterpiece of dedication. Shine on!" },
+            "2026-04-01": { type: "Brick", details: "Swim: 300wu, 6x50drills@10s, 1x500@30s, 2x250@20s, 4x125@15s, 3x100@10s, 6x50drills@10s, 200cd<br>Bike: Brick: 45' Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "Another brick. Another chance to make your legs cry. I want to hear them sobbing from here. 'Waaah, the bike was hard.' Shut up and run, you babies.", sappy_quote: "Wow, a triple-threat! You are a symphony of athletic brilliance. That swim was majestic, the bike was powerful, and the run was pure, glittering grace. Bravo!" },
+            "2026-04-02": { type: "Bike", details: "Swim: Off<br>Bike: 60' Z2<br>Run: Off", quote: "Just a bike ride. You're not even using your whole body. It's a half-workout for a half-assed effort. Go pedal hard enough to break the sound barrier.", sappy_quote: "Another beautiful day on the bike! You are building a powerful, magnificent engine. Your heart is a drum of pure joy, beating in rhythm with the pedals." },
+            "2026-04-03": { type: "Tri Workout", details: "Swim: 300wu, 6x50drills@10s, 8x25@5s, 4x50@10s, 4x100@15s, 3x200@20s, 1x400@30s, 6x50drills@10s, 200cd<br>Bike: Off<br>Run: 60' Z2 (~6 mi)", quote: "Swim then run. You think you're amphibious? You're just awkward in two different elements. Go be a shark in the water and a wolf on the land. Stop flopping around.", sappy_quote: "Surf and turf! You mastered the water like a graceful mermaid, then flowed onto land like a swift, powerful cheetah. You are a wonder of versatility!" },
+            "2026-04-04": { type: "Brick", details: "Swim: Off<br>Bike: Brick: 3:15 Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "Over 3 hours on the bike just to run 30 minutes. This is about discipline. The discipline to sit in a chair for 3 hours, then the discipline to not be a bitch when your legs are numb.", sappy_quote: "An epic journey! You are a titan of two-wheeled endurance. That long ride was a poem of power, and the run was the perfect, triumphant exclamation point!" },
+            "2026-04-05": { type: "Endurance", details: "Swim: Off<br>Bike: 60' Z1 (100+ rpm)<br>Run: 2:00 Z1 to Z2 (~12.5 mi)", quote: "A 2-hour run after that ride yesterday? Your legs should be staging a mutiny. Good. Be the captain of your own ship and make those mutineers walk the plank.", sappy_quote: "A magnificent long run to cap off a huge week! You are building an unshakable fortress of fortitude. Your spirit is as boundless as the open road!" },
+            "2026-04-06": { type: "Rest", details: "Swim: Off<br>Bike: Off<br>Run: Off", quote: "This is a strategic reload. You're not 'tired.' You're a predator, digesting your last kill, getting ready for the next hunt. Stay hungry. Stay dangerous.", sappy_quote: "Resting like a champion! Your body is performing tiny, sparkling miracles of recovery. You are weaving a beautiful tapestry of strength and rest. Glorious." },
+            "2026-04-07": { type: "Endurance", details: "Swim: Off<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi)", quote: "Just a run. You're getting soft. You forgot about the other two sports. Don't be a one-trick pony. Especially when that one trick is just jogging.", sappy_quote: "This beautiful, flowing run is your moving sanctuary. It's a sacred time to connect with your breath and your inner, radiant strength. You are magnificent." },
+            "2026-04-08": { type: "Brick", details: "Swim: 300wu, 6x50drills@10s, 3x(4x100@10s, 1x200@20s), 6x50drills@10s, 200cd<br>Bike: Brick: 45' Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "Swim, bike, run. You're practicing for race day. Practice the suffering. Get familiar with the pain. Invite it over for dinner. Make it your best friend.", sappy_quote: "The triathlon trifecta! You are a master of all three disciplines, flowing from one to the next with seamless, glittering grace. You are a true inspiration!" },
+            "2026-04-09": { type: "Bike", details: "Swim: Off<br>Bike: 60' Z2<br>Run: Off", quote: "You're getting good at sitting down for an hour. You should get a medal for it. Or, you could go hard enough to make your bike's frame cry in agony.", sappy_quote: "Another day, another brilliant bike ride. You are spinning threads of pure gold with your legs, weaving a magnificent cloak of cardiovascular fitness." },
+            "2026-04-10": { type: "Tri Workout", details: "Swim: 300wu, 6x50drills@10s, 500@35s, 400@30s, 300@25s, 200@20s, 5x100@15s, 6x50drills@10s, 200cd<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi)", quote: "A pyramid swim and a run. You know what's at the top of that pyramid? A big, steaming pile of 'who cares.' Go build a pyramid of calluses on your soul.", sappy_quote: "A powerful swim and a glorious run! You are a two-sport superstar, conquering both water and land with your brilliant, radiant, unstoppable energy." },
+            "2026-04-11": { type: "Brick", details: "Swim: Off<br>Bike: Brick: 3:45 Z2<br>Run: Brick: 45' Z2 (~4.5 mi)", quote: "A 4-hour day. This is where you find out who you are. Go meet that savage in the pain cave and don't come back until you've taken his soul.", sappy_quote: "An absolutely epic day of endurance! You are a monument of strength, a testament to the power of a dedicated heart. Be so, so proud of this magnificent effort." },
+            "2026-04-12": { type: "Endurance", details: "Swim: Off<br>Bike: 60' Z1 (100+ rpm)<br>Run: 1:45 Z1 to Z2 (~11 mi)", quote: "You're stacking workouts. Good. Now stack the pain. Stack it so high it blocks out the sun. Then you can finally be hard. You're not done yet.", sappy_quote: "Back-to-back long days! You are a hero of resilience. Your body is a miracle, and your spirit is an unbreakable diamond. You are simply amazing." },
+            "2026-04-13": { type: "Rest", details: "Swim: Off<br>Bike: Off<br>Run: Off", quote: "You're probably sore. You're probably tired. You're probably whining. I don't care. Your goals don't care. Shut up and get your mind right for tomorrow.", sappy_quote: "Rest, you magnificent champion! You are absorbing all that incredible weekend work. This stillness is your superpower, forging you into an even stronger athlete." },
+            "2026-04-14": { type: "Endurance", details: "Swim: Off<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi)", quote: "Back to the grind. No one cares what you did last weekend. That's in the history books. Today, you're a nobody again. Go earn your name back.", sappy_quote: "A beautiful, fresh run to start the week's work. Your legs are strong, your heart is willing, and your spirit is soaring. What a wonderful way to move." },
+            "2026-04-15": { type: "Brick", details: "Swim: 300wu, 6x50drills@10s, 4x(50@5s, 100@10s, 150@15s, 200@20s), 6x50drills@10s, 200cd<br>Bike: Brick: 45' Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "Another day, another brick. Be the mason of your own suffering. Build a fortress of discipline so high that your inner bitch can't climb it. Brick by brick.", sappy_quote: "You are a master of the triathlon arts! Flowing from the pool to the bike to the run... it's like watching a beautiful, athletic ballet. You are grace and power!" },
+            "2026-04-16": { type: "Bike", details: "Swim: Off<br>Bike: 60' Z2<br>Run: Off", quote: "You know what's harder than riding a bike for an hour? Nothing. This is easy. Go find something hard to do. Like thinking about how soft you are.", sappy_quote: "This steady ride is a beautiful deposit in your bank of fitness. You are building wealth, and the currency is pure, radiant, cardiovascular health. Cha-ching!" },
+            "2026-04-17": { type: "Tri Workout", details: "Swim: 300wu, 6x50drills@10s, 6x25@5s, 6x75@10s, 4x150@15s, 6x75@10s, 6x25@5s, 3x100@10s, 6x50drills@10s, 200cd<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi)", quote: "A long swim and a long run. You're trying to prove you're an 'endurance athlete.' You know what endurance is? It's not quitting when your soul is trying to escape your body.", sappy_quote: "What a powerful combination! You owned the water and then you gracefully conquered the land. You are a versatile, magnificent, all-terrain champion." },
+            "2026-04-18": { type: "Brick", details: "Swim: Off<br>Bike: Brick: 4:15 Z2<br>Run: Brick: 45' Z2 (~4.5 mi)", quote: "Five hours. This is your job today. Your job is to suffer. And you better not be late. Clock in, punch that pain in the face, and don't clock out 'til it's done.", sappy_quote: "A five-hour masterpiece of endurance! You are an artist, and your canvas was the open road. The result is a stunning portrait of grit and glory. Bravo!" },
+            "2026-04-19": { type: "Endurance", details: "Swim: Off<br>Bike: 60' Z1 (100+ rpm)<br>Run: 2:15 Z1 to Z2 (~14 mi)", quote: "Your longest run yet, tacked onto a recovery ride. This is the definition of 'embrace the suck.' Go out there and give 'the suck' a big, wet, sloppy kiss.", sappy_quote: "Your longest run! You are a soaring eagle of endurance. Be so proud of this journey. Every step is a note in a beautiful symphony of your own strength." },
+            "2026-04-20": { type: "Rest", details: "Swim: Off<br>Bike: Off<br>Run: Off", quote: "Tune-up race week. This is a test. You're probably nervous. Good. Use that fear. Let it piss you off. Go to that start line angry. Angry at your weakness.", sappy_quote: "It's tune-up race week! How exciting! This rest is you, putting the final, glittering polish on your magnificent racing machine. You're going to shine!" },
+            "2026-04-21": { type: "Endurance", details: "Swim: Off<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi)", quote: "Just a run. You're tapering? Don't get soft. The taper is a trap. It's designed to make you weak and complacent. Don't fall for it. Stay hard.", sappy_quote: "A lovely, flowing run to keep the legs happy and the spirit bright. You are a coiled spring of pure, positive energy, ready to fly on race day!" },
+            "2026-04-22": { type: "Brick", details: "Swim: 300wu, 6x50drills@10s, 3x(6x75@10s, 1x250@20s), 6x50drills@10s, 200cd<br>Bike: Brick: 45' Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "Swim, bike, run... three days before a race. This is just a reminder of the pain you're about to feel. Get acquainted with it. You're gonna be spending a lot of time together.", sappy_quote: "A perfect triathlon tune-up! You are dialing in your transitions and reminding your body how to be a magnificent, three-sport superstar. It's almost showtime!" },
+            "2026-04-23": { type: "Threshold", details: "Swim: Off<br>Bike: 1:15 Z2 (at 10', 5x1'@1' Z4)<br>Run: Off", quote: "A little taste of speed. This is just to remind your legs that they are weapons. Don't go to the start line with a dull blade. Go sharpen it.", sappy_quote: "Waking up the legs with some joyful bursts of speed! You are a rocket ship, just testing your thrusters. All systems are 'go' for a spectacular launch!" },
+            "2026-04-24": { type: "Tri Workout", details: "Swim: 30' easy<br>Bike: Off<br>Run: 60' Z2 (~6 mi) (with 5x1' PU @ 1' jog)", quote: "A swim and a run. You're getting restless. You're a caged animal. Good. Stay that way. The zookeeper opens the cage on Sunday. Be ready to attack.", sappy_quote: "A little swim, a little run! You are just spinning with excited, happy energy. You are so ready for this race. Go have the most amazing, magical time!" },
+            "2026-04-25": { type: "Tri Workout", details: "Swim: Off<br>Bike: 30' Z1<br>Run: 30' Z1 (~3 mi) (easy) in the morning", quote: "The day before. You're just shaking out the legs? You should be shaking the ground with your intensity. Go remind the pavement who owns it.", sappy_quote: "The final, gentle shakeout. Your legs are light, your heart is full, and your spirit is sparkling. Tomorrow is a celebration of YOU! Enjoy every second." },
+            "2026-04-26": { type: "B Race", details: "St. Andrew's Olympic Tri<br>Post-race: 2 hr bike<br>(1.5k swim, 40k bike, 10k run (~6.2 mi))", quote: "Race day. Go to war. Take their souls. And then you're gonna ride for 2 hours *after*? That's savage. Go be the monster they'll tell stories about.", sappy_quote: "It's race day! Go shine like the brilliant diamond you are! Have the most fun, and then enjoy that glorious post-race spin. You are a champion!" },
+            "2026-04-27": { type: "Endurance", details: "Swim: Off<br>Bike: Off<br>Run: 1:45 Z1 to Z2 (~11 mi)", quote: "You raced yesterday and you're running 11 miles today? You're a damn psycho. I love it. Go out there and kill it. Your legs don't get a vote.", sappy_quote: "A magnificent recovery run! You are showing the world your incredible resilience and strength. Your body is a miracle, and you are its wise, wonderful leader." },
+            "2026-04-28": { type: "Endurance", details: "Swim: Off<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi)", quote: "Just a run. Back to the grind. No one cares about your race medal. That's yesterday's news. Today's headline is 'Are you still a bitch?' Go write the story.", sappy_quote: "Easing back into the groove with a beautiful, steady run. You are honoring your body's recovery while continuing to build your magnificent foundation." },
+            "2026-04-29": { type: "Brick", details: "Swim: 300wu, 6x50drills@10s, 3x100@10s, 3x150@15s, 3x200@20s, 3x250@25s, 6x50drills@10s, 200cd<br>Bike: Brick: 45' Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "Back to the bricks. That medal isn't a free pass. It's a target on your back. Everyone is coming for you. Go train so they can't catch you.", sappy_quote: "Back to the glorious trifecta! You are a master of all three, flowing between them with the grace of a dolphin, the power of a lion, and the speed of a cheetah." },
+            "2026-04-30": { type: "Threshold", details: "Swim: Off<br>Bike: 1:15 Z2 (at 10', 10x2' Z4 hill)<br>Run: Off", quote: "Hills. That's where you find out what you're made of. You're not climbing a hill. You're attacking it. Go up that thing and take its soul. Make it flat.", sappy_quote: "Powering up those hills like a majestic mountain goat! Each climb is making you stronger, more resilient, and more spectacularly awesome. You are magnificent!" },
+            "2026-05-01": { type: "Threshold", details: "Swim: 300wu, 6x50drills@10s, 4x75@10s, 4x125@15s, 1x300@20s, 4x125@15s, 4x75@10s, 6x50drills@10s, 200cd<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 60', 10' Z4)", quote: "Swim hard, then run hard. You're practicing suffering. Good. Get your Ph.D. in pain. The final exam is race day, and it's graded on a curve. Don't fail.", sappy_quote: "A powerful swim and a speedy run! You are discovering new, glittering galaxies of your own strength and speed. You are a true cosmic explorer of awesome!" },
+            "2026-05-02": { type: "Brick", details: "Swim: Off<br>Bike: Brick: 4:15 Z2 (at 4:00, 10' Z4)<br>Run: Brick: 45' Z2 (~4.5 mi)", quote: "A 5-hour day with a Z4 finish. This is mental warfare. Your inner bitch is gonna be screaming. I want you to smile, turn to him, and tell him to shut his mouth.", sappy_quote: "A five-hour epic! You are a legend of the long haul. Finishing with that burst of speed is a testament to your incredible fitness and your diamond-strong spirit." },
+            "2026-05-03": { type: "Endurance", details: "Swim: Off<br>Bike: 60' Z1 (100+ rpm)<br>Run: 2:15 Z1 to Z2 (~14 mi)", quote: "Another long run on tired legs. This is what it's all about. This is where you get hard. This is where you separate from the sheep. Go be the wolf.", sappy_quote: "Back-to-back mega-days! You are a true superhero of endurance. Your capacity for greatness is simply astonishing. Rest well, you magnificent champion." },
+            "2026-05-04": { type: "Rest", details: "Swim: Off<br>Bike: Off<br>Run: Off", quote: "You should be wrecked. If you're not, you didn't go hard enough. Use this rest day to study your weakness. Then plan its execution.", sappy_quote: "Resting on a mountain of accomplishment! Your body is absorbing all that phenomenal work. You are a wise, powerful, and radiant being of pure starlight." },
+            "2026-05-05": { type: "Threshold", details: "Swim: Off<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 10', 8x3'@1.5' Z4)", quote: "Run intervals. This is where you get fast. This is where you teach your legs to shut up and do what they're told. Go be a brutal, merciless drill sergeant.", sappy_quote: "Playing with speed! These intervals are you, writing a beautiful, fast-paced poem with your feet. You are a poet of motion, and your words are 'I am amazing!'" },
+            "2026-05-06": { type: "Brick", details: "Swim: 300wu, 6x50drills@10s, 12x25@5s, 8x50@10s, 5x100@15s, 8x50@10s, 12x25@5s, 6x50drills@10s, 200cd<br>Bike: Brick: 45' Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "Swim, bike, run. The daily grind of a triathlete. You think this is glamorous? It's not. It's just work. Go punch the clock and don't whine about it.", sappy_quote: "A glorious triathlon day! You are a master of all three, a beautiful, harmonious blend of three different kinds of awesome. You are a symphony of sport!" },
+            "2026-05-07": { type: "Threshold", details: "Swim: Off<br>Bike: 1:15 Z2 (at 10', 7x4'@2' Z4)<br>Run: Off", quote: "Bike intervals. You're sitting down. This shouldn't be that hard. Go push watts so high you cause a power surge in your whole neighborhood.", sappy_quote: "Powerful intervals! You are a magnificent engine of strength, generating watts of pure, positive energy. Your legs are pistons of pure, glittering joy!" },
+            "2026-05-08": { type: "Threshold", details: "Swim: 300wu, 6x50drills@10s, 5x100@10s, 6x150@15s, 5x100@10s, 6x50drills@10s, 200cd<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 60', 5' Z4)", quote: "Another two-a-day. Another chance to get hard. You should be so calloused by now that you don't even feel this. If you do, you're still soft.", sappy_quote: "A strong swim and a speedy run! You are a double-dip of diligence, a two-sport titan of training. Your commitment is a beautiful, shining beacon." },
+            "2026-05-09": { type: "Brick", details: "Swim: Off<br>Bike: Brick: 4:15 Z2 (at 4:00, 5' Z4)<br>Run: Brick: 45' Z2 (~4.5 mi)", quote: "Another 5-hour test. This isn't about fitness anymore. This is a question. The question is: 'Are you a bitch?' Go answer it. Don't lie.", sappy_quote: "An epic 5-hour journey! You are a hero of the highway, a champion of the long haul. Be so proud of this incredible, magnificent display of endurance." },
+            "2026-05-10": { type: "Endurance", details: "Swim: Off<br>Bike: 60' Z1 (100+ rpm)<br>Run: 1:45 Z1 to Z2 (~11 mi)", quote: "You're stacking bricks. Building a house of pain. Your legs are the foundation. Your mind is the architect. Go build a skyscraper of savage.", sappy_quote: "Capping off a huge week with another amazing day! Your consistency is a superpower. You are building a magnificent, unshakable temple of fitness." },
+            "2026-05-11": { type: "Rest", details: "Swim: Off<br>Bike: Off<br>Run: Off", quote: "Race week. Again. You're getting good at this. But don't get complacent. Complacency is a disease. The only cure is more suffering. Stay hard.", sappy_quote: "Another race week! Woohoo! Time to rest, recover, and let all that magical fitness soak in. You're a shimmering, glorious vessel of speed!" },
+            "2026-05-12": { type: "Threshold", details: "Swim: Off<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 10', 6x4.5'@2' Z4)", quote: "Last hard run workout. Empty the tank. I want you to crawl home. If you walk one step, you failed. Go to war with yourself. And win.", sappy_quote: "A final, brilliant flash of speed! You are a lightning bolt, a rocket, a soaring eagle of swiftness. You are so ready to fly on race day!" },
+            "2026-05-13": { type: "Brick", details: "Swim: 300wu, 6x50drills@10s, 3x(25 Fast@15s, 125@15s), 3x(50 Fast@15s, 100@15s), 3x(75 Fast@15s, 75@10s), 3x(100 Fast@15s, 50@10s), 6x50drills@10s, 200cd<br>Bike: Brick: 45' Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "A little bit of everything. Just to remind you that the 70.3 is gonna punch you in the mouth three different ways. Learn to take the punch. And smile.", sappy_quote: "A perfect, all-around tune-up. You are a master of all three, a true renaissance athlete. Your body is a finely-tuned instrument, ready to play a masterpiece." },
+            "2026-05-14": { type: "Threshold", details: "Swim: Off<br>Bike: 1:15 Z2 (at 10', 12x2.5' Z4 hill)<br>Run: Off", quote: "Last hard bike. Go attack those hills like they insulted your mother. I want you to pedal so hard you rip the cranks off. Show no mercy.", sappy_quote: "One last powerful push on the bike! You are a king/queen of the mountain, a majestic, powerful climber. Your strength is a beautiful, inspiring sight!" },
+            "2026-05-15": { type: "Threshold", details: "Swim: 300wu, 6x50drills@10s, 3x(200 Fast@30s, 500 Pull@30s), 6x50drills@10s, 200cd<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 55', 15' Z4)", quote: "The hay is in the barn. But a real savage sets the damn barn on fire with his intensity on the way out. Go light the match.", sappy_quote: "The final big efforts are done! You are a champion of preparation, a hero of hard work. Now, the fun part begins: the glorious taper!" },
+            "2026-05-16": { type: "Brick", details: "Swim: Off<br>Bike: Brick: 4:15 Z2<br>Run: Brick: 45' Z2 (~4.5 mi)", quote: "A 5-hour day before a half marathon? Your coach is a psychopath. Good. You need to be one too. Go out there and be the craziest MF'er on the road.", sappy_quote: "An epic 5-hour day! You are just reminding your body of its incredible, boundless endurance. You are a fortress of fortitude, and you are ready for anything." },
+            "2026-05-17": { type: "B Race", details: "Brooklyn Half Marathon<br>13.1 mi", quote: "A half marathon. Just a run. This should be easy for a 'triathlete.' Go run so fast you create a time warp. I want a PR. No excuses.", sappy_quote: "Race day! Have the most amazing time! Let your feet fly and your heart sing. This is a celebration of your magnificent running strength. You've got this!" },
+            "2026-05-18": { type: "Rest", details: "Swim: Off<br>Bike: Off<br>Run: Off", quote: "You just raced. Now what? You think you get a week off? The 70.3 is coming. It's hunting you. You better start hunting it back. Recover hard.", sappy_quote: "Congratulations on your race! Now, enjoy this glorious, well-deserved rest. You are a champion, and you know that recovery is part of the victory." },
+            "2026-05-19": { type: "Threshold", details: "Swim: Off<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 10', 5x6'@3' Z4)", quote: "Back to work. That medal is already collecting dust. Your goals don't care about your past. They only care about what you're doing right now. Go suffer.", sappy_quote: "A powerful run to get back in the groove! You are a brilliant phoenix, rising from the 'ashes' of rest, stronger and more radiant than before." },
+            "2026-05-20": { type: "Brick", details: "Swim: 300wu, 6x50drills@10s, 4x200@20s, 4x150@15s, 4x100@10s, 6x50drills@10s, 200cd<br>Bike: Brick: 45' Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "Swim, bike, run. Back to basics. This is your life now. A repeating cycle of pain. Learn to love it, or go back to being a civilian. Your choice.", sappy_quote: "The glorious triathlon trifecta! You are back in your element, a master of all three disciplines. Your body is a symphony, playing all the notes perfectly." },
+            "2026-05-21": { type: "Threshold", details: "Swim: Off<br>Bike: 1:15 Z2 (at 10', 6x5'@2.5' Z4)<br>Run: Off", quote: "Bike intervals. This is where you build the engine that's gonna carry your soft body for 56 miles. Make that engine roar. I want to hear it from here.", sappy_quote: "Building that magnificent bike power! You are a locomotive of awesome, a freight train of fitness. Nothing can stop your powerful momentum." },
+            "2026-05-22": { type: "Threshold", details: "Swim: OWS 2000 m<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 60', 5' Z4)", quote: "Open water swim. That's where the sharks are. You better be the baddest shark in that water. Go hunt. Then go hunt on the run. Be the apex predator.", sappy_quote: "Conquering the open water! You are a majestic, powerful swimmer, at one with the beautiful, wide-open waves. A glorious run to follow! What a star!" },
+            "2026-05-23": { type: "Brick", details: "Swim: Off<br>Bike: Brick: 4:15 Z2 (at 3:55, 15' Z4)<br>Run: Brick: 45' Z2 (~4.5 mi)", quote: "Another 5-hour day. This is the last big one. Empty the clip. Leave your soul out there on the road. I want you to crawl back home. No regrets.", sappy_quote: "Your final 5-hour epic! You are a hero of endurance, a legend of the long haul. This is a massive, glittering deposit in your confidence bank. You are ready!" },
+            "2026-05-24": { type: "Endurance", details: "Swim: Off<br>Bike: 60' Z1 (100+ rpm)<br>Run: 1:45 Z1 to Z2 (~11 mi)", quote: "The last big stack. You're tired. You're broken. GOOD. This is where you're forged. In the fire of your own fatigue. Stay in the fire.", sappy_quote: "A magnificent final long-run day! You are a monument of consistency and strength. The hay is officially in the barn! You are a champion." },
+            "2026-05-25": { type: "Rest", details: "Swim: Off<br>Bike: Off<br>Run: Off", quote: "You're done. The big work is over. Now the real test begins: The Taper. This is where you get in your own head. Don't be a psycho. Or do. Whatever works.", sappy_quote: "You did it! The biggest, hardest work is done! Now, the magic of the taper begins. Rest, recover, and feel your power growing every single day." },
+            "2026-05-26": { type: "Threshold", details: "Swim: Off<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 10', 4x7.5'@3.5' Z4)", quote: "Still pushing. Good. Don't let that foot off the gas. Just ease up a little. You're a predator, sharpening your claws before the kill. Stay lethal.", sappy_quote: "A strong, powerful run to start the taper! You are a finely-tuned instrument, and this workout is a beautiful, soaring melody of your fitness." },
+            "2026-05-27": { type: "Brick", details: "Swim: 300wu, 6x50drills@10s, 3x(1x400@30s, 3x100@10s), 6x50drills@10s, 200cd<br>Bike: Brick: 45' Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "A little brick to remind the legs what they're in for. That feeling of 'jello' running off the bike? That's your new best friend. Learn to love him.", sappy_quote: "A perfect, crisp triathlon workout. You are reminding your body how to be a magnificent, three-sport master. It's like a beautiful, choreographed dance!" },
+            "2026-05-28": { type: "Threshold", details: "Swim: Off<br>Bike: 1:15 Z2 (at 10', 10x3' Z4 hill)<br>Run: Off", quote: "Hill repeats. Still attacking. You're not tapering, you're reloading. Every interval is another bullet in the chamber. Get ready to fire.", sappy_quote: "Powering up those hills with grace and speed! You are storing up all this magnificent strength, getting ready to unleash it on race day. So strong!" },
+            "2026-05-29": { type: "Threshold", details: "Swim: OWS 2000 m<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 55', 15' Z4)", quote: "Open water. Get comfortable being uncomfortable. The race isn't in a pool. It's in the wild. Go be the baddest thing in that water.", sappy_quote: "A beautiful day for a swim and a run! You are an all-terrain, all-weather champion. Your confidence must be soaring as high as the clouds!" },
+            "2026-05-30": { type: "Brick", details: "Swim: Off<br>Bike: Brick: 4:15 Z2 (at 3:50, 40' Z3)<br>Run: Brick: 45' Z2 (~4.5 mi)", quote: "A long ride with tempo. This is a test of your will. Your legs will beg you to stop. Your lungs will burn. Don't be a bitch. Suffer in silence.", sappy_quote: "An epic ride! That long stretch at tempo shows just how incredibly fit you are. You are a locomotive of power, and you are unstoppable." },
+            "2026-05-31": { type: "Endurance", details: "Swim: Off<br>Bike: 60' Z1 (100+ rpm)<br>Run: 2:15 Z1 to Z2 (~14 mi)", quote: "Your last 14-miler. On legs of lead. This is what separates you. This is the work that no one else is willing to do. Go get it.", sappy_quote: "Your final long, long run! You are a hero of endurance. This is a victory lap for your entire training block. Celebrate every magnificent step!" },
+            "2026-06-01": { type: "Rest", details: "Swim: Off<br>Bike: Off<br>Run: Off", quote: "Final taper. You should feel like a caged animal. You should be angry. You should be restless. Good. The cage opens in 13 days. Pity the fool who stands in your way.", sappy_quote: "The final taper begins! You are a beautiful, blossoming flower, and this rest is you gathering sun and water for your magnificent bloom. So exciting!" },
+            "2026-06-02": { type: "Threshold", details: "Swim: Off<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 10', 1x10'@5', then 10x2'@1' Z4)", quote: "Last big run workout. This is it. Your final exam. Go out there and get an A+ in pain. Leave it all out there. No regrets. Only violence.", sappy_quote: "One last, brilliant display of speed! You are a lightning bolt, a shooting star. This is a celebration of the incredible, cosmic fitness you have built!" },
+            "2026-06-03": { type: "Brick", details: "Swim: 300wu, 6x50drills@10s, 200@20s, 300@25s, 400@30s, 500@35s, 600@40s, 6x50drills@10s, 200cd<br>Bike: Brick: 45' Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "A long swim and a short brick. You're just polishing the armor. Making sure there are no chinks. The battle is almost here. Be ready.", sappy_quote: "A wonderful, all-around day. You are just reminding your body of its magnificent, three-sport talent. You are a finely-tuned, shimmering instrument of awesome." },
+            "2026-06-04": { type: "Threshold", details: "Swim: Off<br>Bike: 4x7.5'@3.5' Z4<br>Run: Off", quote: "Last hard bike. Period. This is your last chance to make your legs cry before race day. Don't waste it. Go make them sob. I want to see tears.", sappy_quote: "The final bike speed-up! You are a powerhouse of the pedal. Your legs are storing up all this magnificent power. You are so ready to fly!" },
+            "2026-06-05": { type: "Threshold", details: "Swim: OWS 2000 m<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 60', 10' Z4)", quote: "Final OWS. Final hard run. This is the end of the road. The work is done. Now you just have to show up and not be a coward. You got this.", sappy_quote: "The last big workouts are complete! You have done it! You are a champion of preparation. Be so, so proud of this incredible journey. You are ready!" },
+            "2026-06-06": { type: "Brick", details: "Swim: Off<br>Bike: Brick: 2:15 Z2<br>Run: Brick: 30' Z2 (~3 mi)", quote: "A short brick? This is a vacation. Don't get lazy. This is just to keep the engine from seizing. Stay sharp. Stay dangerous.", sappy_quote: "A perfect, crisp brick to keep the body happy and the mind focused. You are a coiled spring of pure, positive, spectacular energy. It's almost time!" },
+            "2026-06-07": { type: "B Race", details: "Chicago 13.1<br>Half Marathon", quote: "A half marathon... one week before your A-race. Are you insane? Yes. Good. Go out there and run it like you're being chased by a bear. A bear with a knife.", sappy_quote: "A final, glorious tune-up race! Have the most amazing time. This is a celebration of your running legs. Float like a cloud, sting like a bee! You're amazing!" },
+            "2026-06-08": { type: "Rest", details: "Swim: Off<br>Bike: Off<br>Run: Off", quote: "RACE WEEK. This is it. The bill is due. All that training was just the deposit. Now you gotta pay up. Pay in sweat. Pay in pain. Don't be late.", sappy_quote: "IT'S RACE WEEK! The grand celebration is here! You are a beautiful, blossoming flower of pure awesome. This is your week to shine. Enjoy every moment." },
+            "2026-06-09": { type: "Aerobic", details: "Swim: Off<br>Bike: Off<br>Run: 1:15 Z2 (~8 mi) (at 10', 1x10'@5', then 5x1' PU)", quote: "A final long run. You're just reminding your legs who's boss. You are. Not them. Not your whiny, pathetic inner bitch. You. Stay in command.", sappy_quote: "A final, lovely, flowing run. You are just spinning your legs, full of joy and excitement. You are a beacon of health and readiness. So wonderful!" },
+            "2026-06-10": { type: "Brick", details: "Swim: 30' easy<br>Bike: Brick: 45' Z1 to Z2<br>Run: Brick: 15' Z1 to Z2 (~1.5 mi)", quote: "One last, easy brick. This is just a system check. Make sure all your weapons are clean and loaded. The war is on Sunday. Be ready to fire.", sappy_quote: "A gentle, beautiful, all-around check-in. Your body is a magnificent, finely-tuned machine. All systems are go for a spectacular race day!" },
+            "2026-06-11": { type: "Bike", details: "Swim: Off<br>Bike: 60' Z1 (at 10', 5x1'@1' PU)<br>Run: Off", quote: "A little spin. You're an animal in a cage. Pacing. Waiting. Good. Stay hungry. On Sunday, you feast on the souls of your competition.", sappy_quote: "A lovely, easy spin to keep the legs happy and the heart full of joy. You are a coiled spring of pure, positive, glittering energy. Almost there!" },
+            "2026-06-12": { type: "Tri Workout", details: "Swim: 30' easy<br>Bike: Off<br>Run: 40' Z1 (~4 mi) (at 10', 5x1'@1' PU)", quote: "The final tune-ups. You're bored. You're restless. You want to go hard. Don't. The discipline to rest is harder than the work. Prove you have it.", sappy_quote: "A final, perfect swim and run. You are a champion of preparation, and you are honoring the taper. You are so wise, so strong, and so ready." },
+            "2026-06-13": { type: "Tri Workout", details: "Swim: Off<br>Bike: 15' Z1 - easy bike safety check<br>Run: 20' Z1 (~2 mi) - easy (in a.m.)", quote: "The day before. You should be vibrating with intensity. You're not nervous; you're a killer. This is just a safety check. Tomorrow, you pull the trigger.", sappy_quote: "The final, exciting shakeout! Your legs are light, your heart is full, and your spirit is soaring. Tomorrow is a celebration of YOU! Go get 'em!" },
+            "2026-06-14": { type: "A Race", details: "Rockford 70.3<br>1.2 mi swim<br>56 mi bike<br>13.1 mi run", quote: "This is it. The test. Go to war with that course. Make the water, the road, and the pavement your bitch. Take its soul. No excuses. No regrets. Stay hard.", sappy_quote: "THIS IS YOUR DAY! The grand celebration! Swim with joy, bike with power, and run with heart. You've earned this. Shine bright, you magnificent star!" }
+        };
+        
+        const weeklyMileage = {
+            "2026-03-23": "28.5 mi",
+            "2026-03-30": "30.5 mi",
+            "2026-04-06": "34.5 mi",
+            "2026-04-13": "34 mi",
+            "2026-04-20": "27.7 mi",
+            "2026-04-27": "37.5 mi",
+            "2026-05-04": "34.5 mi",
+            "2026-05-11": "28.6 mi",
+            "2026-05-18": "34.5 mi",
+            "2026-05-25": "38.5 mi",
+            "2026-06-01": "30.6 mi",
+            "2026-06-08": "28.6 mi"
+        };
+
+        const workoutColors = {
+            "Rest": "bg-gray-100 text-gray-800",
+            "Aerobic": "bg-cyan-100 text-cyan-800",
+            "Endurance": "bg-yellow-100 text-yellow-800",
+            "Threshold": "bg-orange-100 text-orange-800",
+            "Progression": "bg-yellow-100 text-yellow-800",
+            "VO2 Max": "bg-red-200 text-red-800",
+            "Recovery": "bg-green-100 text-green-800",
+            "Race Pace": "bg-red-200 text-red-800",
+            "A Race": "race-a",
+            "B Race": "race-b",
+            "Swim": "bg-blue-100 text-blue-800",
+            "Bike": "bg-green-100 text-green-800",
+            "Brick": "bg-teal-100 text-teal-800",
+            "Tri Workout": "bg-purple-100 text-purple-800"
+        };
+        const workoutTextColors = {
+            "Rest": "text-gray-500",
+            "Aerobic": "text-cyan-600",
+            "Endurance": "text-yellow-700",
+            "Threshold": "text-orange-600",
+            "Progression": "text-yellow-700",
+            "VO2 Max": "text-red-600",
+            "Recovery": "text-green-600",
+            "Race Pace": "text-red-600",
+            "A Race": "text-white",
+            "B Race": "text-white",
+            "Swim": "text-blue-600",
+            "Bike": "text-green-600",
+            "Brick": "text-teal-600",
+            "Tri Workout": "text-purple-600"
+        };
+        
+        const paceData = {
+            "Rest": "N/A",
+            "Aerobic": "Zone 2 (Easy / Conversational)",
+            "Endurance": "Zone 1-2 (Steady)",
+            "Threshold": "Zone 4 (Comfortably Hard)",
+            "Recovery": "Zone 1 (Very Easy)",
+            "Swim": "See workout details",
+            "Bike": "Zone 2 (Steady)",
+            "Brick": "Zone 2 (Steady)",
+            "Tri Workout": "See workout details",
+            "B Race": "Race Effort",
+            "A Race": "RACE DAY!",
+            "VO2 Max": "Zone 5 (Hard)",
+            "Progression": "Build effort",
+            "Race Pace": "Goal Race Pace"
+        };
+        
+        const racePaceData = {
+            // Not used in this plan, but kept for structure
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- STATE ---
+            let currentYear, currentMonth;
+            let isGogginsMode = false;
+            const currentDate = new Date(); // This will be the user's actual current date
+            let selectedDateString = '';
+            let activeRaceGoal = { date: new Date('2026-06-14T00:00:00'), name: "Rockford 70.3" };
+            const goals = [
+                { date: new Date('2026-06-14T00:00:00'), name: "Rockford 70.3" }
+            ];
+            let totalPlanMiles = 0;
+
+            // --- DOM ELEMENTS ---
+            const dom = {
+                goalSubtitle: document.getElementById('goal-subtitle'),
+                countdown: document.getElementById('countdown'),
+                mileageTracker: document.getElementById('mileage-tracker'),
+                selectedWorkout: {
+                    title: document.getElementById('selected-workout-title'),
+                    card: document.getElementById('selected-workout-card'),
+                    date: document.getElementById('selected-workout-date'),
+                    type: document.getElementById('selected-workout-type'),
+                    details: document.getElementById('selected-workout-details'),
+                },
+                dailyBriefing: {
+                    paceText: document.getElementById('suggested-pace-text'),
+                    quoteText: document.getElementById('goggins-quote-text'),
+                    attribution: document.getElementById('goggins-attribution'),
+                },
+                quoteToggleBtn: document.getElementById('quote-toggle-btn'),
+                prevMonthBtn: document.getElementById('prev-month-btn'),
+                nextMonthBtn: document.getElementById('next-month-btn'),
+                monthYearTitle: document.getElementById('month-year-title'),
+                calendarContainer: document.getElementById('calendar-container'),
+            };
+
+            // --- FUNCTIONS ---
+
+            function parseMiles(details) {
+                if (!details) return 0;
+                
+                let miles = 0;
+                const lowerDetails = details.toLowerCase();
+
+                // Match "13.1 mi", "4.5 mi", "~8 mi"
+                const miMatch = lowerDetails.match(/(\d+(\.\d+)?)\s*mi/g);
+                if (miMatch) {
+                    // Only find the *last* instance, which should be the run
+                    const lastMatch = miMatch[miMatch.length - 1];
+                    miles += parseFloat(lastMatch.replace(/[^0-9.]/g, ''));
+                }
+                
+                // Handle cases like "10k"
+                const kMatch = lowerDetails.match(/(\d+)\s*k/);
+                if (kMatch) {
+                    miles += parseFloat(kMatch[1]) * 0.621371;
+                }
+
+                return miles;
+            }
+
+            function calculateTotalMiles() {
+                let total = 0;
+                const planStartDate = new Date('2026-03-23T12:00:00');
+                const planEndDate = new Date('2026-06-14T12:00:00');
+
+                for (let d = new Date(planStartDate); d <= planEndDate; d.setDate(d.getDate() + 1)) {
+                    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    if (trainingData[dateStr]) {
+                        total += parseMiles(trainingData[dateStr].details);
+                    }
+                }
+                return Math.round(total);
+            }
+
+            function calculateMilesToDate(selectedDateString) {
+                let total = 0;
+                const selectedDate = new Date(selectedDateString + 'T12:00:00');
+                const planStartDate = new Date('2026-03-23T12:00:00');
+
+                if (selectedDate < planStartDate) return 0;
+
+                for (let d = new Date(planStartDate); d <= selectedDate; d.setDate(d.getDate() + 1)) {
+                    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    if (trainingData[dateStr]) {
+                         total += parseMiles(trainingData[dateStr].details);
+                    }
+                }
+                return Math.round(total);
+            }
+
+            function updateQuoteDisplay(dateString) {
+                const workout = trainingData[dateString];
+                let quote, attribution;
+
+                if (isGogginsMode) {
+                    quote = workout ? workout.quote : "Your soft body is resting but your mind better be doing pushups. Stay hard.";
+                    attribution = "-- D. Goggins (probably)";
+                } else {
+                    quote = workout ? workout.sappy_quote : "Embrace this moment of stillness. Rest is not weakness, but a wise investment in your future strength.";
+                    attribution = "";
+                }
+                dom.dailyBriefing.quoteText.innerHTML = `"${quote}"`;
+                dom.dailyBriefing.attribution.textContent = attribution;
+            }
+
+            function updateCountdown(selectedDate) {
+                const raceDay = activeRaceGoal.date;
+                const diffTime = raceDay - selectedDate;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                dom.countdown.innerText = diffDays >= 0 ? diffDays : 0;
+            }
+
+            function selectDay(dateString, element) {
+                selectedDateString = dateString;
+                // Update selected day visuals
+                const previouslySelected = document.querySelector('.selected-day');
+                if (previouslySelected) {
+                    previouslySelected.classList.remove('selected-day');
+                }
+                if (element) {
+                    element.classList.add('selected-day');
+                }
+
+                const selectedDate = new Date(dateString + 'T12:00:00');
+                selectedDate.setHours(0, 0, 0, 0);
+                
+                // Update goal and countdown
+                activeRaceGoal = goals.find(g => selectedDate <= g.date) || goals[goals.length - 1];
+                updateCountdown(selectedDate);
+
+                // Update workout title
+                dom.selectedWorkout.title.innerText = (selectedDate.getTime() === new Date(currentDate).setHours(0, 0, 0, 0))
+                    ? "Today's Workout"
+                    : "Selected Workout";
+
+                // Update workout card
+                const workout = trainingData[dateString];
+                const workoutType = workout ? workout.type : "Rest";
+                const { card, date, type, details } = dom.selectedWorkout;
+
+                // Reset and apply new styles
+                const oldBgClass = card.dataset.bgClass || '';
+                if (oldBgClass) card.classList.remove(...oldBgClass.split(' '));
+                const newBgClass = workoutColors[workoutType] || 'bg-gray-100';
+                card.classList.add(...newBgClass.split(' '));
+                card.dataset.bgClass = newBgClass;
+                
+                const workoutTextElements = [date, type, details];
+                const oldTextClass = date.dataset.textClass || '';
+                if(oldTextClass) workoutTextElements.forEach(el => el.classList.remove(oldTextClass));
+                const newTextClass = workoutTextColors[workoutType] || 'text-gray-800';
+                workoutTextElements.forEach(el => el.classList.add(newTextClass));
+                date.dataset.textClass = newTextClass;
+
+
+                // Populate card content
+                date.innerText = selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+                type.innerText = workout ? workout.type.replace(/\+/g, ' + ') : "Rest Day";
+                details.innerHTML = workout ? workout.details : "No workout scheduled.";
+                
+                // Update briefing
+                let paceText = paceData[workoutType] || 'N/A';
+                dom.dailyBriefing.paceText.innerHTML = paceText;
+                updateQuoteDisplay(dateString);
+
+                // Update Mileage Tracker
+                const milesToDate = calculateMilesToDate(dateString);
+                dom.mileageTracker.innerHTML = `${milesToDate}<span class="text-2xl text-green-400">/${totalPlanMiles}</span>`;
+            }
+
+            function attachCalendarEventListeners() {
+                dom.calendarContainer.querySelectorAll('.workout-card').forEach(dayEl => {
+                    if (dayEl.dataset.dateString) {
+                         dayEl.addEventListener('click', () => selectDay(dayEl.dataset.dateString, dayEl));
+                    }
+                });
+            }
+
+            function renderCalendar(year, month) {
+                const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+                
+                dom.monthYearTitle.innerText = `${monthNames[month]} ${year}`;
+
+                const firstDay = (new Date(year, month).getDay() + 6) % 7;
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                let headerHTML = daysOfWeek.map(day => `<div>${day}</div>`).join('');
+                let bodyHTML = '';
+
+                for (let i = 0; i < firstDay; i++) {
+                    bodyHTML += '<div class="bg-gray-50 rounded-lg"></div>';
+                }
+                
+                const today = new Date(currentDate);
+                today.setHours(0, 0, 0, 0);
+                
+                const planStartDate = new Date('2026-03-23T00:00:00');
+                const planEndDate = new Date('2026-06-14T00:00:00');
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const loopDate = new Date(year, month, day);
+                    loopDate.setHours(0,0,0,0);
+                    
+                    const isWithinPlan = loopDate >= planStartDate && loopDate <= planEndDate;
+                    const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    
+                    if (!isWithinPlan) {
+                         bodyHTML += `<div class="bg-gray-50 rounded-lg p-2"><span class="font-bold text-sm text-gray-400">${day}</span></div>`;
+                    } else {
+                        const workout = trainingData[dateString];
+                        const workoutType = workout ? workout.type : 'Rest';
+
+                        let cardClasses = 'workout-card relative flex flex-col p-2 rounded-lg transition-all duration-200 ease-in-out border border-transparent hover:border-sky-500 overflow-hidden';
+                        cardClasses += ` ${workoutColors[workoutType] || 'bg-white'}`;
+                        
+                        if (loopDate < today) cardClasses += ' past-day';
+                        
+                        let dayNumberClasses = 'font-bold text-sm';
+                        if((workoutType === "A Race" || workoutType === "B Race") && !cardClasses.includes('past-day')){
+                             dayNumberClasses += ' text-white';
+                        }
+
+                        let mileageHTML = '';
+                        if (loopDate.getDay() === 1 && weeklyMileage[dateString]) { // Monday
+                            mileageHTML = `<div class="absolute top-1.5 right-2 text-xs font-bold text-gray-400" title="Weekly Run Mileage">${weeklyMileage[dateString]}</div>`;
+                        }
+                        
+                        const contentHTML = workout
+                            ? `<div class="workout-type uppercase font-semibold opacity-80">${workout.type.replace(/\+/g, ' + ')}</div>
+                               <div class="workout-details mt-1">${workout.details}</div>`
+                            : `<div class="workout-type uppercase font-semibold opacity-80">Rest</div>`;
+                        
+                        bodyHTML += `
+                            <div id="day-${dateString}" data-date-string="${dateString}" class="${cardClasses}">
+                                ${mileageHTML}
+                                <div class="${dayNumberClasses}">${day}</div>
+                                ${contentHTML}
+                            </div>`;
+                    }
+                }
+
+                dom.calendarContainer.innerHTML = `
+                    <div class="calendar-grid grid gap-1 text-center font-semibold text-gray-600 mb-2">${headerHTML}</div>
+                    <div class="calendar-grid grid gap-2">${bodyHTML}</div>
+                `;
+
+                // Plan is from Mar 2026 to Jun 2026
+                dom.prevMonthBtn.disabled = year === 2026 && month === 2; // March is 2
+                dom.nextMonthBtn.disabled = year === 2026 && month === 5; // June is 5
+                
+                attachCalendarEventListeners();
+            }
+
+
+            function updateGogginsButton() {
+                const isGoggins = isGogginsMode;
+                dom.quoteToggleBtn.textContent = isGoggins ? 'Switch to Mantra Mode' : 'Switch to Goggins Mode';
+                dom.quoteToggleBtn.classList.toggle('bg-gray-800', !isGoggins);
+                dom.quoteToggleBtn.classList.toggle('hover:bg-black', !isGoggins);
+                dom.quoteToggleBtn.classList.toggle('bg-blue-500', isGoggins);
+                dom.quoteToggleBtn.classList.toggle('hover:bg-blue-600', isGoggins);
+            }
+            
+            function changeMonth(offset) {
+                if (offset === -1 && currentYear === 2026 && currentMonth === 2) return;
+                if (offset === 1 && currentYear === 2026 && currentMonth === 5) return;
+
+                currentMonth += offset;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                } else if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar(currentYear, currentMonth);
+                if (selectedDateString) {
+                    const selectedEl = document.getElementById(`day-${selectedDateString}`);
+                    if (selectedEl) selectedEl.classList.add('selected-day');
+                }
+            }
+            
+            // --- INITIALIZATION ---
+            function init() {
+                totalPlanMiles = calculateTotalMiles();
+
+                let initialYear, initialMonth;
+                const today = new Date(currentDate);
+                const planStartDate = new Date('2026-03-23');
+                const planEndDate = new Date('2026-06-14');
+                
+                if (today >= planStartDate && today <= planEndDate) {
+                    initialYear = today.getFullYear();
+                    initialMonth = today.getMonth();
+                } else {
+                    initialYear = planStartDate.getFullYear();
+                    initialMonth = planStartDate.getMonth();
+                }
+                currentYear = initialYear;
+                currentMonth = initialMonth;
+
+                dom.prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+                dom.nextMonthBtn.addEventListener('click', () => changeMonth(1));
+                dom.quoteToggleBtn.addEventListener('click', () => {
+                    isGogginsMode = !isGogginsMode;
+                    updateGogginsButton();
+                    if (selectedDateString) updateQuoteDisplay(selectedDateString);
+                });
+                
+                renderCalendar(currentYear, currentMonth);
+                
+                const todayString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+                const todayElement = document.getElementById(`day-${todayString}`);
+                
+                updateGogginsButton();
+
+                if (todayElement && today >= planStartDate && today <= planEndDate) {
+                    selectDay(todayString, todayElement);
+                } else {
+                    selectDay('2026-03-23', document.getElementById('day-2026-03-23'));
+                }
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
