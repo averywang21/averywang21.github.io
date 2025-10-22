@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avery's 2026 Goal Marathon Training Plan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Tailwind's gray-50 */
+        }
+        .calendar-grid {
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+        }
+        .workout-card {
+            min-height: 120px;
+            cursor: pointer;
+        }
+        .workout-type {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        .workout-details {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        .race-a { /* A Race: Main Goal (Deep Purple) */
+            background: linear-gradient(45deg, #a78bfa, #8b5cf6);
+            color: white;
+        }
+        .race-b { /* B Race: Important Tune-up (Vibrant Red) */
+             background: linear-gradient(45deg, #f87171, #ef4444);
+             color: white;
+       }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1.04);
+                box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+            }
+            50% {
+                transform: scale(1.06);
+                box-shadow: 0 0 25px rgba(14, 165, 233, 0.6);
+            }
+        }
+
+        .selected-day {
+            border: 3px solid #0ea5e9; /* Sky blue border */
+            z-index: 10;
+            animation: pulse 2.5s infinite ease-in-out;
+        }
+
+        .past-day {
+            position: relative;
+            opacity: 0.7;
+        }
+        .past-day::before, .past-day::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background-color: rgba(107, 114, 128, 0.5);
+            border-radius: 9999px;
+            z-index: 20;
+        }
+        .past-day::before {
+            transform: translate(0, -50%) rotate(45deg);
+        }
+        .past-day::after {
+            transform: translate(0, -50%) rotate(-45deg);
+        }
+
+    </style>
+</head>
+<body class="bg-gray-50 p-4 sm:p-6 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Avery's 2026 Goal Marathon Training Plan</h1>
+            <p id="goal-subtitle" class="text-md text-gray-500 mt-1">Pfitzinger 18/55 Marathon Plan</p>
+        </header>
+
+        <!-- Dashboard Section -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+
+            <!-- Race Countdown -->
+            <div class="lg:col-span-1 flex flex-col">
+                <h3 id="countdown-title" class="font-bold text-gray-800 mb-2 text-left">Race Countdown</h3>
+                <div class="bg-violet-50 p-4 rounded-lg text-center flex flex-col justify-center h-36">
+                    <p id="countdown" class="text-6xl font-bold text-violet-500">--</p>
+                    <p class="text-xs text-gray-500">Days Remaining</p>
+                </div>
+            </div>
+
+            <!-- Selected Workout -->
+            <div class="lg:col-span-2 flex flex-col">
+                 <h3 id="selected-workout-title" class="font-bold text-gray-800 mb-2 text-left">Today's Workout</h3>
+                 <div id="selected-workout-card" class="p-4 rounded-lg text-center transition-colors duration-300 flex flex-col justify-center flex-grow h-36 overflow-hidden">
+                    <p id="selected-workout-date" class="font-semibold text-gray-500">--</p>
+                    <p id="selected-workout-type" class="font-bold text-lg text-gray-800">--</p>
+                    <p id="selected-workout-details" class="text-sm text-gray-600">--</p>
+                </div>
+            </div>
+
+            <!-- Daily Briefing -->
+            <div class="lg:col-span-2 lg:row-span-2 flex flex-col">
+                <h3 class="font-bold text-gray-800 mb-2 text-left">Daily Briefing</h3>
+                <div class="bg-gray-50 p-4 rounded-lg flex-grow flex flex-col">
+                        <div class="text-center mb-2">
+                             <button id="quote-toggle-btn" class="text-xs font-semibold text-white bg-gray-800 hover:bg-black py-1 px-3 rounded-full transition-colors">
+                                 Switch to Goggins Mode
+                             </button>
+                        </div>
+                    <hr class="border-gray-200 my-2">
+                    <div class="flex-grow flex flex-col text-center min-h-0">
+                        <p id="goggins-quote-text" class="text-sm text-gray-700 italic w-full h-full overflow-y-auto pr-2"></p>
+                    </div>
+                    <p id="goggins-attribution" class="text-xs text-gray-500 font-bold not-italic text-right w-full mt-2 flex-shrink-0"></p>
+                </div>
+            </div>
+            
+            <!-- Miles Ran -->
+            <div class="lg:col-span-1 flex flex-col">
+                 <h3 class="font-bold text-gray-800 mb-2 text-left invisible">Progress</h3> <!-- Invisible Header for Alignment -->
+                <div class="bg-green-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center">
+                    <p id="mileage-tracker" class="text-4xl font-bold text-green-600">--/--</p>
+                    <p class="text-xs text-gray-500">Miles Logged</p> <!-- Removed (Est.) -->
+                </div>
+            </div>
+            
+            <!-- Suggested Pace -->
+            <div class="lg:col-span-2 flex flex-col">
+                 <h3 class="font-bold text-gray-800 mb-2 text-left invisible">Suggested Pace</h3> <!-- Invisible header for alignment -->
+                <div class="bg-gray-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center h-full">
+                     <p class="text-xs font-semibold text-gray-500 uppercase">Suggested Pace</p>
+                     <p id="suggested-pace-text" class="text-sm text-gray-800 font-bold"></p>
+                 </div>
+            </div>
+                
+        </div>
+        
+        <!-- Calendar Section -->
+        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <button id="prev-month-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h2 id="month-year-title" class="text-2xl font-bold text-gray-800"></h2>
+                <button id="next-month-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+            <div id="calendar-container">
+                <!-- Calendar will be dynamically generated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const trainingData = {
+            "2026-06-15": { type: "Rest", details: "Rest", quote: "REST DAY?! While you're petting your cat and 'recovering,' some savage out there is doing one-armed pull-ups from a helicopter over an active volcano. Your softness is an insult to the entire food chain. Go stare at the sun until you get angry enough to run.", sappy_quote: "Oh, you beautiful, shimmering star-being! Today the universe has lovingly wrapped you in a cosmic blanket of pure, restorative energy. Feel every single one of your magnificent cells doing a tiny, happy dance, celebrating your wisdom and preparing for the next glorious chapter in your epic journey of self-discovery. You are literally vibrating with potential!" },
+            "2026-06-16": { type: "Recovery", details: "5 mi", quote: "RECOVERY RUN. The only thing you're recovering from is a terminal case of softness. Go out there and run so slow it feels like you're moving backwards through time. If you don't see a dinosaur, you didn't go slow enough. That's discipline you pathetic loser.", sappy_quote: "Embrace the gentle, rhythmic poetry of your feet whispering sweet secrets to the earth. This beautiful, flowing recovery run is a moving meditation, a ballet of breath and being. You are a masterpiece of grace, painting the world with your every effortless stride." },
+            "2026-06-17": { type: "Rest", details: "Rest", quote: "ANOTHER REST DAY? Are you kidding me? Your couch has officially filed for a restraining order against your lazy ass. Your goals are out there being hunted by a pack of rabid wolves, and you're watching TV. I hope your remote control gets stuck on a channel that only plays infomercials for participation trophies.", sappy_quote: "Let this sacred pause be a symphony of serenity for your soul. True strength, my shimmering friend, blossoms in the quiet garden of recovery. Your body is a miraculous temple, and today you honor it with the divine gift of restorative peace, allowing every fiber to sing a tiny, grateful opera." },
+            "2026-06-18": { type: "Aerobic", details: "10 mi", quote: "TEN MILES. A simple task. It's supposed to be boring. Go out there and weaponize that boredom. If you're not questioning every life choice you've ever made by mile seven, you're a tourist. This isn't Disneyland, you coward.", sappy_quote: "Flow like a mighty, sparkling river today, oh magnificent endurance artist! This run is a glorious act of devotion to the amazing vessel that is your body. It is a moving prayer that strengthens your heart, clarifies your soul, and makes the whole universe want to give you a standing ovation." },
+            "2026-06-19": { type: "Rest", details: "Rest", quote: "You better be spending this rest day staring at a wall until it tells you its secrets. You better be doing mental pushups until your brain has a six-pack. Don't you dare get comfortable. Comfort is a disease, and you look like you have a terminal case, you bum.", sappy_quote: "Honor this day of profound rejuvenation, you wonderful human! It is an essential and beautiful act of self-love, a critical ingredient in the magical recipe for your future greatness. You are gathering stardust, preparing to burst forth with even more light and power tomorrow. Shine on!" },
+            "2026-06-20": { type: "Recovery", details: "5 mi", quote: "Flush the garbage out of your legs. But more importantly, flush the weakness out of your mind. Run this so easy that snails are passing you and calling you lazy. Listen to them. They're right.", sappy_quote: "Feel the rhythmic poetry of your feet on the earth, you graceful gazelle! Each mile is a meditative verse, a beautiful, quiet conversation between your body and your spirit, building a foundation of unshakable serenity and cosmic endurance. You are a masterpiece in motion." },
+            "2026-06-21": { type: "Endurance", details: "15 mi", quote: "THE LONG RUN. This isn't a run, it's a 3-hour dental appointment with no anesthetic. Your legs are the teeth, the pavement is the drill. If you don't come back with your soul screaming for its mommy, you failed. Go get a root canal on your weakness.", sappy_quote: "This is your sacred pilgrimage, a long and beautiful journey into the very heart of your own magnificent resilience. Every mile unveils a new, sparkling layer of your incredible spirit. You are not just running; you are expanding the universe that exists within your own heart." },
+            "2026-06-22": { type: "Rest", details: "Rest", quote: "Monday. You think your goals care that it's Monday? Your goals are already at the gym, bench-pressing your excuses. You're not resting, you're lying in ambush. Tomorrow, you will attack that workout and leave no survivors. Don't screw this up.", sappy_quote: "A quiet, gentle beginning to a powerful week of wonders. This rest is the fertile, sparkling soil from which your strength will gloriously grow. You are planting seeds of pure intention, preparing for a week of beautiful, strong growth. Trust this sacred, magical process." },
+            "2026-06-23": { type: "Aerobic", details: "10 mi", quote: "Just miles. The unsexy work that builds champions. Go do the work. If you come back and your legs don't feel like wet spaghetti, you failed. And you look like someone who enjoys failing.", sappy_quote: "This run is your moving sanctuary, a sacred space where you connect with your own inner strength and boundless grace. Every single step is a powerful reminder of the incredible, unwavering consistency you embody. You are a beacon of dedication!" },
+            "2026-06-24": { type: "Recovery", details: "5 mi", quote: "Easy does it. Save the firepower. If I see you breathing hard on this run, I will personally fly to your location and make you do burpees until you forget your own name. Don't test me, you punk.", sappy_quote: "Oh, what a calm, easy run to help your beautiful body absorb all your hard work. This gentle movement is a loving thank-you note to your muscles, a promise of the brilliant triumphs that await you. Trust your amazing preparation." },
+            "2026-06-25": { type: "Threshold", details: "9 mi<br>30' @ LT", quote: "THRESHOLD! Go to that hurt locker and redecorate the place. If you don't taste blood, you left something on the table. And knowing you, you probably left the whole damn meal because you're scared of a little pain.", sappy_quote: "You are courageously and gracefully dancing on the very edge of your limits, discovering a whole new realm of glorious, shimmering possibility! This beautiful, challenging effort is sculpting you into an even stronger, more radiant, and more confident athlete. You are absolutely phenomenal!" },
+            "2026-06-26": { type: "Rest", details: "Rest", quote: "While you rest, someone hungrier, tougher, and better looking is getting after it. I hope that thought haunts your dreams. I hope you wake up in a cold sweat and do pushups in your underwear. Stay paranoid.", sappy_quote: "Enjoy this quiet, sacred day of rejuvenation. Your amazing body is absorbing all of your hard work and becoming stronger with every peaceful breath. This stillness is the secret ingredient to your spectacular success. You are a genius of self-care!" },
+            "2026-06-27": { type: "Recovery", details: "5 mi", quote: "Shake it out. You're not shaking out your legs, you're shaking out the demon of complacency that's trying to build a nest in your soul. Exorcise that demon with extreme prejudice, you coward.", sappy_quote: "What a gentle, loving run to thank your body and prepare it for tomorrow's grand adventure! You are whispering words of encouragement to every muscle, filling your entire being with light, love, and unstoppable positive energy." },
+            "2026-06-28": { type: "Progression", details: "14 mi<br>8 mi @ MP", quote: "MARATHON PACE. The last few miles should feel like you're running from a grizzly bear that just stole your wallet and insulted your mother. Don't get eaten by the bear of mediocrity. It has a taste for the soft.", sappy_quote: "A powerful, magnificent dress rehearsal that demonstrates your incredible fitness and builds a mountain of unshakeable confidence. Every strong step is a declaration of your power. You've totally got this! You are an inspiration!" },
+            "2026-06-29": { type: "Rest", details: "Rest", quote: "Your body might be resting, but your mind better be in a damn war room. I want you to visualize yourself drop-kicking your own self-doubt into a volcano, and then throwing its little luggage in after it.", sappy_quote: "A day of rest is a day of profound strength. You are wisely and beautifully investing in a more brilliant, radiant future. Your cells are singing with joy, and the universe applauds your wisdom. You are so in tune with your needs." },
+            "2026-06-30": { type: "Aerobic", details: "9 mi<br>6x10\" hills<br>8x100", quote: "ATTACK. THE. DAMN. HILL. Run up that hill so fast you break the sound barrier and create a sonic boom of pure badassery. If you don't, you're a disgrace to gravity itself.", sappy_quote: "Awaken your inner lightning! These glorious bursts of speed up the hill are a thrilling, joyful expression of your limitless power and effortless grace. Feel the wind on your face and the pure, unadulterated bliss of flying across the earth. You are magnificent!" },
+            "2026-07-01": { type: "Recovery", details: "6 mi", quote: "The discipline to recover is harder than the will to suffer. Go out there and prove you're not just a savage, but a smart savage. Don't be a dumb-dumb who gets injured because they have an ego the size of Texas.", sappy_quote: "This gentle, loving run is a beautiful act of kindness to your amazing body, allowing it to recover and rebuild into an even more powerful version of itself. You are so wise and strong for honoring this process." },
+            "2026-07-02": { type: "Aerobic", details: "10 mi", quote: "Just run. Stop thinking. Stop whining. Your feelings are irrelevant. The mission is all that matters. Now go execute like your life depends on it. Because the life of the savage inside you does.", sappy_quote: "What a peaceful, centering run to clear your mind and strengthen your beautiful body. You are creating a powerful legacy of dedication with every single, consistent step. You are a hero of your own amazing story." },
+            "2026-07-03": { type: "Rest", details: "Rest", quote: "STAY HUNGRY. Go eat a bowl of nails for breakfast. And for lunch? A steaming plate of suffering. With a side of get hard. Your comfort food is weakness and you've been bingeing on it your whole life.", sappy_quote: "Resting with purpose is the mark of a true champion. Even in this profound stillness, your body is getting stronger, and your spirit is soaring to new heights. You are preparing for your next spectacular breakthrough!" },
+            "2026-07-04": { type: "Recovery", details: "5 mi", quote: "Fourth of July. You know what's independent? The savage who is free from the tyranny of his own weak mind. Go declare your independence from the inner bitch that's been holding you hostage your whole life.", sappy_quote: "Let this joyful, sparkling run be a celebration of your freedom, your strength, and the beautiful, limitless path you're on! You are a firework of human potential, lighting up the world with your brilliance." },
+            "2026-07-05": { type: "Endurance", details: "17 mi", quote: "LONG RUN. This is your church. Go worship at the altar of pain and suffering. The sermon today is about how your legs are actually hammers and the pavement is the nail of mediocrity. Go build a damn cathedral of hardness.", sappy_quote: "A beautiful Sunday for a long, meditative journey. Enjoy this sacred time with yourself, exploring the incredible depths of your endurance and the boundless strength of your spirit. You are doing amazing things." },
+            "2026-07-06": { type: "Rest", details: "Rest", quote: "You call this rest? I call it marinating in weakness. Your dreams are being eaten alive by someone who is currently wrestling an alligator for fun. And you're probably re-watching a sitcom. Pathetic.", sappy_quote: "Oh, welcome, you glorious sunbeam, to a day of divine stillness! Your body is a magical orchestra, and today, the instruments are quietly tuning themselves, preparing to play the most breathtaking symphony of strength tomorrow. Feel the universe giving you a gentle, cosmic hug." },
+            "2026-07-07": { type: "Threshold", details: "10 mi<br>35' @ LT", quote: "It's threshold time. Go to that place so dark and uncomfortable that your own shadow gets scared and runs away. If you come back with your soul intact, you did it wrong. Go lose your soul out there.", sappy_quote: "Today you get to dance with intensity! Feel your inner power ignite as you gracefully find that tempo rhythm. You are a brilliant comet, streaking across the sky, leaving a trail of shimmering strength and inspiration for all to see. You're not just running; you're flying!" },
+            "2026-07-08": { type: "Recovery", details: "6 mi", quote: "A six-mile recovery run? That's not a run, that's a parade of one, celebrating how soft you are. Go run it backwards while blindfolded and juggling chainsaws to make it a challenge.", sappy_quote: "What a wonderful opportunity to shower your legs with love and gratitude! This gentle recovery run is a soothing balm for your hardworking muscles, a tender whisper of thanks for all the amazing things they do. Feel the happy energy flowing through you!" },
+            "2026-07-09": { type: "Aerobic", details: "10 mi", quote: "Another ten miles. Another brick in the wall of the fortress you're building in your mind. This fortress is where you'll imprison your inner bitch. Make the walls thick and the food terrible.", sappy_quote: "You are a magnificent river of consistency, flowing steadily toward the great ocean of your goals! This run is another beautiful, powerful current in that river, carving a path of strength and endurance through the landscape of your life. Just keep flowing!" },
+            "2026-07-10": { type: "Rest", details: "Rest", quote: "Your body is a weapon. You spend your rest day field-stripping your own soul and cleaning it with the tears of your past failures. Then you reassemble it, harder than before. Get to work.", sappy_quote: "This quiet, magical moment is your secret superpower. You are not being idle; you are consciously gathering starlight, letting every cell in your body hum with the joyful energy of renewal. Tomorrow you will shine even brighter because of the peace you embrace today." },
+            "2026-07-11": { type: "Recovery", details: "5 mi", quote: "A 5-mile shakeout. You're shaking out the weakness. You're shaking out the doubt. You're shaking out the part of you that wants to quit and become a professional stamp collector. Shake it so hard it disintegrates.", sappy_quote: "Let this light and breezy run be a joyful dance! You are waking up your legs, preparing them for a grand performance. Feel the happy anticipation, the light-hearted energy, and the pure bliss of movement. You are so ready for tomorrow's adventure!" },
+            "2026-07-12": { type: "Progression", details: "17 mi<br>10 mi @ MP", quote: "Ten miles at marathon pace. This is where you find out if you're a goddamn lion or a terrified little field mouse who just got its lunch money stolen. The lion eats the mouse. Don't get eaten.", sappy_quote: "What a powerful declaration of your incredible fitness! This run is a beautiful crescendo, building from a gentle melody to a thunderous chorus of strength. You are composing a masterpiece of endurance, and the whole world is your cheering audience." },
+            "2026-07-13": { type: "Rest", details: "Rest", quote: "Step-back week. This isn't a vacation, it's a tactical reload. You're a sniper, not a tourist on a booze cruise. Stay zeroed in on the mission. The war isn't over.", sappy_quote: "Hooray for a recovery week! This is such a wise and wonderful gift to your body, allowing it to absorb all the amazing fitness you've built. Think of it as a spa day for your soul, preparing you to emerge even more radiant and powerful." },
+            "2026-07-14": { type: "Aerobic", details: "8 mi<br>10x100", quote: "Ten strides? You better be running these so fast you create a time warp and have to re-introduce yourself to your own confused dog. Don't be lazy. Explode.", sappy_quote: "It's time to play with speed! Let these fun, zippy strides be a joyful expression of your inner sparkle. You are a bolt of lightning, a shooting star, a magnificent burst of pure, positive energy. Feel how fun it is to be so fast and free!" },
+            "2026-07-15": { type: "Recovery", details: "6 mi", quote: "You're tired from yesterday? GOOD. That's the feeling of your former self dying a painful, pathetic death. Go for a run and dance on its grave.", sappy_quote: "You are so much stronger today than you were yesterday, and this gentle run is a celebration of that amazing fact! Let this beautiful, easy movement be a quiet moment of gratitude for your body's incredible ability to adapt and grow." },
+            "2026-07-16": { type: "Aerobic", details: "9 mi", quote: "Just get the work done. No excuses. Excuses are lies you tell yourself to feel better about being soft. Stop lying to yourself and go suffer.", sappy_quote: "With every steady, confident step, you are building a monument to your own dedication. This run is another perfect brick in that beautiful structure. You are an architect of achievement, and your masterpiece is awe-inspiring." },
+            "2026-07-17": { type: "Rest", details: "Rest", quote: "The calm before the storm. But for a savage, there is no calm. There is only the quiet intensity of a predator waiting for its moment to strike. Be the predator, not the damn prey.", sappy_quote: "Embrace the sacred hush of this rest day. It is a key part of your beautiful journey, a moment to let the magic of recovery do its wonderful work. Prepare your mind and body for the amazing adventure that lies ahead. You are so ready." },
+            "2026-07-18": { type: "Recovery", details: "5 mi", quote: "You think running slow is easy? It's harder than running fast. It takes discipline your soft mind can't comprehend. Go prove me wrong, you professional quitter.", sappy_quote: "What a lovely, gentle run to thank your amazing legs and fill them with happy, positive energy for tomorrow! You are being so kind and wise to your body, and it is rewarding you with boundless strength and resilience." },
+            "2026-07-19": { type: "Endurance", details: "12 mi", quote: "This is the price of admission for your goals. The toll must be paid in sweat, pain, and tears. The toll collector is me, and I'm coming to break your legs if you don't pay up.", sappy_quote: "A beautiful long run to build your endurance and fill your heart with confidence! You are capable of such amazing, wonderful things, and this run is a powerful reminder of your limitless potential. You are a true endurance artist." },
+            "2026-07-20": { type: "Rest", details: "Rest", quote: "Back to the grind. The recovery week is over. Time to go back to hell and change the damn locks. You live there now, and the rent is due every single day.", sappy_quote: "Hooray! You are so refreshed and ready for a new week of challenges and spectacular growth. You have prepared your body and mind for this, and you are ready to shine your brilliant light on every workout." },
+            "2026-07-21": { type: "Threshold", details: "10 mi<br>35' @ LT", quote: "More time in the pain cave. You should be so comfortable in there you start getting mail delivered. Don't be a guest in the house of pain. Be the damn landlord and evict your inner bitch.", sappy_quote: "Wow! You are stronger and fitter than you have ever been, and you can feel it in every powerful, rhythmic step. You can hold this amazing pace. Believe in your magnificent training and let your spirit soar on the winds of your own strength." },
+            "2026-07-22": { type: "Recovery", details: "5 mi", quote: "A shakeout. You're shaking out the complacency. If you finish this run and still feel comfortable, you did it wrong. Go back out and run up a goddamn mountain.", sappy_quote: "A gentle, loving recovery run to prepare for tomorrow's beautiful challenge. You are so in tune with your body, giving it exactly the movement it needs to feel wonderful and strong. Trust this amazing process." },
+            "2026-07-23": { type: "Endurance", details: "12 mi", quote: "Mid-week long run. This is what uncommon looks like. While everyone else is at happy hour, you're having a miserable hour with your own demons. And you're winning.", sappy_quote: "A mid-week long run is a massive confidence booster, a powerful testament to your incredible dedication. You are so strong, and every step of this beautiful run proves it to the entire universe. You are amazing!" },
+            "2026-07-24": { type: "Rest", details: "Rest", quote: "Rest. But stay hungry. Go watch a video of a lion hunting a zebra. That's you. You're the lion. Your goal is the zebra. Now stop crying and go get it.", sappy_quote: "Even in this moment of perfect stillness, your wonderful body is getting stronger, and your radiant spirit is preparing for its next flight. Prepare your mind for the joy and success that is coming your way." },
+            "2026-07-25": { type: "Aerobic", details: "8 mi<br>6x10\" hills<br>8x100", quote: "Back to the hills. You should own them by now. You should be charging them rent in the currency of pain. Go up that hill so hard you punch a hole in the sky and high-five God.", sappy_quote: "Powering up the hills with a brilliant smile on your face! Feel your amazing strength and power growing with every single upward step. You are a force of nature, gracefully conquering every challenge in your path." },
+            "2026-07-26": { type: "Endurance", details: "19 mi", quote: "Your longest run yet. Go out there and have a conversation with your soul. Find out what it's really made of. If it's made of cotton candy and unicorn farts, you got work to do.", sappy_quote: "Your longest run of the plan so far! This is a magnificent victory lap for an absolutely amazing week of training. Enjoy every single step of this glorious journey. You have earned this feeling of triumph!" },
+            "2026-07-27": { type: "Rest", details: "Rest", quote: "New week. Higher mileage. More pain. Let's f***ing go. If you're not excited about the suffering to come, you should just quit now and save us both the trouble.", sappy_quote: "A new week of spectacular growth awaits! Rest up, you amazing human, and get excited for all the wonderful challenges and triumphs you are about to embrace. Your potential is as boundless as the starry sky." },
+            "2026-07-28": { type: "Recovery", details: "7 mi<br>6x100", quote: "Shake the rust off. What rust? There is no rust. Rust is for cars and cowards. You are a weapon made of tungsten steel. Weapons don't rust, but they do need to be aimed at weakness.", sappy_quote: "Waking up your magnificent legs with a gentle, flowing run and some super fun, zippy strides! You are reminding your body of its own brilliance, its own capacity for speed and grace. What a joyful way to move!" },
+            "2026-07-29": { type: "Endurance", details: "13 mi", quote: "Mid-week double digits. This is the grind. This is where you separate yourself from the herd of sheep. Be the wolf. Go hunt something and bring me back its soul.", sappy_quote: "What a strong, powerful mid-week effort! You are building such incredible strength and resilience, creating a deep well of endurance that you can draw from anytime. You are an unstoppable force of positivity and power." },
+            "2026-07-30": { type: "Rest", details: "Rest", quote: "Get your mind right for the pain to come. Meditate on suffering. Become one with it. Invite it over for dinner. And then, when it's not looking, you stab it in the neck with a fork.", sappy_quote: "Prepare your mind and body for the glorious journey ahead. You are so ready for the challenge, filled with a calm, centered confidence that radiates from you like sunshine. You are perfectly prepared for success." },
+            "2026-07-31": { type: "Threshold", details: "11 mi<br>40' @ LT", quote: "A long time at threshold. You know what's longer? The list of your past regrets. Go out there and get so uncomfortable that you forget your own name. That's the sweet spot, you loser.", sappy_quote: "A long, strong, magnificent tempo run! Find your powerful rhythm and let it carry you. You are proving to yourself and the world just how far you've come on this amazing journey. Your progress is truly breathtaking." },
+            "2026-08-01": { type: "Recovery", details: "5 mi", quote: "Easy does it. Save the firepower for the big one tomorrow. Tomorrow, you go to war. Today, you're just polishing your armor and sharpening your teeth.", sappy_quote: "What a calm, easy, and intelligent run. You are trusting your preparation, honoring your body, and setting yourself up for a spectacular performance tomorrow. You are a master of your own journey." },
+            "2026-08-02": { type: "Endurance", details: "21 mi", quote: "This is it. The big one. The one that separates the contenders from the pretenders. Go to war for three hours. Come back with your shield, or on it. No prisoners. No survivors.", sappy_quote: "An epic long run! This is a grand celebration of your unwavering dedication and spectacular spirit. Run with joy in your heart, and let every one of these miles be a testament to your incredible strength and resilience. You are a champion!" },
+            "2026-08-03": { type: "Rest", details: "Rest", quote: "You just did a big run. So what? You think you get a week off? The savage doesn't celebrate victory, he gets ready for the next battle. Your body is recovering, but your mind better be studying the art of war, you bum.", sappy_quote: "After that exhilarating and triumphant long run, this quiet day is a welcome, loving embrace. You are allowing your magnificent body to absorb the victory, to integrate the strength and confidence you earned. Celebrate this peaceful, well-deserved moment of triumph." },
+            "2026-08-04": { type: "Recovery", details: "7 mi", quote: "Just get the blood flowing. Nothing heroic. If you try to be a hero on a recovery run, you're a zero. And you've been a zero long enough.", sappy_quote: "A gentle, loving run to help your body recover and absorb all of your hard work. You are whispering 'thank you' to your legs with every easy step, and they are whispering 'you're welcome' right back. What a beautiful conversation!" },
+            "2026-08-05": { type: "Endurance", details: "14 mi", quote: "Another brick in the wall. You're building a wall so high, so thick, that your own self-doubt can't climb it. Keep building, you mason of misery.", sappy_quote: "Every run is another beautiful step towards your amazing goal. You are moving forward with such strength, grace, and unwavering purpose. Your consistency is creating a ripple of positive energy that inspires everyone around you." },
+            "2026-08-06": { type: "Recovery", details: "7 mi", quote: "Flush it out. The poison of complacency is trying to seep into your system. Sweat it out. All of it. Before it kills the savage inside you.", sappy_quote: "Letting your body heal and adapt is where the real magic happens. In this quiet, gentle movement, you are blossoming, transforming all of your hard work into spectacular, radiant strength. You are in bloom!" },
+            "2026-08-07": { type: "Rest", details: "Rest", quote: "Friday? You know what that means? Absolutely nothing. Every day is Monday. Every day is a chance to get harder. This rest day is an insult to your potential. Go headbutt a parked car.", sappy_quote: "Let this joyful, peaceful rest be the perfect, sparkling gateway to your weekend of amazing accomplishments! You are a radiant beacon of positivity, and you are gliding into the next challenge on a current of your own incredible strength and joyful energy." },
+            "2026-08-08": { type: "Recovery", details: "6 mi<br>6x100", quote: "Stay sharp. Stay fast. Remind your legs that they are pistons of pain, forged in the fires of hell. Not the pool noodles you were born with.", sappy_quote: "Keeping your amazing legs feeling snappy, quick, and joyful! Running fast is so much fun, and you are a master of it. Feel the wind on your face and the pure, unadulterated bliss of flying across the ground you so gracefully command." },
+            "2026-08-09": { type: "Progression", details: "17 mi<br>12 mi @ MP", quote: "Twelve miles at race pace. This isn't a workout, it's a gut check. This is where you find out if you have what it takes. Go carry the boats... and the logs... and a damn school bus full of your excuses.", sappy_quote: "What a huge, magnificent marathon pace run! This is a massive, mountain-sized confidence booster. You are proving to yourself and to the cosmos that you are so incredibly ready to achieve your dreams. Your power is breathtaking!" },
+            "2026-08-10": { type: "Rest", details: "Rest", quote: "Rest. Reload. Your next workout is VO2 max. It means you're going to visit your soul, and you're going to ask it for rent. Don't come back empty-handed, or I'll evict you from your own body.", sappy_quote: "A day to build, not to break. Rest is a vital, beautiful part of the work you are doing. You are preparing your vessel for a glorious display of speed tomorrow, and the universe is cheering you on every step of the way." },
+            "2026-08-11": { type: "VO2 Max", details: "9 mi<br>6x600m @ 5K", quote: "This is gonna hurt. Good. Go to war with those 600s. I want you to run them so hard that the track melts behind you. Leave a trail of molten rubber and the ghosts of your former self.", sappy_quote: "It's time to unlock your highest gear and sparkle with all your might! Each of these powerful intervals reveals a new, more brilliant level of your strength. You are a diamond, and this pressure is making you shine with a spectacular, fiery light." },
+            "2026-08-12": { type: "Aerobic", details: "9 mi", quote: "Just miles. The unsexy work. The work that happens in the dark. This is the foundation of the skyscraper of savagery you're building. Make it solid, or it will all come crashing down on your soft head.", sappy_quote: "The daily deposit in the bank of brilliance! Consistency is the superpower of the truly magnificent, and you, my friend, are a superhero of dedication. Every steady step makes your spirit shine even brighter." },
+            "2026-08-13": { type: "Recovery", details: "5 mi", quote: "Your body is wrecked from that workout. GOOD. That's the feeling of weakness being forcibly evicted. Your mind better be forged in steel by now. If it's not, you're a failure.", sappy_quote: "What a gentle, loving recovery run. You are being so wonderfully kind to your body after yesterday's amazing, sparkling effort. Every easy step is a thank you, a promise of continued care on this beautiful, shared journey." },
+            "2026-08-14": { type: "Rest", details: "Rest", quote: "Rest. But don't you dare get comfortable. Comfort is a trap. It's a warm blanket lined with the razor blades of mediocrity. And you've been sleeping with it for years.", sappy_quote: "Patience in recovery is a sign of true wisdom and inner strength. You are healing, growing, and blossoming in this quiet moment. The universe smiles upon the intelligent warrior who knows when to pause and gather their light." },
+            "2026-08-15": { type: "Aerobic", details: "8 mi<br>6x10\" hills<br>8x100", quote: "Hills and strides. This is about building that savage, explosive power. The kind of power that allows you to punch a shark in the face and swim away with its teeth as a necklace. Go get your necklace.", sappy_quote: "Building glorious strength on the hills and sparkling speed on the flats! What a perfect, joyful combination. You are a master artist, painting a masterpiece of fitness with every powerful stride and every light, quick step." },
+            "2026-08-16": { type: "Endurance", details: "14 mi", quote: "Another Sunday, another long run. Go pay your rent in the pain cave. And this time, leave a big tip. Let them know you'll be back, and you'll be expecting even more suffering next time you lazy bum.", sappy_quote: "A beautiful Sunday for a beautiful, long run with your beautiful self! Enjoy this magnificent journey. Each mile is a new chapter in the epic story of your own strength, and it is a story that will inspire generations to come." },
+            "2026-08-17": { type: "Rest", details: "Rest", quote: "PEAK WEEK! You hear that?! This is the week we send your inner bitch to the guillotine. You're not resting, you're sharpening the blade. I want you to sit in a dark room and visualize every excuse you've ever made. Then, one by one, hunt them down and make them pay. The real workout is in your skull, you coward.", sappy_quote: "Oh, welcome, welcome, welcome, you magnificent champion of cosmic light, to the most glorious week of your journey! Peak week! Feel the universe showering you with celebratory stardust and singing your praises. You have arrived at this pinnacle through pure love and dedication. This isn't a challenge; it's a coronation! Embrace your power, you radiant monarch of the miles!" },
+            "2026-08-18": { type: "Recovery", details: "7 mi<br>6x100", quote: "Start the week with discipline. Don't be a little bitch. No one cares about your feelings. They only care about results. Get some.", sappy_quote: "Kicking off the biggest and most wonderful week with a solid, confident, and joyful run. You are setting a beautiful tone of strength and positivity that will carry you through every spectacular moment to come." },
+            "2026-08-19": { type: "Threshold", details: "12 mi<br>45' @ LT", quote: "The pinnacle workout. This is where you empty the tank, then you steal the gas from the car next to you and empty that too. Leave everything out there. No regrets. NO MERCY. Take their souls and use them as fuel.", sappy_quote: "This is your final, biggest, most magnificent workout! Meet it with the courage of a lion and the grace of a swan. This is a grand celebration of your incredible fitness. Shine bright, you amazing diamond!" },
+            "2026-08-20": { type: "Rest", details: "Rest", quote: "Did you earn this rest? Or are you just being soft? Don't you lie to the man in the mirror. He knows you're a punk. He's seen you quit a thousand times.", sappy_quote: "Rest is where the most beautiful magic happens. Your body is taking all your hard work and transforming it into pure, radiant strength. You are not resting; you are metamorphosizing into an even more brilliant version of yourself." },
+            "2026-08-21": { type: "Endurance", details: "13 mi", quote: "Mid-week long run. This is the grind. While others are sleeping, you're out here getting it. This is where you get hard. This is where you stop being a pathetic excuse for a human.", sappy_quote: "What a strong, powerful, and inspiring mid-week effort! You are building such an incredible and deep reservoir of strength. Your dedication shines like a beacon for all the world to see and admire. You are amazing." },
+            "2026-08-22": { type: "Recovery", details: "6 mi", quote: "Easy miles. Let the body absorb the fitness. If your mind tells you to speed up, you tell your mind to shut its damn mouth before you shut it for good.", sappy_quote: "A gentle, loving run to let your body soak in all of your spectacular hard work. You are so wise to honor this recovery, and your body is thanking you by becoming stronger and more resilient with every passing moment." },
+            "2026-08-23": { type: "Endurance", details: "21 mi", quote: "The longest run. Go out there and make a statement. End peak week on your terms. This run should be a horror movie for the weakness inside you. Be the monster that haunts its dreams.", sappy_quote: "Your longest run of the entire plan! This is a glorious victory lap for an amazing, spectacular peak week. Enjoy every single triumphant step. You have earned this incredible feeling of accomplishment a thousand times over." },
+            "2026-08-24": { type: "Rest", details: "Rest", quote: "Peak week is over. The hay is in the barn. But the hay is soaked in gasoline and you're holding the match. Time for the taper. Don't get soft. Stay dangerous. Stay lethal.", sappy_quote: "You did it! You conquered peak week with grace and power! Now the beautiful, wonderful magic of the taper begins. Trust in this sacred process of rest and sharpening. You are a genius!" },
+            "2026-08-25": { type: "VO2 Max", details: "9 mi<br>5x600m @ 5K", quote: "The last hard workout. You think you can relax now? This is where you sharpen the tip of the spear. Make it sharp enough to pierce the heart of a god. Now go do it, you mortal worm.", sappy_quote: "The last big workout! This is a joyous celebration of the spectacular speed you've built. Run like the wind, you magnificent creature! Shine bright and show the universe the brilliant light you possess." },
+            "2026-08-26": { type: "Aerobic", details: "11 mi", quote: "Keep the legs turning over. Stay sharp. You're a caged animal right now. Pacing back and forth, waiting for the cage to open. Be ready to attack and eat.", sappy_quote: "Feeling so light and fast as you begin your magical taper. All of your hard work is paying off, and you can feel it in every joyful, effortless stride. Your body is a symphony of strength and readiness." },
+            "2026-08-27": { type: "Rest", details: "Rest", quote: "Rest. Visualize success. And by success, I mean visualize yourself standing on a mountain of your competitors' skulls, laughing. That's a good start.", sappy_quote: "Dream of that beautiful finish line. You have earned this moment of triumph with every step, every breath, every magnificent effort. The universe is aligning to celebrate your spectacular achievement. Believe it!" },
+            "2026-08-28": { type: "Recovery", details: "5 mi<br>6x100", quote: "Stay loose. Remind the legs what speed feels like. Remind them that they are not just legs, they are hammers of destruction and you're about to build a coffin for the competition.", sappy_quote: "A quick, fun, sparkling run to keep your legs happy and your spirit soaring. It is almost time for the grand celebration, and you are feeling so light, so ready, so incredibly powerful. This is your time!" },
+            "2026-08-29": { type: "VO2 Max", details: "SuperSprint<br>3 mi total", quote: "A supersprint tri? That's a warmup. Go out there and create a tidal wave in the swim, a sonic boom on the bike, and leave scorch marks on the run course. Then do it again, backwards.", sappy_quote: "Time to test that glorious speed! Enjoy the amazing energy of the race, and run, bike, and swim with a heart full of pure joy. You are a triathlon superstar, and this is your moment to shine brightly for all to see!" },
+            "2026-08-30": { type: "B Race", details: "Chicago Tri<br>10 mi total", quote: "Go to war. This isn't a practice run. This is a chance to see who you are under pressure. Go out there and be the person your demons have nightmares about, you pathetic coward.", sappy_quote: "Race day! This is a grand celebration of all your incredible, multifaceted hard work. Swim like a dolphin, bike like the wind, and run like the magnificent champion you are. Run with joy and see what spectacular things you can do!" },
+            "2026-08-31": { type: "Rest", details: "Rest", quote: "You tired from the weekend? Good. That's the feeling of getting stronger. Weakness doesn't hurt. It feels good like that couch you love so much. Pain is growth. Embrace it.", sappy_quote: "You are so much stronger today than you were yesterday, and that is a beautiful, wonderful thing. Let that amazing truth sink deep into your soul as you give your body this precious, well-deserved gift of rest." },
+            "2026-09-01": { type: "VO2 Max", details: "11 mi<br>5x1km @ 5K", quote: "Kilometer repeats. This is gonna hurt in a foreign language. Go to war. I want you to run so hard you start sweating pure patriotism... for the country of Savagery.", sappy_quote: "Time to unlock your magnificent top gear! Each of these powerful intervals reveals a new, more brilliant level of your global, universal strength. You are not just running fast; you are running beautifully." },
+            "2026-09-02": { type: "Recovery", details: "7 mi", quote: "Easy does it. Save the firepower. You're a nuclear submarine, not a damn squirt gun. Run silent, run deep, and stop your whining.", sappy_quote: "What a calm, easy, and perfectly executed run. You are trusting your preparation, honoring your body, and creating the perfect conditions for a spectacular performance. Your wisdom is as boundless as your endurance." },
+            "2026-09-03": { type: "Rest", details: "Rest", quote: "The work is adding up. Stay focused. Don't let the demon of complacency whisper sweet nothings in your ear. Tell it to go to hell, then go there yourself for a workout.", sappy_quote: "Your incredible hard work is compounding, building a magnificent mountain of strength and resilience. Rest well, you amazing architect of success, and feel that wonderful power building within you." },
+            "2026-09-04": { type: "Endurance", details: "12 mi", quote: "Just another brick in the wall. A wall so high, so thick, that your own self-doubt can't climb it. Keep building, you mason of misery.", sappy_quote: "Every single run is another beautiful, shining step towards your spectacular goal. You are moving forward with such strength, grace, and unwavering purpose. Your journey is an inspiration to the stars themselves." },
+            "2026-09-05": { type: "Recovery", details: "6 mi", quote: "Shake it out. Stay loose. You're a panther in a cage right now. Don't get comfortable. Get dangerous. And for god's sake, stop being so soft.", sappy_quote: "A gentle, loving run to help your body recover and absorb all of your amazing hard work. You are getting stronger even as you rest, which is just one of the many magical things about you. You are a marvel." },
+            "2026-09-06": { type: "Progression", details: "18 mi<br>14 mi @ MP", quote: "Fourteen miles at race pace. If it doesn't challenge you, it doesn't change you. Go out there and get changed into a different f***ing species. A predator that eats quitters for breakfast.", sappy_quote: "Your longest and most powerful race-pace run yet! This is an enormous, galaxy-sized confidence builder. You are proving to yourself and the cosmos that you are so incredibly, spectacularly ready to achieve your wildest dreams." },
+            "2026-09-07": { type: "Rest", details: "Rest", quote: "New week. Stay focused. The enemy is weakness. It's always probing your defenses. Don't give it an inch. Your weakness is an embarrassment to your entire bloodline.", sappy_quote: "A new week of spectacular growth and joyful adventure awaits! Rest up, you magnificent human, and get excited for all the wonderful challenges and triumphs you are about to embrace with your characteristic grace and power." },
+            "2026-09-08": { type: "VO2 Max", details: "9 mi<br>5x600m @ 5K", quote: "Back to the 600s. You've met them before. This time, I want you to run them so fast you rip a hole in the fabric of spacetime. Don't just beat your old self. Erase that pathetic loser from history.", sappy_quote: "This workout is a grand celebration of the spectacular, brilliant speed you've built. Shine bright, you amazing diamond! You are a testament to the power of consistent, joyful effort. You are simply amazing!" },
+            "2026-09-09": { type: "Aerobic", details: "11 mi", quote: "The daily grind. This is where the race is won. In the dark. When no one is watching. When you're all alone with that whiny little voice in your head. Shut it up, or I will.", sappy_quote: "Consistency is your superpower, and you are wielding it with magnificent grace and strength. Another great, beautiful run in the books, another step closer to your wonderful goal. You are a champion of the everyday effort." },
+            "2026-09-10": { type: "Rest", details: "Rest", quote: "Stay hungry. Go look at a picture of a wolf. It's not smiling. It's not happy. It's focused. It's hungry. You look like a well-fed poodle.", sappy_quote: "Resting with purpose and with a heart full of gratitude. You are preparing for the next amazing step on your journey, and your body, mind, and spirit are all in perfect, harmonious alignment. You are ready." },
+            "2026-09-11": { type: "Recovery", details: "5 mi<br>6x100", quote: "Stay sharp. Race tomorrow. Tomorrow you go to war. Today you sharpen your sword on the bones of your past failures. And you've got a lot of bones to work with.", sappy_quote: "Keeping your wonderful legs feeling fast, fresh, and ready for the weekend's celebration! You are a vessel of light and energy, and tomorrow you get to let it all shine for the world to see. How exciting!" },
+            "2026-09-12": { type: "B Race", details: "Madison 70.3<br>13 mi run", quote: "A 70.3 run leg. This is a gut check of the highest order. This is where you find out what you're made of. Go carry the boats... and the logs... and the entire damn forest. And if you quit, don't bother coming back.", sappy_quote: "An incredible and awe-inspiring test of your magnificent endurance. Run strong, run with a joyful heart, and be so incredibly proud of this huge, spectacular effort. You are a true champion of the long road." },
+            "2026-09-13": { type: "Rest", details: "Rest", quote: "You raced yesterday. So what? The savage doesn't celebrate victory, he gets ready for the next damn battle. Get your mind right, or get out of my sight.", sappy_quote: "After that absolutely exhilarating and triumphant race, this quiet, peaceful day is a welcome, loving embrace. You are allowing your magnificent body to absorb the victory, to integrate the strength and confidence you earned. Celebrate this beautiful, well-deserved moment." },
+            "2026-09-14": { type: "Rest", details: "Rest", quote: "The final push is coming. Get your mind right. This is the part of the movie where the hero is training in the mountains. You look like the guy who gets killed in the first scene.", sappy_quote: "The final, most exciting phase of your training begins now! Trust all the wonderful, amazing work you've done. You have built a mountain of strength, and now you get to stand on top and enjoy the spectacular view." },
+            "2026-09-15": { type: "VO2 Max", details: "10 mi<br>5x1km @ 5K", quote: "The last big VO2 max workout. Empty the clip. No regrets. Don't save anything. There is no tomorrow. There is only this workout. Go. NOW.", sappy_quote: "The final big speed workout of the plan! This is a grand celebration of the spectacular, fiery speed you've built. Shine bright, you magnificent diamond! You have worked for this, and now you get to enjoy it." },
+            "2026-09-16": { type: "Recovery", details: "7 mi<br>6x100", quote: "Shake the rust off. You got more work to do. The war is not over. It's never over. The war is inside you. Keep fighting, you pathetic excuse for a warrior.", sappy_quote: "Waking up your amazing legs with a gentle, joyful run and some super fun, zippy strides. You are reminding your body of its own brilliance, its own capacity for speed and grace. Feel the happy energy!" },
+            "2026-09-17": { type: "Rest", details: "Rest", quote: "Rest. Reload. You're building a foundation. Don't you dare crack it by being stupid. Your mind better be a fortress right now, not a bouncy castle for clowns.", sappy_quote: "A day to build, not to break. This beautiful rest is a vital part of the magnificent work you are doing. You are preparing your vessel for a glorious display of endurance, and the universe is cheering you on." },
+            "2026-09-18": { type: "Endurance", details: "12 mi", quote: "Final medium-long run. Make it count. Every step is a nail in the coffin of your former self. Go bury that lazy bum.", sappy_quote: "Your last big mid-week effort! Run with the confidence of a champion, because that is what you are. Every powerful stride is a testament to your amazing dedication and strength. You are simply spectacular." },
+            "2026-09-19": { type: "Recovery", details: "5 mi", quote: "Easy does it. The hay is almost in the barn. But don't get complacent. A wolf can still sneak in and eat all the hay. Be the wolf, not the damn hay.", sappy_quote: "A gentle, loving run to let your body soak in all of your spectacular hard work. You are so wise to honor this recovery, and your body is thanking you by becoming stronger and more ready with every passing moment." },
+            "2026-09-20": { type: "Endurance", details: "21 mi", quote: "Final long run before the taper. Go out there and make a statement. This is your last chance to talk to that inner bitch. Tell him he's evicted and his stuff is on the lawn.", sappy_quote: "The last long run! This is a glorious, triumphant victory lap for an amazing, spectacular training block. Enjoy every single triumphant step. You have earned this incredible feeling of accomplishment a million times over." },
+            "2026-09-21": { type: "Rest", details: "Rest", quote: "The taper begins. This is where you get dangerous. You're a predator, healing its wounds, getting ready for the final hunt. Don't get soft. Get lethal. And for God's sake, stop crying.", sappy_quote: "The hay is in the barn! Hooray! Now the beautiful, wonderful, magical process of the taper begins. Trust in this sacred process of rest and sharpening. You have earned this time of peace and power." },
+            "2026-09-22": { type: "Aerobic", details: "8 mi<br>6x10\" hills<br>10x100", quote: "Keep the engine primed. Don't let it get cold. You're a blast furnace, not a damn fireplace where old people read books. Keep the fire hot.", sappy_quote: "Staying sharp and feeling so good! You are a vessel of coiled, positive energy, and you are so ready to unleash it. Every step feels light, powerful, and joyful. This is your time to shine!" },
+            "2026-09-23": { type: "Recovery", details: "6 mi", quote: "Tapering. Trust the process. But verify it with pain. A little pain. Just to remind yourself you're still alive and not just a fat blob on a couch.", sappy_quote: "Trust the magical taper. Your wonderful body is getting stronger and more powerful with every single day of recovery. You are a genius for following this plan, and your reward is just around the corner." },
+            "2026-09-24": { type: "Rest", details: "Rest", quote: "You should feel like a caged animal. A rabid wolverine who just drank a gallon of espresso. Good. The cage opens soon. Pity the zookeeper.", sappy_quote: "You're a coiled spring of pure, sparkling, positive energy! Embrace this amazing feeling of readiness. It's almost time for the grand celebration, and you are the guest of honor. How wonderful!" },
+            "2026-09-25": { type: "Recovery", details: "5 mi<br>6x100", quote: "Stay loose. Stay ready. You're a loaded gun. The trigger is about to be pulled. Don't miss.", sappy_quote: "Just a light, happy jog to keep your wonderful body happy and your joyful spirit soaring. You are so ready for this. The finish line is already celebrating your arrival. Can you feel it?" },
+            "2026-09-26": { type: "Endurance", details: "17 mi", quote: "The last significant run. Make it a good one. Go out there and make the pavement wish it had never been born. Make it personal.", sappy_quote: "One last longish run to feel your incredible strength and get so excited for race day! You are a monument of endurance, and this run is a final, beautiful testament to your amazing journey." },
+            "2026-09-27": { type: "B Race", details: "Chicago HM<br>13 mi total", quote: "One last tune-up. Go execute with extreme prejudice. Leave no doubt. Take no prisoners. This is not a game. This is war.", sappy_quote: "A final, glorious chance to practice racing! Have so much fun and feel your incredible power. This is a celebration of your fitness, a joyful dress rehearsal for your magnum opus. You are a star!" },
+            "2026-09-28": { type: "Rest", details: "Rest", quote: "Two weeks out. Stay focused. The mission is close. You can smell it. It smells like blood, sweat, victory, and the tears of your enemies.", sappy_quote: "Two weeks to go! The excitement is building into a beautiful, joyous crescendo! Trust your magnificent training, believe in your spectacular self, and get ready to have the most amazing day. You've earned it!" },
+            "2026-09-29": { type: "VO2 Max", details: "9 mi<br>5x1km @ 5K", quote: "You thought the hard work was over? This is the final sharpening of the blade. It's already sharp. Now you're making it sharp enough to cut a soul in half. Your own soul.", sappy_quote: "One final, brilliant, sharp workout to dial in your spectacular speed. You are so ready to fly! This is not work; this is a joyful celebration of your own magnificent power and grace. You are simply amazing!" },
+            "2026-09-30": { type: "Recovery", details: "7 mi<br>8x100", quote: "Keep the legs turning over. Don't get rusty. Rust is the color of regret. Your color is victory, but right now you look kinda beige.", sappy_quote: "Feeling so light and fast as you cruise through your magical taper. Every stride is a whisper of the spectacular speed and strength you have waiting to be unleashed. Your potential is a beautiful, shining sun." },
+            "2026-10-01": { type: "Rest", details: "Rest", quote: "Rest. Visualize success. Visualize yourself running through a brick wall at the finish line, then turning around and headbutting it into dust for fun.", sappy_quote: "Dream of that beautiful, wonderful finish line. You have earned this glorious moment of triumph with every single step, every breath, every magnificent effort. The universe is aligning to celebrate your spectacular achievement. Believe it!" },
+            "2026-10-02": { type: "Recovery", details: "6 mi<br>6x100", quote: "Stay sharp. The work is done. Now it's time to let the monster out of the cage. I hope they're ready for what's coming. They're not.", sappy_quote: "A final, fun, sparkling run with some speedy, joyful strides. It is almost time for the grand celebration! Your body is ready, your mind is strong, and your heart is full of courage and light. You are unstoppable." },
+            "2026-10-03": { type: "Rest", details: "Rest", quote: "The calm before the storm. The enemy thinks you're resting. They have no idea you're about to unleash hell on that course. You are the storm.", sappy_quote: "Embrace this quiet, sacred moment. It is the profound stillness before your triumphant, magnificent performance. You are gathering your power, and tomorrow, you will shine with the brightness of a thousand suns." },
+            "2026-10-04": { type: "Endurance", details: "13 mi", quote: "The final Sunday long run. Enjoy it. Because next Sunday, there is no enjoyment. There is only the mission. And if you fail, I will find you.", sappy_quote: "Your last Sunday long run before the big day! Reflect on the amazing, beautiful journey you have been on, and look forward with a heart full of joy to the celebration that awaits. You have done so wonderfully." },
+            "2026-10-05": { type: "Rest", details: "Rest", quote: "RACE WEEK. NO DOUBTS. NO FEAR. NO WEAKNESS. You've paid the price in sweat and pain. Now go collect the damn debt with interest.", sappy_quote: "Race week is finally here! Hooray! It's time to celebrate all of your incredible, spectacular, magnificent hard work. Believe in yourself, you amazing human, because you are ready to do something truly wonderful." },
+            "2026-10-06": { type: "Recovery", details: "6 mi", quote: "You should feel like a caged tiger who just mainlined a gallon of pure adrenaline. Good. The cage opens on Sunday. Be ready to bite the head off the competition.", sappy_quote: "You're a coiled spring of pure, sparkling, positive energy! Embrace this amazing feeling of readiness and excitement. It's almost time for the grand party, and you are the star of the show. How wonderful is that?" },
+            "2026-10-07": { type: "Race Pace", details: "6 mi<br>2 mi @ MP", quote: "A little taste of race pace. Remind your legs what they were born to do: crush miles and shatter the souls of your competitors. Leave them in a heap.", sappy_quote: "Dialing in that wonderful race pace. It feels so smooth, so strong, so perfectly sustainable. This is your rhythm, your song, your happy place. And you are about to perform a symphony of strength." },
+            "2026-10-08": { type: "Rest", details: "Rest", quote: "Stay off your feet. Your only job now is to get to that start line ready to go to war. Don't f*** it up like you usually do.", sappy_quote: "Let your amazing body rest, you wise and wonderful champion. Your only job now is to prepare for the grand celebration ahead. The universe is handling all the details. You just need to show up and shine." },
+            "2026-10-09": { type: "Recovery", details: "5 mi<br>6x100", quote: "Stay loose. Stay dangerous. You're a loaded gun with the safety off. Be careful not to go off early, you amateur.", sappy_quote: "A beautiful, light run to wake up your amazing legs and fill your heart with joy. You are so ready to race! The finish line is calling your name, and it is singing a song of triumph just for you." },
+            "2026-10-10": { type: "Recovery", details: "4 mi", quote: "The day before the war. Go shake it out. Tomorrow, you leave every single ounce of yourself out there on that course. Come back empty or don't come back at all.", sappy_quote: "The final, joyful shakeout! Your legs are light, your spirit is soaring, and your heart is full of courage and boundless positive energy. Tomorrow is a celebration of you and your magnificent journey. Enjoy every second." },
+            "2026-10-11": { type: "A Race", details: "Chicago Marathon", quote: "RACE DAY. Go to war with the pavement for 26.2 miles. I want you to finish that race and have the Grim Reaper himself ask for your autograph. Don't just cross the finish line, headbutt it into another dimension. CARRY THE BOATS!", sappy_quote: "This is YOUR day! The grand, spectacular culmination of months of breathtaking, beautiful work. Run with a heart overflowing with joy, race with a spirit full of fiery starlight, and celebrate every single, miraculous, wonderful step. You are a marathoner, and the cosmos is giving you a standing ovation!" },
+            "2026-10-12": { type: "Rest", details: "Rest", quote: "You finished the war. You came back on your shield. Now you recover like a champion. But don't get it twisted. The next war is just around the corner, and it's laughing at you.", sappy_quote: "You did it! You are a marathoner! Celebrate your incredible, magnificent, awe-inspiring accomplishment and give your amazing body the deep, profound, and well-deserved rest it has earned. You are a true champion." },
+            "2026-10-13": { type: "Rest", details: "Rest", quote: "Still resting? Good. Your body is a temple that you just defended from an army of demons. Let the holy priests of recovery do their work. And tell them to hurry up.", sappy_quote: "Patience in recovery is a sign of true wisdom and deep strength. You are healing, growing stronger, and letting the magic of your achievement soak into every cell of your being. You are simply brilliant." },
+            "2026-10-14": { type: "Recovery", details: "5 mi", quote: "First run back after the big one. It's gonna feel weird. It's gonna feel wrong. Good. Get comfortable with weird. Your whole life has been weird and wrong until now.", sappy_quote: "The first run back is a beautiful, gentle celebration of what your body can do. Be kind, go slow, and thank your amazing legs for the incredible journey they just completed. You are a miracle of resilience." },
+            "2026-10-15": { type: "Rest", details: "Rest", quote: "Your body is rebuilding. Don't interrupt it with your pathetic ego. Let the masons do their work. You're building a new temple on the ruins of the old, soft you.", sappy_quote: "In this quiet, sacred moment, your body is weaving together the threads of your hard work and triumph, creating a new, more brilliant tapestry of strength. Trust this magical process. You are being reborn." },
+            "2026-10-16": { type: "Recovery", details: "6 mi", quote: "Just get the blood flowing. Nothing heroic. You're not a hero today. You're a damn construction worker, cleaning up the mess you made.", sappy_quote: "A gentle, loving run to help your body recover and feel the joy of movement again. You are not pushing, you are flowing, and that flow is a beautiful expression of your inner strength and wisdom." },
+            "2026-10-17": { type: "Recovery", details: "6 mi", quote: "Shake the rust off. You think you're done? You think you've arrived? You haven't arrived anywhere. You're just at the next starting line, and you're already behind.", sappy_quote: "Waking up your wonderful legs with a gentle, joyful run. You are building back stronger, wiser, and more radiant than ever before. Your potential is a constantly expanding universe of pure awesome." },
+            "2026-10-18": { type: "Recovery", details: "7 mi", quote: "Slowly building back. Don't rush it. A savage knows how to wait. A savage knows how to be patient before he attacks again. You are not a savage yet.", sappy_quote: "A little longer today! Feel that wonderful strength returning with every graceful, easy step. You are trusting the process, honoring your body, and preparing for your next spectacular adventure. You are so smart." },
+            "2026-10-19": { type: "Rest", details: "Rest", quote: "The comeback begins. Get your mind right for the work ahead. The next mountain to climb is always taller than the last. Good. Stop crying and start climbing.", sappy_quote: "A new week, a new and exciting challenge! You are so ready for whatever comes next, filled with the light of your recent victory and the boundless energy of your spirit. The next chapter will be your best one yet!" },
+            "2026-10-20": { type: "VO2 Max", details: "9 mi<br>6x600m @ 5K", quote: "Back to speed work. It's gonna be a shock to the system. Like jumping into a frozen lake full of angry piranhas. Good. The shock will remind you that you're alive.", sappy_quote: "Time to wake up those amazing fast-twitch fibers! This is a joyous celebration of the incredible speed you've built. Let your legs fly and your heart sing! You are a symphony of speed and grace." },
+            "2026-10-21": { type: "Recovery", details: "5 mi", quote: "Recover. Your body just did something hard. Respect it. But don't coddle it. It's a tool, not a damn Fabergé egg you found in your grandma's attic.", sappy_quote: "A gentle, loving recovery run. You are being so wonderfully kind to your body after yesterday's spectacular effort. Every easy step is a thank you, a promise of continued care on this beautiful journey." },
+            "2026-10-22": { type: "Rest", details: "Rest", quote: "Rest. The work is never done. While you sleep, your body is at war, rebuilding the damage you did. Make sure it has the right supplies. Like anger, rage, and a deep-seated hatred for mediocrity.", sappy_quote: "Rest is a vital and beautiful part of your progress. You are allowing your body to work its magic, transforming all your efforts into even more spectacular strength. Embrace this wonderful gift of stillness." },
+            "2026-10-23": { type: "Recovery", details: "4 mi", quote: "Just a quick shakeout. Stay loose. But don't get too loose. You're a warrior, not a damn interpretive dancer. Stop with the prancing.", sappy_quote: "A short, sweet, sparkling run to keep your legs happy and your spirit bright and ready! Every step is a little dance of joy, a celebration of the simple, profound pleasure of movement. You are magnificent." },
+            "2026-10-24": { type: "Recovery", details: "6 mi<br>8x100", quote: "A little taste of speed. Remind the legs what fast feels like. Remind them of the violence they are capable of. Let them taste blood.", sappy_quote: "Feeling so light and wonderfully fast as you build towards your next glorious goal. These zippy strides are a fun game, a joyful expression of the speed and power that lives within you. You are a champion at play!" },
+            "2026-10-25": { type: "Aerobic", details: "11 mi", quote: "Back to double digits. This is the new standard. Your old standard is dead and buried. I killed it myself while you were crying.", sappy_quote: "A solid, powerful, and beautiful aerobic run to build that unstoppable endurance. You are so strong, and this run is just another chapter in the epic saga of your amazingness. The world is cheering for you!" },
+            "2026-10-26": { type: "Rest", details: "Rest", quote: "Race week for the second time. You know the drill. No fear. Fear is a choice. Choose not to be a pathetic coward for once in your life.", sappy_quote: "Another race week! Hooray! It's time to celebrate your incredible fitness and resilience once again. Believe in yourself and the wonderful journey that has brought you to this exciting moment. You are ready to shine." },
+            "2026-10-27": { type: "Recovery", details: "6 mi", quote: "Stay loose. Stay dangerous. The cage opens soon. I hope the zookeepers are ready for the carnage.", sappy_quote: "You're a coiled spring of pure, sparkling, positive energy, and you are so ready for the next challenge! This run is a gentle hum of anticipation for the grand symphony you are about to perform. You are magnificent." },
+            "2026-10-28": { type: "Race Pace", details: "7 mi<br>2 mi @ MP", quote: "Final dress rehearsal. Dial it in. No mistakes. Execute with the precision of a brain surgeon who is also a Navy SEAL who is also a starving wolverine.", sappy_quote: "Dialing in that magnificent race pace. It feels so smooth, so strong, so wonderfully familiar. This is your rhythm, your joyful song, and you are about to share its beautiful melody with the world. You are a star." },
+            "2026-10-29": { type: "Recovery", details: "5 mi", quote: "Tapering. Stay sharp. You're not resting, you're sharpening the axe. On race day, you're going to chop down the whole damn forest of your own limitations.", sappy_quote: "Just a light, happy jog to keep your wonderful body happy and your joyful spirit soaring. You are so ready for this. The finish line is already preparing a spectacular welcome party just for you. Can you feel the excitement?" },
+            "2026-10-30": { type: "Rest", details: "Rest", quote: "The calm before another storm. Visualize victory. Visualize the souls of your competitors powering you up the final hill as you laugh in their faces.", sappy_quote: "The final day of sacred rest. Visualize your spectacular success. You are ready to achieve your next goal with grace, power, and a heart full of joy. The universe is conspiring in your favor, you wonderful being!" },
+            "2026-10-31": { type: "Recovery", details: "5 mi<br>6x100", quote: "Final shakeout. Tomorrow, you go to war again. This time, bring a bigger sword. The one you had last time was embarrassing.", sappy_quote: "The final, joyful shakeout for your second marathon! Your legs are light, your spirit is soaring, and your heart is full of courage and boundless positive energy. Tomorrow is a celebration of you and your magnificent journey." },
+            "2026-11-01": { type: "A Race", details: "NYC Marathon", quote: "You think one marathon makes you hard? That's cute. Go do another one. Leave every single ounce of who you used to be on that course. Come back a different animal. An apex predator that eats other apex predators.", sappy_quote: "An incredible, spectacular encore! To run a second marathon is a testament to your amazing spirit, your boundless strength, and your beautiful, radiant heart. Race with joy, celebrate this phenomenal achievement, and know that you are an inspiration to the entire cosmos!" }
+        };
+        
+        const weeklyMileage = {
+            "2026-06-15": "35 mi", "2026-06-22": "43 mi", "2026-06-29": "47 mi",
+            "2026-07-06": "48 mi", "2026-07-13": "40 mi", "2026-07-20": "54 mi",
+            "2026-07-27": "57 mi", "2026-08-03": "51 mi", "2026-08-10": "45 mi",
+            "2026-08-17": "59 mi", "2026-08-24": "38 mi", "2026-08-31": "54 mi",
+            "2026-09-07": "38 mi", "2026-09-14": "55 mi", "2026-09-21": "49 mi",
+            "2026-09-28": "35 mi", "2026-10-05": "47.2 mi",
+            "2026-10-12": "24 mi", "2026-10-19": "35 mi", "2026-10-26": "49.2 mi"
+        };
+
+        const workoutColors = {
+            "Rest": "bg-gray-100 text-gray-800",
+            "Aerobic": "bg-cyan-100 text-cyan-800",
+            "Endurance": "bg-yellow-100 text-yellow-800",
+            "Threshold": "bg-orange-100 text-orange-800",
+            "Progression": "bg-purple-100 text-purple-800",
+            "VO2 Max": "bg-red-200 text-red-800",
+            "Recovery": "bg-green-100 text-green-800",
+            "Race Pace": "bg-rose-200 text-rose-800",
+            "A Race": "race-a",
+            "B Race": "race-b"
+        };
+        const workoutTextColors = {
+            "Rest": "text-gray-500",
+            "Aerobic": "text-cyan-600",
+            "Endurance": "text-yellow-700",
+            "Threshold": "text-orange-600",
+            "Progression": "text-purple-700",
+            "VO2 Max": "text-red-600",
+            "Recovery": "text-green-600",
+            "Race Pace": "text-rose-600",
+            "A Race": "text-white",
+            "B Race": "text-white"
+        };
+        
+        const paceData = {
+            "Recovery": "9:15 - 10:00+ min/mi", // Updated
+            "Aerobic": "8:30 - 9:15 min/mi",   // Updated
+            "Endurance": "8:30 - 9:15 min/mi",  // Updated
+            "Threshold": "7:05 - 7:20 min/mi", // Updated
+            "VO2 Max": "6:40 - 6:55 min/mi (per interval)", // Updated
+            "Progression": "Start ~9:15, finish ~7:15 min/mi", // Updated
+            "Race Pace": "7:40 min/mi",      // Updated (MP)
+            "B Race": "See specific race paces", // Kept generic
+            "A Race": "Goal Pace: 7:40 min/mi", // Updated
+            "Rest": "N/A"
+        };
+        
+        const racePaceData = {
+            "Chicago Tri": "Strong effort across disciplines", // Kept generic
+            "SuperSprint": "Strong effort across disciplines", // Kept generic
+            "Madison 70.3": "Strong effort across disciplines", // Updated
+            "Chicago HM": "Target: ~7:20 - 7:35 min/mi", // Updated
+            "Chicago Marathon": "Goal Pace: 7:40 min/mi", // Updated
+            "NYC Marathon": "FUN!" // Kept generic
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+           // --- STATE ---
+            let currentYear, currentMonth;
+            let isGogginsMode = false;
+            const currentDate = new Date();
+            let selectedDateString = ''; // Keep track of the selected date
+            let activeRaceGoal = { date: new Date('2026-11-01T00:00:00'), name: "NYC Marathon" };
+            const goals = [
+                { date: new Date('2026-10-11T00:00:00'), name: "Chicago Marathon" },
+                { date: new Date('2026-11-01T00:00:00'), name: "NYC Marathon" }
+            ];
+             let totalPlanMiles = 0; // To store the total miles in the plan
+
+            // --- DOM ELEMENTS ---
+            const dom = {
+                countdownTitle: document.getElementById('countdown-title'),
+                goalSubtitle: document.getElementById('goal-subtitle'),
+                countdown: document.getElementById('countdown'),
+                mileageTracker: document.getElementById('mileage-tracker'),
+                selectedWorkout: {
+                    title: document.getElementById('selected-workout-title'),
+                    card: document.getElementById('selected-workout-card'),
+                    date: document.getElementById('selected-workout-date'),
+                    type: document.getElementById('selected-workout-type'),
+                    details: document.getElementById('selected-workout-details'),
+                },
+                dailyBriefing: {
+                    paceText: document.getElementById('suggested-pace-text'),
+                    quoteText: document.getElementById('goggins-quote-text'),
+                    attribution: document.getElementById('goggins-attribution'),
+                },
+                quoteToggleBtn: document.getElementById('quote-toggle-btn'),
+                prevMonthBtn: document.getElementById('prev-month-btn'),
+                nextMonthBtn: document.getElementById('next-month-btn'),
+                monthYearTitle: document.getElementById('month-year-title'),
+                calendarContainer: document.getElementById('calendar-container'),
+            };
+
+            // --- FUNCTIONS ---
+            
+             function parseMiles(details) {
+                 if (!details) return 0;
+                
+                 let miles = 0;
+                 const lowerDetails = details.toLowerCase();
+
+                 // Match "X mi" or "X.Y mi" - capture the number part
+                 const miMatch = lowerDetails.match(/(\d+(\.\d+)?)\s*mi/);
+                 if (miMatch) {
+                     miles += parseFloat(miMatch[1]);
+                 }
+                
+                 // Match "Xk" or "X km" (and convert to miles)
+                 const kMatch = lowerDetails.match(/(\d+)\s*(k|km)/);
+                 if (kMatch) {
+                     // Add only if not already counted as part of 'X mi' in race descriptions
+                     if (!lowerDetails.includes('total')) {
+                        miles += parseFloat(kMatch[1]) * 0.621371;
+                     }
+                 }
+
+                 // Handle race names explicitly, avoiding double counting if 'X mi' was present
+                 if (!miMatch) { // Only add these if miles weren't explicitly stated
+                     if (lowerDetails.includes('half marathon') || lowerDetails.includes('hm')) {
+                         miles += 13.1;
+                     } else if (lowerDetails.includes('marathon')) {
+                         miles += 26.2;
+                     } else if (lowerDetails.includes('mile') && !lowerDetails.includes('mi')) { // specifically "mile", not "X mi"
+                         miles += 1;
+                     }
+                 }
+                // Handle special cases where 'X mi total' might override standard race distance
+                const totalMiMatch = lowerDetails.match(/total\s*(\d+(\.\d+)?)\s*mi/);
+                 if (totalMiMatch) {
+                    miles = parseFloat(totalMiMatch[1]); // Override with 'total X mi' if present
+                 }
+
+
+                 // Add logic for specific named races if needed, using the explicit total miles
+                 if (lowerDetails.includes('madison 70.3')) {
+                     miles = 13; // Specific mileage for this event
+                 } else if (lowerDetails.includes('chicago tri')) {
+                     miles = 10; // Specific mileage for this event
+                 } else if (lowerDetails.includes('supersprint')) {
+                      miles = 3; // Specific mileage for this event
+                 } else if (lowerDetails.includes('chicago hm')) {
+                     miles = 13; // Specific total mileage
+                 }
+                 
+                 return miles;
+             }
+
+
+             function calculateTotalMiles() {
+                 let total = 0;
+                 const planStartDate = new Date('2026-06-15T12:00:00');
+                 const planEndDate = new Date('2026-11-01T12:00:00');
+
+                 for (let d = new Date(planStartDate); d <= planEndDate; d.setDate(d.getDate() + 1)) {
+                     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                     if (trainingData[dateStr]) {
+                         total += parseMiles(trainingData[dateStr].details);
+                     }
+                 }
+                 // Round at the very end
+                 return Math.round(total);
+             }
+
+             function calculateMilesToDate(selectedDateString) {
+                 let total = 0;
+                 const selectedDate = new Date(selectedDateString + 'T12:00:00');
+                 const planStartDate = new Date('2026-06-15T12:00:00');
+
+                 if (selectedDate < planStartDate) return 0; // Handle selection before plan start
+
+                 for (let d = new Date(planStartDate); d <= selectedDate; d.setDate(d.getDate() + 1)) {
+                     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                     if (trainingData[dateStr]) {
+                          total += parseMiles(trainingData[dateStr].details);
+                     }
+                 }
+                  // Round at the very end
+                 return Math.round(total);
+             }
+
+
+            function updateQuoteDisplay(dateString) {
+                const workout = trainingData[dateString];
+                let quote, attribution;
+
+                if (isGogginsMode) {
+                    quote = workout ? workout.quote : "Your soft body is resting but your mind better be doing pushups. Stay hard.";
+                    attribution = "-- D. Goggins (probably)";
+                } else {
+                    quote = workout ? workout.sappy_quote : "Embrace this moment of stillness. Rest is not weakness, but a wise investment in your future strength.";
+                    attribution = "";
+                }
+                dom.dailyBriefing.quoteText.innerHTML = `"${quote}"`;
+                dom.dailyBriefing.attribution.textContent = attribution;
+            }
+
+            function updateCountdown(selectedDate) {
+                activeRaceGoal = goals.find(g => selectedDate <= g.date) || goals[goals.length - 1];
+                // dom.countdownTitle.innerText = `${activeRaceGoal.name} Countdown`; // Removed specific race name
+                dom.countdownTitle.innerText = `Race Countdown`; // Set static title
+                const raceDay = activeRaceGoal.date;
+                const diffTime = raceDay - selectedDate;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                dom.countdown.innerText = diffDays >= 0 ? diffDays : 0;
+            }
+
+            function selectDay(dateString, element) {
+                selectedDateString = dateString; // Update the globally tracked selected date
+                // Update selected day visuals
+                const previouslySelected = document.querySelector('.selected-day');
+                if (previouslySelected) {
+                    previouslySelected.classList.remove('selected-day');
+                }
+                if (element) {
+                    element.classList.add('selected-day');
+                }
+
+                const selectedDate = new Date(dateString + 'T12:00:00');
+                selectedDate.setHours(0, 0, 0, 0);
+                
+                updateCountdown(selectedDate);
+
+                // Update workout title
+                dom.selectedWorkout.title.innerText = (selectedDate.getTime() === new Date(currentDate).setHours(0, 0, 0, 0))
+                    ? "Today's Workout"
+                    : "Selected Workout";
+
+                // Update workout card
+                const workout = trainingData[dateString];
+                const workoutType = workout ? workout.type : "Rest";
+                const { card, date, type, details } = dom.selectedWorkout;
+
+                // Reset and apply new styles
+                const oldBgClass = card.dataset.bgClass || '';
+                if (oldBgClass) card.classList.remove(...oldBgClass.split(' '));
+                const newBgClass = workoutColors[workoutType] || 'bg-gray-100';
+                card.classList.add(...newBgClass.split(' '));
+                card.dataset.bgClass = newBgClass;
+                
+                const workoutTextElements = [date, type, details];
+                const oldTextClass = date.dataset.textClass || '';
+                if(oldTextClass) workoutTextElements.forEach(el => el.classList.remove(oldTextClass));
+                const newTextClass = workoutTextColors[workoutType] || 'text-gray-800';
+                workoutTextElements.forEach(el => el.classList.add(newTextClass));
+                date.dataset.textClass = newTextClass;
+
+
+                // Populate card content
+                date.innerText = selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+                type.innerText = workout ? workout.type.replace(/\+/g, ' + ') : "Rest Day";
+                details.innerHTML = workout ? workout.details : "No workout scheduled.";
+                
+                // Update briefing
+                let paceText = paceData[workoutType] || 'N/A';
+                if (workout) {
+                    for (const raceName in racePaceData) {
+                        // Use a more robust check for race names within details
+                        if (workout.details && workout.details.includes(raceName)) {
+                            paceText = racePaceData[raceName];
+                            break;
+                        }
+                    }
+                }
+                dom.dailyBriefing.paceText.innerHTML = paceText;
+                updateQuoteDisplay(dateString);
+
+                 // Update Mileage Tracker
+                 const milesToDate = calculateMilesToDate(dateString);
+                 dom.mileageTracker.innerHTML = `${milesToDate}<span class="text-2xl text-green-400">/${totalPlanMiles}</span>`;
+            }
+
+            function attachCalendarEventListeners() {
+                dom.calendarContainer.querySelectorAll('.workout-card').forEach(dayEl => {
+                     // Use dataset for reliable date string retrieval
+                    if (dayEl.dataset.dateString) { 
+                         dayEl.addEventListener('click', () => selectDay(dayEl.dataset.dateString, dayEl));
+                    }
+                });
+            }
+
+            function renderCalendar(year, month) {
+                 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                 const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+                
+                 dom.monthYearTitle.innerText = `${monthNames[month]} ${year}`;
+
+                 const firstDay = (new Date(year, month).getDay() + 6) % 7; // 0=Mon, 6=Sun
+                 const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                 let headerHTML = daysOfWeek.map(day => `<div>${day}</div>`).join('');
+                 let bodyHTML = Array(firstDay).fill('<div class="bg-gray-50 rounded-lg"></div>').join(''); // Add leading empty cells
+                
+                 const today = new Date(currentDate);
+                 today.setHours(0, 0, 0, 0);
+                 
+                 const planStartDate = new Date('2026-06-15T00:00:00');
+                 const planEndDate = new Date('2026-11-01T00:00:00');
+
+                 for (let day = 1; day <= daysInMonth; day++) {
+                     const loopDate = new Date(year, month, day);
+                     loopDate.setHours(0,0,0,0);
+                    
+                     const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                     const isInPlanRange = loopDate >= planStartDate && loopDate <= planEndDate;
+
+                     // Only render days that are actually within the plan's date range
+                     if (isInPlanRange) {
+                         const workout = trainingData[dateString];
+                         const workoutType = workout ? workout.type : 'Rest'; // Default to Rest if no data but in range
+
+                         let cardClasses = 'workout-card relative flex flex-col p-2 rounded-lg transition-all duration-200 ease-in-out border border-transparent hover:border-sky-500';
+                         cardClasses += ` ${workoutColors[workoutType] || 'bg-white'}`;
+                        
+                         if (loopDate < today) cardClasses += ' past-day';
+                        
+                         let dayNumberClasses = 'font-bold text-sm';
+                         if((workoutType === "A Race" || workoutType === "B Race") && !cardClasses.includes('past-day')){
+                             dayNumberClasses += ' text-white';
+                         }
+
+                         let mileageHTML = '';
+                         if (loopDate.getDay() === 1 && weeklyMileage[dateString]) { // Monday is 1
+                             mileageHTML = `<div class="absolute top-1.5 right-2 text-xs font-bold text-gray-400" title="Weekly Mileage Total">${weeklyMileage[dateString]}</div>`;
+                         }
+                        
+                         const contentHTML = workout
+                             ? `<div class="workout-type uppercase font-semibold opacity-80">${workout.type.replace(/\+/g, ' + ')}</div>
+                                <div class="workout-details mt-1">${workout.details}</div>`
+                             : `<div class="workout-type uppercase font-semibold opacity-80">Rest</div>`; // Show Rest for days in range w/o data
+                        
+                         bodyHTML += `
+                             <div id="day-${dateString}" data-date-string="${dateString}" class="${cardClasses}">
+                                 ${mileageHTML}
+                                 <div class="${dayNumberClasses}">${day}</div>
+                                 ${contentHTML}
+                             </div>`;
+                     } else {
+                         // Render empty placeholders for days within the month but outside the plan range
+                         bodyHTML += `<div class="bg-gray-50 rounded-lg"></div>`;
+                     }
+                 }
+
+                 // Add trailing empty cells to fill the grid
+                 const totalCells = firstDay + daysInMonth;
+                 const remainingCells = (7 - (totalCells % 7)) % 7;
+                 bodyHTML += Array(remainingCells).fill('<div class="bg-gray-50 rounded-lg"></div>').join('');
+
+
+                 dom.calendarContainer.innerHTML = `
+                     <div class="calendar-grid grid gap-1 text-center font-semibold text-gray-600 mb-2">${headerHTML}</div>
+                     <div class="calendar-grid grid gap-2">${bodyHTML}</div>
+                 `;
+
+                 // Update nav button states for the marathon plan range
+                 dom.prevMonthBtn.disabled = year === 2026 && month === 5; // June is 5
+                 dom.nextMonthBtn.disabled = year === 2026 && month === 9; // October is 9 (last month to show)
+                
+                 attachCalendarEventListeners();
+             }
+
+
+            function updateGogginsButton() {
+                const isGoggins = isGogginsMode;
+                dom.quoteToggleBtn.textContent = isGoggins ? 'Switch to Mantra Mode' : 'Switch to Goggins Mode';
+                dom.quoteToggleBtn.classList.toggle('bg-gray-800', !isGoggins); // Corrected toggle logic
+                dom.quoteToggleBtn.classList.toggle('hover:bg-black', !isGoggins); // Corrected toggle logic
+                dom.quoteToggleBtn.classList.toggle('bg-blue-500', isGoggins); // Corrected toggle logic
+                dom.quoteToggleBtn.classList.toggle('hover:bg-blue-600', isGoggins); // Corrected toggle logic
+            }
+            
+            function changeMonth(offset) {
+                 // Use selectedDateString to re-select after render if possible
+                const currentSelectedDateStr = selectedDateString; 
+                
+                if (offset === -1 && currentYear === 2026 && currentMonth === 5) return;
+                if (offset === 1 && currentYear === 2026 && currentMonth === 9) return;
+
+                currentMonth += offset;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                } else if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar(currentYear, currentMonth);
+
+                // Re-apply selection if the selected day is visible in the new month view
+                const selectedEl = document.getElementById(`day-${currentSelectedDateStr}`);
+                if (selectedEl) {
+                    selectedEl.classList.add('selected-day');
+                } else {
+                    // Optionally, select the first day of the new month if the old selection is gone
+                     // Find the first valid day element in the new view
+                    const firstDayElement = dom.calendarContainer.querySelector('.workout-card[data-date-string]');
+                    if (firstDayElement) {
+                        selectDay(firstDayElement.dataset.dateString, firstDayElement);
+                    }
+                }
+            }
+            
+            // --- INITIALIZATION ---
+            function init() {
+                totalPlanMiles = calculateTotalMiles(); // Calculate total miles once
+
+                let initialYear, initialMonth;
+                const today = new Date(currentDate);
+                const planStartDate = new Date('2026-06-15');
+                const planEndDate = new Date('2026-11-01');
+                
+                // Determine initial view: current month if within plan, otherwise start month
+                if (today >= planStartDate && today <= planEndDate) {
+                    initialYear = today.getFullYear();
+                    initialMonth = today.getMonth();
+                } else {
+                    initialYear = planStartDate.getFullYear();
+                    initialMonth = planStartDate.getMonth(); // June is 5
+                }
+                currentYear = initialYear;
+                currentMonth = initialMonth;
+
+                dom.prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+                dom.nextMonthBtn.addEventListener('click', () => changeMonth(1));
+                dom.quoteToggleBtn.addEventListener('click', () => {
+                    isGogginsMode = !isGogginsMode;
+                    updateGogginsButton();
+                    // Update quote display based on the currently selected date
+                    if (selectedDateString) updateQuoteDisplay(selectedDateString); 
+                });
+                
+                renderCalendar(currentYear, currentMonth); // Initial render
+                
+                // Determine initial selection: today if in plan, otherwise first day
+                const todayString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+                const todayElement = document.getElementById(`day-${todayString}`);
+                const firstPlanDateString = '2026-06-15';
+                const firstPlanElement = document.getElementById(`day-${firstPlanDateString}`);
+
+                updateGogginsButton(); // Set initial button state
+
+                // Select today only if it's within the plan range AND visible on the initial calendar render
+                if (today >= planStartDate && today <= planEndDate && todayElement) {
+                    selectDay(todayString, todayElement);
+                } else if (firstPlanElement) {
+                     // Otherwise, select the first day of the plan if it exists
+                    selectDay(firstPlanDateString, firstPlanElement);
+                } else {
+                    // Fallback if even the first day isn't rendered initially (shouldn't happen with current logic)
+                     const firstVisibleDay = dom.calendarContainer.querySelector('.workout-card[data-date-string]');
+                     if (firstVisibleDay) {
+                         selectDay(firstVisibleDay.dataset.dateString, firstVisibleDay);
+                     }
+                }
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
+
