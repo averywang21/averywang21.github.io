@@ -97,50 +97,73 @@
         </header>
 
         <!-- Dashboard Section -->
-        <div class="bg-white p-6 rounded-2xl shadow-lg grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8 items-stretch">
-            <!-- Countdown -->
-            <div class="lg:col-span-1 flex flex-col">
+        <!-- *** MODIFICATION: Changed grid structure *** -->
+        <!-- *** REMOVED items-stretch, col-span wrappers. Added explicit lg:grid-rows-2 *** -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-6 mb-8">
+            
+            <!-- Col 1, Row 1: Countdown -->
+            <div class="flex flex-col">
                 <h3 class="font-bold text-gray-800 mb-2 text-left">Race Countdown</h3>
-                <div class="bg-violet-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center">
+                <!-- *** MODIFICATION: Reduced min-height from 150 to 130 *** -->
+                <div class="bg-violet-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center min-h-[130px]">
                     <p id="countdown" class="text-6xl font-bold text-violet-500">--</p>
                     <p class="text-xs text-gray-500">Days Remaining</p>
                 </div>
             </div>
 
-            <!-- Selected Workout -->
-            <div class="lg:col-span-2 flex flex-col">
+            <!-- Col 2, Row 1: Selected Workout -->
+            <div class="flex flex-col">
                 <h3 id="selected-workout-title" class="font-bold text-gray-800 mb-2 text-left">Today's Workout</h3>
-                <!-- Added min-h-48 for consistent height -->
-                <div id="selected-workout-card" class="p-4 rounded-lg text-center transition-colors duration-300 flex-grow flex flex-col justify-center min-h-48">
+                 <!-- *** MODIFICATION: Reduced min-height from 150 to 130 *** -->
+                <div id="selected-workout-card" class="p-4 rounded-lg text-center transition-colors duration-300 flex-grow flex flex-col justify-center min-h-[130px]">
                     <p id="selected-workout-date" class="font-semibold text-gray-500">--</p>
                     <p id="selected-workout-type" class="font-bold text-lg text-gray-800">--</p>
                     <p id="selected-workout-details" class="text-sm text-gray-600">--</p>
                 </div>
-                 <div class="bg-gray-50 p-4 rounded-lg text-center mt-4">
-                    <p class="text-xs font-semibold text-gray-500 uppercase">Suggested Pace:</p>
-                    <p id="suggested-pace-text" class="text-sm text-gray-800 font-bold"></p>
-                </div>
             </div>
             
-            <!-- Daily Briefing -->
-            <div class="lg:col-span-2 flex flex-col">
+            <!-- Col 3, Row 1 & 2: Daily Briefing -->
+            <!-- *** MODIFICATION: This is now the 3rd item in the grid *** -->
+            <div class="lg:col-span-1 lg:row-span-2 flex flex-col"> 
                 <h3 class="font-bold text-gray-800 mb-2 text-left">Daily Briefing</h3>
-                <!-- Added min-h-48 for consistent height -->
-                <div class="bg-gray-50 p-4 rounded-lg flex-grow flex flex-col min-h-48">
+                <div class="bg-gray-50 p-4 rounded-lg flex-grow flex flex-col h-full"> <!-- Added h-full -->
                         <div class="text-center mb-2">
                             <button id="quote-toggle-btn" class="text-xs font-semibold text-white bg-gray-800 hover:bg-black py-1 px-3 rounded-full transition-colors">
                                 Switch to Goggins Mode
                             </button>
                         </div>
                     <hr class="border-gray-200 my-2">
-                    <!-- Adjusted flex properties for better quote handling -->
                     <div class="flex-grow flex flex-col text-center min-h-0 overflow-hidden">
                         <p id="goggins-quote-text" class="text-sm text-gray-700 italic w-full flex-grow overflow-y-auto pr-2"></p>
                     </div>
                     <p id="goggins-attribution" class="text-xs text-gray-500 font-bold not-italic text-right w-full mt-2 flex-shrink-0"></p>
                 </div>
             </div>
-        </div>
+
+            <!-- Col 1, Row 2: Progress -->
+            <!-- *** MODIFICATION: This is now the 4th item in the grid *** -->
+            <div class="flex flex-col">
+                <h3 class="font-bold text-gray-800 mb-2 text-left">Progress</h3>
+                 <!-- *** MODIFICATION: Reduced min-height from 150 to 130 *** -->
+                <div class="bg-sky-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center min-h-[130px]">
+                    <!-- *** MODIFICATION: Changed text-2xl to text-xl for total *** -->
+                    <p id="miles-ran-stat" class="text-4xl font-bold text-sky-600">--<span class="text-xl text-sky-500 font-medium">/--</span></p>
+                    <p class="text-xs text-gray-500">Miles Ran</p>
+                </div>
+            </div> 
+
+            <!-- Col 2, Row 2: Suggested Pace -->
+            <!-- *** MODIFICATION: This is now the 5th item in the grid *** -->
+            <div class="flex flex-col">
+                 <h3 class="font-bold text-gray-800 mb-2 text-left">Suggested Pace</h3>
+                 <!-- *** MODIFICATION: Reduced min-height from 150 to 130 *** -->
+                 <div class="bg-gray-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center min-h-[130px]">
+                    <!-- *** MODIFICATION: Removed "Current Selection" text and mt-1 from pace text *** -->
+                    <p id="suggested-pace-text" class="text-lg text-gray-800 font-bold"></p>
+                </div>
+             </div>
+
+        </div> <!-- *** END OF GRID *** -->
         
         <!-- Calendar Section - Now with phase navigation -->
         <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg">
@@ -170,6 +193,32 @@
         // =================================================================================
         // TRAINING DATA (11/10 REWRITE)
         // =================================================================================
+
+        // *** NEW HELPER FUNCTION to parse mileage ***
+        function getWorkoutMileage(workout) {
+            if (!workout) return 0;
+            
+            // Priority 1: Check 'totalMiles' property (e.g., "total 10 mi")
+            if (workout.totalMiles) {
+                const totalMatch = workout.totalMiles.match(/(\d+)/); 
+                if (totalMatch) return parseInt(totalMatch[1], 10);
+            }
+            
+            // Priority 2: Check 'details' property for "total X mi" (e.g., "Hot Choco 15k<br>total 10 mi")
+            if (workout.details) {
+                 const detailsTotalMatch = workout.details.match(/total (\d+) mi/);
+                 if (detailsTotalMatch) return parseInt(detailsTotalMatch[1], 10);
+            }
+
+            // Priority 3: Check 'details' for "X mi" (e.g., "5 mi" or "6 mi<br>8x100")
+            if (workout.details) {
+                const simpleMatch = workout.details.match(/(\d+) mi/);
+                if (simpleMatch) return parseInt(simpleMatch[1], 10);
+            }
+            
+            return 0; // Rest days or unparseable
+        }
+        
         const trainingData = {
             // <!--
             // PHASE 1: Base Training (10/27 - 12/14)
@@ -292,7 +341,7 @@
             "2026-01-22": { type: "Endurance", details: "11 mi", quote: "Eleven miles on tired legs. This is peak week reality. Feels like hell? GOOD. That's where growth happens. Keep pushing. Or quit. No one cares.", sappy_quote: "Eleven miles fueled by pure grit! Even tired, you shine brighter than a supernova! Your determination is blindingly beautiful! What a star! Twinkle, twinkle!" },
             "2026-01-23": { type: "Rest", details: "", quote: "Rest. Travel to NYC? Don't let the big city distract you. You're here for Fred Lebow HM workout. Stay focused. Stay disciplined. The city doesn't care about you. Go prove it wrong.", sappy_quote: "NYC travel/rest! Woohoo! Get ready to soak in the Big Apple energy! You're going to run like a Broadway star hitting the high notes! Sing your speedy song!" },
             "2026-01-24": { type: "Aerobic", details: "6 mi<br>6x12\" uphill<br>8x100", quote: "NYC shakeout. Six miles, attack those Central Park hills. Feel the energy, but stay controlled. Tomorrow's progression run is the real test. Don't be a tourist.", sappy_quote: "Central Park Adventure Run! Hills and strides in the iconic park! You're making memories and fitness magic! What a superstar! You're the main character!" },
-            "2026-01-25": { type: "Progression", details: "Fred Lebow HM<br>total 15 mi<br>last 2 mi @ LT", quote: "Fred Lebow HM course for 15 miles. Progression run. Make those last two miles at threshold BURN. Show respect for the course by leaving everything out there. Take its soul. Now.", sappy_quote: "Fred Lebow HM Progression Power! Run through Central Park, feel the history, finish FAST like the legend you're becoming! NYC loves you! (And we love you!)" },
+            "2026-01-25": { type: "Progression", details: "Fred Lebow HM<br>total 15 mi", quote: "Fred Lebow HM course for 15 miles. Progression run. Make those last two miles at threshold BURN. Show respect for the course by leaving everything out there. Take its soul. Now.", sappy_quote: "Fred Lebow HM Progression Power! Run through Central Park, feel the history, finish FAST like the legend you're becoming! NYC loves you! (And we love you!)" },
 
             // Week 14 (1/26/2026 - 39 mi)
             "2026-01-26": { type: "Rest", details: "", quote: "Rest. Recover from 15 miles in the park. You handled it? Good. Manhattan 10k race this Sunday. No time to get complacent. Stay hungry. Or get eaten. Your choice.", sappy_quote: "Post-NYC triumph rest! You just ran amazing in Central Park! Today, put your feet up and wear your invisible Crown of Awesome! You rule! All hail!" },
@@ -456,6 +505,8 @@
             // --- STATE ---
             let currentPhaseIndex = 0; // Start with the first phase
             let isGogginsMode = false;
+            let totalPlanMileage = 0; // *** Moved totalPlanMileage here ***
+            const allDates = Object.keys(trainingData).sort(); // *** Moved allDates here ***
             
             // --- SET CURRENT DATE BASED ON USER PROMPT ---
             // User provided: "Sunday, October 26, 2025 at 12:45 AM CDT"
@@ -478,6 +529,7 @@
             const dom = {
                 goalSubtitle: document.getElementById('goal-subtitle'),
                 countdown: document.getElementById('countdown'),
+                milesRanStat: document.getElementById('miles-ran-stat'), // *** ADDED ***
                 selectedWorkout: {
                     title: document.getElementById('selected-workout-title'),
                     card: document.getElementById('selected-workout-card'),
@@ -498,6 +550,39 @@
             };
 
             // --- FUNCTIONS ---
+
+            // *** NEW FUNCTION: Calculate mileage stats ***
+            function calculateMileageStats(selectedDate) {
+                let milesRanSoFar = 0;
+                // Recalculate total mileage if it hasn't been done yet
+                if (totalPlanMileage === 0) {
+                    for (const dateString of allDates) {
+                        const workout = trainingData[dateString];
+                        const mileage = getWorkoutMileage(workout);
+                        totalPlanMileage += mileage;
+                    }
+                }
+
+                // Calculate miles ran up to the selected date
+                const selectedDateNormalized = new Date(selectedDate);
+                selectedDateNormalized.setHours(0,0,0,0);
+
+                for (const dateString of allDates) {
+                    const workout = trainingData[dateString];
+                    const workoutDate = new Date(dateString + 'T12:00:00');
+                    workoutDate.setHours(0,0,0,0);
+                    
+                    // *** MODIFICATION: Changed < to <= to include selected day's mileage ***
+                    if (workoutDate <= selectedDateNormalized) { 
+                        const mileage = getWorkoutMileage(workout);
+                        milesRanSoFar += mileage;
+                    }
+                 }
+                 // Update the DOM element
+                 // *** MODIFICATION: Changed text-2xl to text-xl for total ***
+                 dom.milesRanStat.innerHTML = `${milesRanSoFar}<span class="text-xl text-sky-500 font-medium">/${totalPlanMileage}</span>`;
+            }
+            // *** End new function ***
 
             function updateQuoteDisplay(dateString) {
                 if (!dateString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return;
@@ -568,6 +653,7 @@
                 
                 // Keep activeRaceGoal fixed to NYC Half
                 updateCountdown(selectedDate); 
+                calculateMileageStats(selectedDate); // *** CALL MILEAGE CALCULATION HERE ***
 
                 const todayNormalized = new Date(currentDate);
                 todayNormalized.setHours(0,0,0,0);
@@ -763,6 +849,12 @@
                 // Find the initial phase based on today's date
                  const today = new Date(currentDate); // Use normalized date
                  let initialPhaseIndex = 0;
+
+                 // --- *** REMOVED MILEAGE CALCULATION FROM HERE *** ---
+                 // (Total mileage is now calculated on first call to calculateMileageStats)
+                 // --- *** End Removal *** ---
+
+
                  for (let i = 0; i < phases.length; i++) {
                      const phaseStartDate = new Date(phases[i].start + 'T00:00:00');
                      phaseStartDate.setHours(0,0,0,0);
@@ -856,5 +948,9 @@
     </script>
 </body>
 </html>
+
+
+
+
 
 
