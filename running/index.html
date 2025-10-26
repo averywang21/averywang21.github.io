@@ -116,7 +116,7 @@
                 <h3 id="selected-workout-title" class="font-bold text-gray-800 mb-2 text-left">Today's Workout</h3>
                  <!-- *** MODIFICATION: Reduced min-height from 150 to 130 *** -->
                 <div id="selected-workout-card" class="p-4 rounded-lg text-center transition-colors duration-300 flex-grow flex flex-col justify-center min-h-[130px]">
-                    <p id="selected-workout-date" class="font-semibold text-gray-500">--</p>
+                    <!-- *** MODIFICATION: Removed date from this panel *** -->
                     <p id="selected-workout-type" class="font-bold text-lg text-gray-800">--</p>
                     <p id="selected-workout-details" class="text-sm text-gray-600">--</p>
                 </div>
@@ -126,6 +126,8 @@
             <!-- *** MODIFICATION: This is now the 3rd item in the grid *** -->
             <div class="lg:col-span-1 lg:row-span-2 flex flex-col"> 
                 <h3 class="font-bold text-gray-800 mb-2 text-left">Daily Briefing</h3>
+                <!-- *** MODIFICATION: Added date to this panel *** -->
+                <p id="selected-workout-date" class="font-semibold text-gray-500 mb-2 text-left">--</p>
                 <div class="bg-gray-50 p-4 rounded-lg flex-grow flex flex-col h-full"> <!-- Added h-full -->
                         <div class="text-center mb-2">
                             <button id="quote-toggle-btn" class="text-xs font-semibold text-white bg-gray-800 hover:bg-black py-1 px-3 rounded-full transition-colors">
@@ -533,11 +535,13 @@
                 selectedWorkout: {
                     title: document.getElementById('selected-workout-title'),
                     card: document.getElementById('selected-workout-card'),
-                    date: document.getElementById('selected-workout-date'),
+                    // *** MODIFICATION: Removed date ***
                     type: document.getElementById('selected-workout-type'),
                     details: document.getElementById('selected-workout-details'),
                 },
                 dailyBriefing: {
+                    // *** MODIFICATION: Added date ***
+                    date: document.getElementById('selected-workout-date'),
                     paceText: document.getElementById('suggested-pace-text'),
                     quoteText: document.getElementById('goggins-quote-text'),
                     attribution: document.getElementById('goggins-attribution'),
@@ -663,7 +667,9 @@
 
                 const workout = trainingData[dateString];
                 const workoutType = workout ? workout.type : "Rest";
-                const { card, date, type, details } = dom.selectedWorkout;
+                // *** MODIFICATION: Destructure date from dailyBriefing ***
+                const { card, type, details } = dom.selectedWorkout;
+                const { date } = dom.dailyBriefing;
 
                 const oldBgClass = card.dataset.bgClass || '';
                 if (oldBgClass) card.classList.remove(...oldBgClass.split(' '));
@@ -671,12 +677,13 @@
                 card.classList.add(...newBgClass.split(' '));
                 card.dataset.bgClass = newBgClass;
                 
-                const workoutTextElements = [date, type, details];
-                const oldTextClass = date.dataset.textClass || '';
+                // *** MODIFICATION: Removed date from color-changing logic ***
+                const workoutTextElements = [type, details];
+                const oldTextClass = type.dataset.textClass || ''; // *** MODIFICATION: Use type for dataset ***
                 if(oldTextClass) workoutTextElements.forEach(el => el.classList.remove(oldTextClass));
                 const newTextClass = workoutTextColors[workoutType] || 'text-gray-800'; 
                 workoutTextElements.forEach(el => el.classList.add(newTextClass));
-                date.dataset.textClass = newTextClass;
+                type.dataset.textClass = newTextClass; // *** MODIFICATION: Use type for dataset ***
 
                 date.innerText = selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
                 type.innerText = workout ? workout.type.replace(/\+/g, ' + ').replace("VO2 Max", "VO₂max") : "Rest Day"; 
@@ -948,6 +955,7 @@
     </script>
 </body>
 </html>
+
 
 
 
