@@ -96,40 +96,28 @@
             <p id="goal-subtitle" class="text-md text-gray-500 mt-1">Pfitz Build to 35 / 35-50 HM Plan</p>
         </header>
 
-        <!-- Dashboard Section -->
-        <!-- *** MODIFICATION: Changed grid structure *** -->
-        <!-- *** REMOVED items-stretch, col-span wrappers. Added explicit lg:grid-rows-2 *** -->
         <div class="bg-white p-6 rounded-2xl shadow-lg grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-6 mb-8">
             
-            <!-- Col 1, Row 1: Countdown -->
             <div class="flex flex-col">
                 <h3 class="font-bold text-gray-800 mb-2 text-left">Race Countdown</h3>
-                <!-- *** MODIFICATION: Reduced min-height from 150 to 130 *** -->
                 <div class="bg-violet-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center min-h-[130px]">
                     <p id="countdown" class="text-6xl font-bold text-violet-500">--</p>
                     <p class="text-xs text-gray-500">Days Remaining</p>
                 </div>
             </div>
 
-            <!-- Col 2, Row 1: Selected Workout -->
             <div class="flex flex-col">
                 <h3 id="selected-workout-title" class="font-bold text-gray-800 mb-2 text-left">Today's Workout</h3>
-                 <!-- *** MODIFICATION: Reduced min-height from 150 to 130 *** -->
-                <div id="selected-workout-card" class="p-4 rounded-lg text-center transition-colors duration-300 flex-grow flex flex-col justify-center min-h-[130px]">
-                    <!-- *** MODIFICATION: Removed date from this panel *** -->
+                 <div id="selected-workout-card" class="p-4 rounded-lg text-center transition-colors duration-300 flex-grow flex flex-col justify-center min-h-[130px]">
                     <p id="selected-workout-type" class="font-bold text-lg text-gray-800">--</p>
                     <p id="selected-workout-details" class="text-sm text-gray-600">--</p>
                 </div>
             </div>
             
-            <!-- Col 3, Row 1 & 2: Daily Briefing -->
-            <!-- *** MODIFICATION: This is now the 3rd item in the grid *** -->
             <div class="lg:col-span-1 lg:row-span-2 flex flex-col"> 
                 <h3 class="font-bold text-gray-800 mb-2 text-left">Daily Briefing</h3>
-                <!-- *** MODIFICATION: Added date to this panel *** -->
                 <p id="selected-workout-date" class="font-semibold text-gray-500 mb-2 text-left">--</p>
-                <div class="bg-gray-50 p-4 rounded-lg flex-grow flex flex-col h-full"> <!-- Added h-full -->
-                        <div class="text-center mb-2">
+                <div class="bg-gray-50 p-4 rounded-lg flex-grow flex flex-col h-full"> <div class="text-center mb-2">
                             <button id="quote-toggle-btn" class="text-xs font-semibold text-white bg-gray-800 hover:bg-black py-1 px-3 rounded-full transition-colors">
                                 Switch to Goggins Mode
                             </button>
@@ -142,33 +130,22 @@
                 </div>
             </div>
 
-            <!-- Col 1, Row 2: Progress -->
-            <!-- *** MODIFICATION: This is now the 4th item in the grid *** -->
             <div class="flex flex-col">
                 <h3 class="font-bold text-gray-800 mb-2 text-left">Progress</h3>
-                 <!-- *** MODIFICATION: Reduced min-height from 150 to 130 *** -->
-                <div class="bg-sky-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center min-h-[130px]">
-                    <!-- *** MODIFICATION: Changed text-2xl to text-xl for total *** -->
+                 <div class="bg-sky-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center min-h-[130px]">
                     <p id="miles-ran-stat" class="text-4xl font-bold text-sky-600">--<span class="text-xl text-sky-500 font-medium">/--</span></p>
                     <p class="text-xs text-gray-500">Miles Ran</p>
                 </div>
             </div> 
 
-            <!-- Col 2, Row 2: Suggested Pace -->
-            <!-- *** MODIFICATION: This is now the 5th item in the grid *** -->
             <div class="flex flex-col">
                  <h3 class="font-bold text-gray-800 mb-2 text-left">Suggested Pace</h3>
-                 <!-- *** MODIFICATION: Reduced min-height from 150 to 130 *** -->
                  <div class="bg-gray-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center min-h-[130px]">
-                    <!-- *** MODIFICATION: Removed "Current Selection" text and mt-1 from pace text *** -->
                     <p id="suggested-pace-text" class="text-lg text-gray-800 font-bold"></p>
                 </div>
              </div>
 
-        </div> <!-- *** END OF GRID *** -->
-        
-        <!-- Calendar Section - Now with phase navigation -->
-        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg">
+        </div> <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg">
             <div class="flex justify-between items-center mb-4">
                  <button id="prev-phase-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                      <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
@@ -179,8 +156,7 @@
                  </button>
              </div>
              <div id="calendar-container">
-                 <!-- Calendar grid for the current phase will be dynamically generated here -->
-             </div>
+                 </div>
         </div>
     </div>
 
@@ -222,10 +198,7 @@
         }
         
         const trainingData = {
-            // <!--
-            // PHASE 1: Base Training (10/27 - 12/14)
-            // -->
-            // Week 1 (10/27/2025 - 30 mi)
+            // // Week 1 (10/27/2025 - 30 mi)
             "2025-10-27": { type: "Rest", details: "", quote: "First day. REST. You think you earned this? You haven't done SHIT. This isn't rest, it's a 24-hour head start for everyone else while you sit on your ass contemplating your softness. Don't enjoy it. Go find something heavy and carry it around your house.", sappy_quote: "Ooh, Day 1 is Rest-acular! Let's wrap ourselves in a cozy blanket of *pure potential* and dream of sparkly finish lines! Your muscles are whispering 'thank you!' for this pre-emptive snuggle!" },
             "2025-10-28": { type: "Aerobic", details: "5 mi", quote: "Five miles. You're gonna log that? You might as well log your walk from the couch to the fridge. Get out, get it done, and then add five more just to feel something. Stop being a tourist in your own training.", sappy_quote: "Whee! Our first *real* run! Five miles of pure fun-shine! Let's pretend we're butterflies collecting nectar from the flowers of our own achievement! Flutter onward, you beautiful little fitness-butterfly!" },
             "2025-10-29": { type: "Aerobic", details: "5 mi", quote: "Another five. Groundhog day. You building consistency or just stuck in a loop of mediocrity? That chocolate race is coming. You're training to run for *candy*? What are you, five? I hope you like the taste of defeat with your cocoa. Go run.", sappy_quote: "Look at us go! Another 5 miles in the happy-bank! We're like little squirrels storing up acorns of amazingness for the big Hot Choco 15k! We're gonna be so prepared and so full of chocolatey-joy! Squeak!" },
@@ -254,7 +227,7 @@
             "2025-11-15": { type: "Aerobic", details: "7 mi", quote: "Seven miles. Just shaking the legs out. Tomorrow is another 10. Don't try to be a hero today. Just do the damn job. Stay disciplined. Save the heroism for... never. You're not a hero.", sappy_quote: "Seven Saturday miles! Let's fill our pockets with sunshine and positive vibes during this run! We'll have plenty to share on tomorrow's 10-mile adventure!" },
             "2025-11-16": { type: "Endurance", details: "10 mi", quote: "Ten miles. You did this last week. It better feel easier. If it doesn't, you're not recovering right, you're not eating right, or you're just plain soft. Figure it out. Or quit. I don't care.", sappy_quote: "Ten miles, take two! Look how much stronger you feel! You're revisiting this distance like a seasoned pro! High-five your awesome self, you endurance-explorer!" },
             "2025-11-17": { type: "Rest", details: "", quote: "Rest. Monday again. You survived another week. Don't pat yourself on the back. That Icebreaker relay is Saturday. Time to start thinking about not embarrassing your team. Your leg of the relay is your only reason to exist this week. Don't screw it up.", sappy_quote: "Start the week with mindful rest! You're a wise gardener, tending to the soil of your body, ensuring beautiful blooms of fitness ahead! Especially for that fun Icebreaker relay!" },
-            "2025-11-18": { type: "Aerobic", details: "7 mi", quote: "Seven miles. Relay prep. You better be visualizing the handoff. Don't drop the damn baton. And don't run your leg like a tourist. You're the 'Icebreaker'? Go break something, preferably your own limits. Not your ankle.", sappy_quote: "Seven miles of smooth sailing! Imagine you're captaining the S.S. Awesome across the Sea of Success! Full steam ahead to that relay! Toot toot, you speedy-boat!" },
+            "2S025-11-18": { type: "Aerobic", details: "7 mi", quote: "Seven miles. Relay prep. You better be visualizing the handoff. Don't drop the damn baton. And don't run your leg like a tourist. You're the 'Icebreaker'? Go break something, preferably your own limits. Not your ankle.", sappy_quote: "Seven miles of smooth sailing! Imagine you're captaining the S.S. Awesome across the Sea of Success! Full steam ahead to that relay! Toot toot, you speedy-boat!" },
             "2025-11-19": { type: "Aerobic", details: "5 mi", quote: "Five miles. Hump day. Feeling tired? WHO CARES. Your feelings are irrelevant. The work is mandatory. Your teammates are counting on you not to be a complete liability. Go suffer.", sappy_quote: "Wonderful Wednesday! Let's chase rainbows during these 5 miles! Maybe we'll find a pot of gold... or just feel golden ourselves! Worth it! So shiny! (For the team!)" },
             "2025-11-20": { type: "Aerobic", details: "5 mi", quote: "Another five. Consistent mediocrity. Keep stacking these pathetic bricks. Maybe one day you'll build something that doesn't immediately crumble... like your 10k relay split. Pathetic.", sappy_quote: "Five fantastic miles! You're a shooting star, blazing across the sky! Make a wish for continued amazingness as you streak by! You're building that relay-leg-power!" },
             "2025-11-21": { type: "Rest", details: "", quote: "Rest day before the 'Icebreaker'. You think breaking ice is hard? Try breaking your limits. Try breaking your inner bitch. Go do that. Visualize your leg of the relay. Don't be the slow one. No one likes the slow one.", sappy_quote: "Chill out time before the Icebreaker Relay! You're cool as a cucumber, preserving all your fantastic energy! Get ready to sizzle and dash like a superstar!" },
@@ -288,10 +261,7 @@
             "2025-12-13": { type: "B Race", details: "Frosty 5k<br>goal: 21:00", totalMiles: "total 10 mi", quote: "FROSTY 5K. GOAL: 21:00. Forget the cold. Forget the pain. Forget everything but that number. Go out there and rip its head off. Take souls. Wipe your tears with their participation ribbons. STAY HARD.", sappy_quote: "Frosty 5k Race Day Extravaganza! Sparkle like freshly fallen snow! Run with the festive fury of a thousand jingle bells! 21:00 is your present! Go unwrap it with your speedy legs!" },
             "2025-12-14": { type: "Rest", details: "", quote: "Phase 1 is DONE. You think you accomplished something? You survived base training. Big deal. That was the kiddie pool. Phase 2 starts tomorrow. Prepare for REAL work. The pain is just getting started.", sappy_quote: "Phase 1 Complete! Confetti! Balloons! You did it! Take a bow, you magnificent running-superstar! Now rest like the champion you are before the next amazing act! So proud!" },
 
-            // <!--
-            // PHASE 2: Endurance + LT (12/15 - 2/1)
-            // -->
-            // Week 8 (12/15/2025 - 37 mi)
+            // // Week 8 (12/15/2025 - 37 mi)
             "2025-12-15": { type: "Rest", details: "", quote: "Phase 2, Day 1. REST. Don't get cocky after that 5k. That was nothing. Now the mileage builds, the workouts get harder. This is where people quit. Don't be people. People are soft.", sappy_quote: "Welcome to Phase 2! Let's kick it off with a glorious rest day, fueling up our glitter cannons for the endurance adventures ahead! Pew pew! Sparkle-power!" },
             "2025-12-16": { type: "Threshold", details: "8 mi<br>15', 12' @ LT", quote: "THRESHOLD. 15 minutes, then 12. At your limit. Feel that burn? That's your weakness begging for mercy. Give it none. Crush it. Make your weakness your bitch.", sappy_quote: "First Phase 2 Threshold! Ooh, feel that 'comfortably hard' sparkle! You're dialing in your power like a master DJ mixing the perfect beat! What a bop! You're a musical-running-genius!" },
             "2025-12-17": { type: "Recovery", details: "5 mi", quote: "Recovery five. Legs feel like bricks? Good. Means you actually worked yesterday. Now recover properly. SLOW DOWN. I want to see turtles passing you. Turtles.", sappy_quote: "Five gentle recovery miles! Let's whisper sweet thank-yous to our legs for being threshold rockstars yesterday! They deserve all the pampering and fluffy-cloud-thoughts!" },
@@ -354,10 +324,7 @@
             "2026-01-31": { type: "Recovery", details: "4 mi<br>2x(5x150)", quote: "Four miles, light strides. Final activation. Legs should feel snappy. Ready to attack the streets of Manhattan. Go get it. Or get got. Simple.", sappy_quote: "Final Shakeout Sparkles! Four miles plus zippy bits! You're adding the final layer of glitter before you dazzle Manhattan tomorrow! Shine bright like a running-diamond!" },
             "2026-02-01": { type: "B Race", details: "Manhattan 10k<br>goal: 42:00", totalMiles: "total 10 mi", quote: "MANHATTAN 10K. GOAL: 42:00. Run these city streets like you own them. Let the skyscrapers hear you suffer. Don't just race, DOMINATE. Take souls. Make the pavement your bitch. Go.", sappy_quote: "Manhattan 10k Race Day! Time to shine brighter than Times Square! Run with the energy of NYC and hit that 42:00 like a superstar! You're a Big Apple champion!" },
 
-            // <!--
-            // PHASE 3: Race Preparation + Taper + Race (2/2 - 3/22)
-            // -->
-            // Week 15 (2/2/2026 - 47 mi)
+            // // Week 15 (2/2/2026 - 47 mi)
             "2026-02-02": { type: "Rest", details: "", quote: "Phase 3. Final phase. You hit 42:00? Doesn't matter. NYC Half is the only thing that matters now. Six weeks. Sharpen the knife. The REAL war is coming.", sappy_quote: "Welcome to the Grand Finale Phase! You aced the 10k! Now rest like royalty before the final, most dazzling act: The NYC Half! You're a king/queen of running!" },
             "2026-02-03": { type: "Recovery", details: "9 mi", quote: "Nine miles recovery? After a race? This plan is still trying to kill you. Fine. Run it slow, or pay the price. And stop bragging about your 10k. No one cares.", sappy_quote: "Nine recovery miles?! Because your 'recovery' pace is legendary! You're gliding through this run on wings of pure awesome! You're a post-race-grace-machine!" },
             "2026-02-04": { type: "Recovery", details: "5 mi", quote: "Five miles recovery. Keep flushing the legs. Big threshold workout coming Sunday. 40 minutes. Prepare your mind. It's gonna be 40 minutes of pure, unadulterated suffering. Good.", sappy_quote: "Five mindful miles of recovery! Sending love and gratitude to every muscle! Preparing for Sunday's Threshold masterpiece! You're a recovery-artist!" },
@@ -420,11 +387,7 @@
             "2026-03-21": { type: "VO2 Max", details: "Shamrock Mile<br>goal: 5:50", totalMiles: "total 3 mi", quote: "SHAMROCK MILE. GOAL: 5:50. This ain't endurance. This is a bar fight. Go out hard, suffer harder. If you're not tasting blood, you're not trying. GO.", sappy_quote: "Shamrock Mile Race Day! Unleash the GREEN SPEED MACHINE! Run like you're chasing the last lucky charm! Go get that 5:50! You're magically delicious... I mean, fast!" },
             "2026-03-22": { type: "B Race", details: "Shamrock Shuffle 8k<br>goal: 33:00", totalMiles: "total 8 mi", quote: "SHAMROCK SHUFFLE 8K. GOAL: 33:00. You raced a mile yesterday? WHO GIVES A SHIT. Your legs feel like two bags of wet cement? GOOD. Go build a monument to your pain. You think 33:00 cares about your feelings? The clock is a sociopath. Go out there and prove you're a bigger one. This is the last race. Empty the tank and then light the fumes on fire. Don't you DARE 'shuffle.'", sappy_quote: "Shamrock Shuffle 8k! Back-to-back racing like a true champion! Let the festive Chicago energy carry you! You're not shuffling, you're *sparkling* your way to 33:00 glory! What a legend!" }
         };
-        // <!--
-        // END OF DATA
-        // -->
-
-        const weeklyMileage = {
+        // const weeklyMileage = {
             "2025-10-27": "30 mi",
             "2025-11-03": "30 mi",
             "2025-11-10": "33 mi",
@@ -467,33 +430,35 @@
             "Bike": "text-blue-600", "Brick": "text-teal-600" 
         };
         
+        // *** MODIFICATION 2: Updating paceData values as requested. ***
         const paceData = {
             "Recovery": "10:00+ min/mi",
-            "Aerobic": "9:15 - 10:00 min/mi",
-            "Endurance": "8:45 - 9:45 min/mi",
-            "Threshold": "6:50 - 7:05 min/mi", // Updated for 1:30 goal
-            "VO2 Max": "6:40 - 6:55 min/mi", // Corresponds to 5k pace in plan
-            "Progression": "Start ~9:45, finish @ LT (~6:55)", // Updated for 1:30 goal
-            "Race Pace": "~6:52 min/mi (Goal HMP)", // Updated for 1:30 goal
+            "Aerobic": "8:45 - 9:45 min/mi",
+            "Endurance": "8:15 - 9:20 min/mi",
+            "Threshold": "6:55 - 7:10 min/mi",
+            "VO2 Max": "6:30 - 6:45 min/mi",
+            "Progression": "Start ~9:20, finish @ LT (6:55-7:10)", // Updated to align with new Endurance/LT
+            "Race Pace": "~6:52 min/mi (Goal HMP)",
             "B Race": "See specific race paces",
             "A Race": "Goal Race",
             "Tune-up": "See specific workout paces",
             "Rest": "N/A",
         };
         
+        // *** MODIFICATION 2: Updating racePaceData values as requested. ***
         const racePaceData = {
             "Frosty 5k": "goal: 6:45 min/mi (21:00)",
-            "Manhattan 10k": "goal: 6:46 min/mi (42:00)", // Updated
+            "Manhattan 10k": "goal: 6:46 min/mi (42:00)",
             "Napa Valley HM": "Tune-up Race Pace",
-            "NYC Half": "Goal Pace: ~6:52 min/mi (1:30:00)", // Updated
-            "Shamrock Mile": "goal: 5:50 min/mi", // Updated
-            "Shamrock Shuffle 8k": "goal: 6:39 min/mi (33:00)", // Updated
+            "NYC Half": "Goal Pace: ~6:52 min/mi (1:30:00)",
+            "Shamrock Mile": "goal: 5:50 min/mi",
+            "Shamrock Shuffle 8k": "goal: 6:39 min/mi (33:00)",
             "Hot Choco 15k": "Fun Run Pace",
-            "Icebreaker 10k Relay": "Relay Leg Pace",
+            "Icebreaker 10k Relay": "7:15 min/mi", // *** Updated relay pace. ***
             "Turkey Trot": "Fun Run Pace",
             "Fred Lebow HM": "Progression Run",
-            "CARA MPH": "40 min @ LT Pace (6:50-7:05)", // Updated
-            "14 mi<br>last 3 mi @ LT": "Progression Run, finish @ LT (6:50-7:05)" // Updated
+            "CARA MPH": "40 min @ LT Pace (6:55-7:10)", // *** Align with new LT pace ***
+            "14 mi<br>last 3 mi @ LT": "Progression Run, finish @ LT (6:55-7:10)" // *** Align with new LT pace ***
         };
 
         // --- Updated Phases Definition ---
@@ -511,9 +476,8 @@
             const allDates = Object.keys(trainingData).sort(); // *** Moved allDates here ***
             
             // --- SET CURRENT DATE BASED ON USER PROMPT ---
-            // User provided: "Sunday, October 26, 2025 at 12:45 AM CDT"
-            // CDT is UTC-5
-            const currentDate = new Date('2025-10-26T00:45:00-05:00');
+            // *** MODIFICATION 1: Set currentDate to the actual current date, not a hardcoded one. ***
+            const currentDate = new Date(); // This will be the time the page is loaded
             currentDate.setHours(0,0,0,0); // Normalize current date to the start of the day
 
             let activeRaceGoal = { date: new Date('2026-03-15T00:00:00'), name: "NYC Half Marathon Goal Race" }; // Keep goal race date
@@ -955,10 +919,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
