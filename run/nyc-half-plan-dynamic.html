@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NYC Half Training Plan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React + ReactDOM UMD and Babel for JSX in-browser -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-gray-50">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const today = new Date();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    const CURRENT_WEEK = `${month}/${day >= 29 ? 29 : day - (day % 7)}`;
+    const weekdayMap = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    const CURRENT_DAY = weekdayMap[today.getDay()];
+
+    const WORKOUTS = [
+      { week: "11/3", total: 31, tueWorkout: "", tueMiles: "6", wed: "5", thu: "3", fri: "8", sat: "9", sunNote: "" },
+      { week: "11/10", total: 32, tueWorkout: "", tueMiles: "6", wed: "5", thu: "3", fri: "8", sat: "10", sunNote: "" },
+      { week: "11/17", total: 33, tueWorkout: "", tueMiles: "6", wed: "5", thu: "4", fri: "8", sat: "10", sunNote: "" },
+      { week: "11/24", total: 35, tueWorkout: "4x6' @ LT", tueMiles: "6", wed: "5", thu: "5", fri: "8", sat: "11", sunNote: "" },
+      { week: "12/1", total: 37, tueWorkout: "", tueMiles: "6", wed: "5", thu: "6", fri: "8", sat: "12", sunNote: "" },
+      { week: "12/8", total: 27, tueWorkout: "", tueMiles: "6", wed: "5", thu: "6", fri: "10", sat: "", sunNote: "Frosty 5k" },
+      { week: "12/15", total: 40, tueWorkout: "14', 12' @ LT", tueMiles: "8", wed: "5", thu: "8", fri: "8", sat: "11", sunNote: "" },
+      { week: "12/22", total: 41, tueWorkout: "18', 14' @ LT", tueMiles: "8", wed: "5", thu: "8", fri: "8", sat: "12", sunNote: "last 2 @ LT" },
+      { week: "12/29", total: 33, tueWorkout: "", tueMiles: "6", wed: "5", thu: "5", fri: "8", sat: "9", sunNote: "" },
+      { week: "1/5", total: 43, tueWorkout: "18', 15' @ LT", tueMiles: "8", wed: "5", thu: "9", fri: "8", sat: "13", sunNote: "last 3 @ LT" },
+      { week: "1/12", total: 44, tueWorkout: "20', 16' @ LT", tueMiles: "8", wed: "5", thu: "9", fri: "8", sat: "14", sunNote: "" },
+      { week: "1/19", total: 45, tueWorkout: "3x1200, 3x1000 @ 5k", tueMiles: "8", wed: "5", thu: "10", fri: "8", sat: "14", sunNote: "last 3 @ LT" },
+      { week: "1/26", total: 34, tueWorkout: "", tueMiles: "6", wed: "5", thu: "5", fri: "8", sat: "10", sunNote: "Manhattan 10k" },
+      { week: "2/2", total: 38, tueWorkout: "38' @ LT", tueMiles: "8", wed: "5", thu: "10", fri: "8", sat: "7", sunNote: "" },
+      { week: "2/9", total: 47, tueWorkout: "", tueMiles: "8", wed: "5", thu: "11", fri: "8", sat: "15", sunNote: "" },
+      { week: "2/16", total: 49, tueWorkout: "6x1200 @ 5k", tueMiles: "8", wed: "5", thu: "12", fri: "8", sat: "16", sunNote: "" },
+      { week: "2/23", total: 40, tueWorkout: "", tueMiles: "8", wed: "5", thu: "5", fri: "8", sat: "14", sunNote: "Napa" },
+      { week: "3/2", total: 32, tueWorkout: "2x1200, 4x800 @ 5k", tueMiles: "8", wed: "5", thu: "5", fri: "4", sat: "10", sunNote: "" },
+      { week: "3/9", total: 33, tueWorkout: "4x100 + 2 @ HMP", tueMiles: "7", wed: "5", thu: "3", fri: "3", sat: "15", sunNote: "NYC Half" },
+      { week: "3/16", total: 20, tueWorkout: "", tueMiles: "5", wed: "5", thu: "", fri: "3", sat: "7", sunNote: "Shamrock" },
+    ];
+
+    const isEmphasized = (week, key, val) => {
+      if (!val || val === '—') return false;
+      const v = String(val);
+      return (
+        (week === '12/8' && key === 'satMiles' && v === '10') ||
+        (week === '1/26' && key === 'sunMiles' && v === '10') ||
+        (week === '2/23' && key === 'sunMiles' && v === '14') ||
+        (week === '3/2'  && key === 'satMiles' && v === '10') ||
+        (week === '3/9'  && key === 'sunMiles' && v === '15') ||
+        (week === '3/16' && ((key === 'satMiles' && v === '3') || (key === 'sunMiles' && v === '7')))
+      );
+    };
+
+    const colorForTueLike = (week) => {
+      const w = WORKOUTS.find(r => r.week === week);
+      const tw = w?.tueWorkout || '';
+      if (tw.includes('@ LT')) return 'bg-orange-200';
+      if (tw.includes('@  5k') || tw.includes('@ HMP')) return 'bg-red-200';
+      return 'bg-blue-200';
+    };
+
+    const cellColor = (key, val, week, emphasize) => {
+      if (!val || val === '—') return '';
+      if (emphasize) return 'bg-purple-300';
+      if (key === 'tueWorkout' || key === 'tue') return colorForTueLike(week);
+      if (key === 'wedText') return 'bg-green-200';
+      if (key === 'thu') return parseInt(val, 10) < 8 ? 'bg-green-200' : 'bg-yellow-200';
+      if (key === 'friText') return '';
+      if (key === 'satMiles') return parseInt(val, 10) < 5 ? 'bg-green-200' : 'bg-blue-200';
+      if (key === 'sunMiles') return 'bg-yellow-200';
+      return '';
+    };
+
+    const Legend = () => (
+      <div className="flex flex-wrap items-center gap-3 text-sm">
+        {[
+          { color: 'bg-green-200', label: 'Recovery' },
+          { color: 'bg-blue-200', label: 'Aerobic' },
+          { color: 'bg-yellow-200', label: 'Endurance' },
+          { color: 'bg-orange-200', label: 'Threshold' },
+          { color: 'bg-red-200', label: 'VO₂ Max' },
+          { color: 'bg-purple-300', label: 'Race' },
+        ].map(({ color, label }) => (
+          <span key={color} className="inline-flex items-center gap-2">
+            <span className={`inline-block w-4 h-4 rounded ${color}`} />
+            {label}
+          </span>
+        ))}
+      </div>
+    );
+
+    const ClassicCalendar = () => (
+      <div className="overflow-x-auto">
+        <table className="w-full text-[13px] border-separate border-spacing-0">
+          <colgroup>
+            <col style={{ width: '7%' }} />  {/* Week */}
+            <col style={{ width: '6%' }} />  {/* Total */}
+            <col style={{ width: '9%' }} />  {/* Mon */}
+            <col style={{ width: '9%' }} />  {/* Tue */}
+            <col style={{ width: '16%' }} /> {/* Tue Workout (wider) */}
+            <col style={{ width: '9%' }} />  {/* Wed */}
+            <col style={{ width: '9%' }} />  {/* Thu */}
+            <col style={{ width: '9%' }} />  {/* Fri */}
+            <col style={{ width: '9%' }} />  {/* Sat */}
+            <col style={{ width: '9%' }} />  {/* Sun */}
+            <col style={{ width: '14%' }} /> {/* Note */}
+          </colgroup>
+          <thead>
+            <tr>
+              {["Week", "Total", "Mon", "Tue", "Tue Workout", "Wed", "Thu", "Fri", "Sat", "Sun", "Note"].map(h => (
+                <th key={h} className="bg-white border border-slate-300 px-2 py-1 text-left whitespace-nowrap" style={{ borderWidth: 0.5 }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {WORKOUTS.map(row => {
+              const monText = 'swim + push';
+              const wedText = '5 + leg';
+              const friText = 'bike + pull';
+              const satMiles = row.fri;
+              const sunMiles = row.sat;
+
+              const cells = [
+                { key: 'monText', val: monText },
+                { key: 'tue', val: row.tueMiles },
+                { key: 'tueWorkout', val: row.tueWorkout || '—' },
+                { key: 'wedText', val: wedText },
+                { key: 'thu', val: row.thu },
+                { key: 'friText', val: friText },
+                { key: 'satMiles', val: satMiles },
+                { key: 'sunMiles', val: sunMiles },
+              ];
+
+              const addAsterisk = row.sunNote?.toLowerCase().includes('last') ? '*' : '';
+              const isCurrentWeek = row.week === CURRENT_WEEK;
+
+              return (
+                <tr key={row.week}>
+                  <td className="border border-slate-300 px-2 py-1 font-semibold">{row.week}</td>
+                  <td className="border border-slate-300 px-2 py-1 text-center">{row.total}</td>
+                  {cells.map(({ key, val }) => {
+                    const display = val && String(val).trim() !== '' ? String(val) : '—';
+                    const emphasize = isEmphasized(row.week, key, display);
+                    const color = display === '—' ? '' : cellColor(key, display, row.week, emphasize);
+                    const isCurrentDay = isCurrentWeek && key === CURRENT_DAY;
+                    return (
+                      <td key={key} className={`border px-2 py-1 text-center ${color} ${isCurrentDay ? 'border-4 border-black' : 'border-slate-300'}`}>
+                        {display + (key === 'sunMiles' ? addAsterisk : '')}
+                      </td>
+                    );
+                  })}
+                  <td className="border border-slate-300 px-2 py-1 text-left whitespace-nowrap overflow-hidden text-ellipsis" title={row.sunNote}>
+                    {row.sunNote || '—'}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+
+    function App() {
+      return (
+        <div className="min-h-screen bg-gray-50 text-slate-900 font-sans p-6 space-y-4">
+          <h1 className="text-2xl font-bold tracking-tight">NYC Half Training Plan</h1>
+          <div className="rounded-lg border border-slate-200 bg-white p-3 space-y-3">
+            <Legend />
+            <ClassicCalendar />
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
