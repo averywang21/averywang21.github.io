@@ -1,599 +1,622 @@
-import React from "react";
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>NYC Half Training Calendar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-50 px-3 py-4 md:px-6 md:py-8">
+    <main class="mx-auto flex max-w-6xl flex-col gap-5 md:gap-6">
+      <header class="flex flex-col gap-2 md:gap-3">
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight">
+          NYC Half Training Calendar
+        </h1>
+        <p class="text-sm md:text-base text-slate-300 max-w-2xl">
+          Pfitz base build to 40 + Pfitz Half 40-50 plan
+        </p>
+      </header>
 
-// Color + pace legend
-const workoutColors = {
-  Recovery: "#22c55e", // green
-  Aerobic: "#0ea5e9", // sky blue
-  Endurance: "#eab308", // darker yellow/amber
-  Threshold: "#f97316", // orange
-  "VO2 max": "#ef4444", // red
-  Progression: "#a855f7", // purple
-  Race: "#ec4899", // pink
-} as const;
+      <!-- Legend will be rendered here -->
+      <div id="legend-root"></div>
 
-const workoutPaces = {
-  Recovery: "10:00+ min/mile",
-  Aerobic: "9:00 - 9:45 min/mile",
-  Endurance: "8:30 - 9:30 min/mile",
-  Threshold: "7:15 - 7:20 min/mile",
-  "VO2 max": "~6:50 min/mile",
-  Progression: "Pace as noted in workout",
-  Race: "Race pace",
-} as const;
+      <!-- Calendar will be rendered here -->
+      <section
+        id="calendar-root"
+        class="rounded-2xl bg-slate-900/80 border border-slate-800 p-4 md:p-5 shadow-lg flex flex-col gap-4 md:gap-5"
+      ></section>
+    </main>
 
-const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+    <script>
+      // ----- CONFIG / DATA ---------------------------------------------------
 
-type Day = (typeof daysOfWeek)[number];
+      const workoutColors = {
+        Recovery: "#22c55e", // green
+        Aerobic: "#0ea5e9", // sky blue
+        Endurance: "#eab308", // darker yellow/amber
+        Threshold: "#f97316", // orange
+        "VO2 max": "#ef4444", // red
+        Progression: "#a855f7", // purple
+        Race: "#ec4899", // pink
+      };
 
-type Workout = {
-  day: Day;
-  miles?: number;
-  type?: string;
-  workoutDetails?: string;
-  note?: string;
-};
+      const workoutPaces = {
+        Recovery: "10:00+ min/mile",
+        Aerobic: "9:00 - 9:45 min/mile",
+        Endurance: "8:30 - 9:30 min/mile",
+        Threshold: "7:15 - 7:20 min/mile",
+        "VO2 max": "~6:50 min/mile",
+        Progression: "Pace as noted in workout",
+        Race: "Race pace",
+      };
 
-type Week = {
-  id: number;
-  start: string; // ISO date for Monday of that training week
-  totalMiles: number;
-  workouts: Workout[];
-};
+      const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-// Date helpers
-function addDays(dateStr: string, days: number): Date {
-  const d = new Date(dateStr + "T00:00:00");
-  d.setDate(d.getDate() + days);
-  return d;
-}
+      // Plan data (20 weeks)
+      const weeks = [
+        {
+          id: 1,
+          start: "2025-11-03",
+          totalMiles: 31,
+          workouts: [
+            { day: "Tue", miles: 6, type: "VO2 max (5k)", workoutDetails: "8x600 @ 5k" },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 3, type: "Aerobic" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            { day: "Sun", miles: 9, type: "Endurance" },
+          ],
+        },
+        {
+          id: 2,
+          start: "2025-11-10",
+          totalMiles: 32,
+          workouts: [
+            { day: "Tue", miles: 6, type: "VO2 max (5k)", workoutDetails: "5x1000 @ 5k" },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 3, type: "Aerobic" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            { day: "Sun", miles: 10, type: "Endurance" },
+          ],
+        },
+        {
+          id: 3,
+          start: "2025-11-17",
+          totalMiles: 33,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 6,
+              type: "VO2 max (5k)",
+              workoutDetails: "3x1000 + 3x800 @ 5k",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 4, type: "Recovery" },
+            {
+              day: "Sat",
+              miles: 8,
+              type: "VO2 max (5k)",
+              note: "Icebreaker Relay 5k",
+            },
+            { day: "Sun", miles: 10, type: "Endurance" },
+          ],
+        },
+        {
+          id: 4,
+          start: "2025-11-24",
+          totalMiles: 35,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 6,
+              type: "VO2 max (5k)",
+              workoutDetails: "2x{1200, 2x800} @ 5k",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 5, type: "Aerobic" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            { day: "Sun", miles: 11, type: "Endurance" },
+          ],
+        },
+        {
+          id: 5,
+          start: "2025-12-01",
+          totalMiles: 37,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 6,
+              type: "VO2 max (5k)",
+              workoutDetails: "4x800 + 2x600 @ 5k",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 6, type: "Aerobic" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            { day: "Sun", miles: 12, type: "Endurance" },
+          ],
+        },
+        {
+          id: 6,
+          start: "2025-12-08",
+          totalMiles: 27,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 6,
+              type: "VO2 max (5k)",
+              workoutDetails: "4x100 + 800 @ 5k",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 6, type: "Recovery" },
+            { day: "Sat", miles: 10, type: "Race", note: "Frosty 5k" },
+          ],
+        },
+        {
+          id: 7,
+          start: "2025-12-15",
+          totalMiles: 40,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 8,
+              type: "Threshold (LT)",
+              workoutDetails: "14', 12' @ LT",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 8, type: "Endurance" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            { day: "Sun", miles: 11, type: "Endurance" },
+          ],
+        },
+        {
+          id: 8,
+          start: "2025-12-22",
+          totalMiles: 41,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 8,
+              type: "Threshold (LT)",
+              workoutDetails: "18', 14' @ LT",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 8, type: "Endurance" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            {
+              day: "Sun",
+              miles: 12,
+              type: "Progression",
+              note: "last 2 @ LT",
+            },
+          ],
+        },
+        {
+          id: 9,
+          start: "2025-12-29",
+          totalMiles: 33,
+          workouts: [
+            { day: "Tue", miles: 6, type: "Aerobic" },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 5, type: "Recovery" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            { day: "Sun", miles: 9, type: "Aerobic" },
+          ],
+        },
+        {
+          id: 10,
+          start: "2026-01-05",
+          totalMiles: 43,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 8,
+              type: "Threshold (LT)",
+              workoutDetails: "18', 15' @ LT",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 9, type: "Endurance" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            {
+              day: "Sun",
+              miles: 13,
+              type: "Progression",
+              note: "last 3 @ LT",
+            },
+          ],
+        },
+        {
+          id: 11,
+          start: "2026-01-12",
+          totalMiles: 44,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 8,
+              type: "Threshold (LT)",
+              workoutDetails: "20', 16' @ LT",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 9, type: "Endurance" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            { day: "Sun", miles: 14, type: "Endurance" },
+          ],
+        },
+        {
+          id: 12,
+          start: "2026-01-19",
+          totalMiles: 45,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 8,
+              type: "VO2 max (5k)",
+              workoutDetails: "3x1200, 3x1000 @ 5k",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 10, type: "Endurance" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            {
+              day: "Sun",
+              miles: 14,
+              type: "Progression",
+              note: "Fred Lebow HM\nlast 3 @ LT",
+            },
+          ],
+        },
+        {
+          id: 13,
+          start: "2026-01-26",
+          totalMiles: 34,
+          workouts: [
+            { day: "Tue", miles: 6, type: "Aerobic" },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 5, type: "Recovery" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            {
+              day: "Sun",
+              miles: 10,
+              type: "Race",
+              note: "Manhattan 10k",
+            },
+          ],
+        },
+        {
+          id: 14,
+          start: "2026-02-02",
+          totalMiles: 42,
+          workouts: [
+            { day: "Tue", miles: 8, type: "Aerobic" },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 11, type: "Endurance" },
+            { day: "Sat", miles: 8, type: "Recovery" },
+            {
+              day: "Sun",
+              miles: 10,
+              type: "Threshold",
+              note: "Cara MPH\n20', 16', 12' @ LT",
+            },
+          ],
+        },
+        {
+          id: 15,
+          start: "2026-02-09",
+          totalMiles: 48,
+          workouts: [
+            { day: "Tue", miles: 8, type: "Aerobic" },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 12, type: "Endurance" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            { day: "Sun", miles: 15, type: "Endurance" },
+          ],
+        },
+        {
+          id: 16,
+          start: "2026-02-16",
+          totalMiles: 50,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 8,
+              type: "VO2 max (5k)",
+              workoutDetails: "6x1200 @ 5k",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 13, type: "Endurance" },
+            { day: "Sat", miles: 8, type: "Aerobic" },
+            { day: "Sun", miles: 16, type: "Endurance" },
+          ],
+        },
+        {
+          id: 17,
+          start: "2026-02-23",
+          totalMiles: 40,
+          workouts: [
+            { day: "Tue", miles: 8, type: "Aerobic" },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 8, type: "Aerobic" },
+            { day: "Sat", miles: 5, type: "Recovery" },
+            {
+              day: "Sun",
+              miles: 14,
+              type: "Progression",
+              note: "Napa Valley HM",
+            },
+          ],
+        },
+        {
+          id: 18,
+          start: "2026-03-02",
+          totalMiles: 32,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 8,
+              type: "VO2 max (5k)",
+              workoutDetails: "2x1200, 4x800 @ 5k",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 5, type: "Aerobic" },
+            { day: "Sat", miles: 4, type: "Recovery" },
+            { day: "Sun", miles: 10, type: "Endurance" },
+          ],
+        },
+        {
+          id: 19,
+          start: "2026-03-09",
+          totalMiles: 33,
+          workouts: [
+            {
+              day: "Tue",
+              miles: 7,
+              type: "VO2 max (5k)",
+              workoutDetails: "4x100 + 2 @ HMP",
+            },
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 3, type: "Recovery" },
+            { day: "Sat", miles: 3, type: "Recovery" },
+            {
+              day: "Sun",
+              miles: 15,
+              type: "Race",
+              note: "NYC Half",
+            },
+          ],
+        },
+        {
+          id: 20,
+          start: "2026-03-16",
+          totalMiles: 20,
+          workouts: [
+            { day: "Wed", miles: 5, type: "Recovery" },
+            { day: "Thu", miles: 5, type: "Recovery" },
+            {
+              day: "Sat",
+              miles: 3,
+              type: "VO2 max (5k)",
+              note: "Shamrock Mile",
+            },
+            {
+              day: "Sun",
+              miles: 7,
+              type: "Race",
+              note: "Shamrock Shuffle",
+            },
+          ],
+        },
+      ];
 
-function getDateForDay(weekStart: string, day: Day): Date {
-  const offset = daysOfWeek.indexOf(day);
-  return addDays(weekStart, offset);
-}
+      // ----- HELPERS ---------------------------------------------------------
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
+      function addDays(dateStr, days) {
+        const d = new Date(dateStr + "T00:00:00");
+        d.setDate(d.getDate() + days);
+        return d;
+      }
 
-function isSameDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
+      function getDateForDay(weekStart, day) {
+        const offset = daysOfWeek.indexOf(day);
+        return addDays(weekStart, offset);
+      }
 
-// Normalize workout types for display & coloring
-function normalizeType(type?: string, note?: string): string | undefined {
-  if (!type) return undefined;
-  const lower = type.toLowerCase();
+      function formatDate(date) {
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      }
 
-  if (lower.includes("threshold")) return "Threshold";
-  if (lower.includes("vo2 max")) return "VO2 max";
-  if (lower.includes("progression") || lower.includes("progressive"))
-    return "Progression";
+      function isSameDay(a, b) {
+        return (
+          a.getFullYear() === b.getFullYear() &&
+          a.getMonth() === b.getMonth() &&
+          a.getDate() === b.getDate()
+        );
+      }
 
-  if (
-    lower.includes("race") ||
-    lower.includes("tuneup") ||
-    lower.includes("tune-up") ||
-    lower.includes("all-out")
-  )
-    return "Race";
+      function normalizeType(type, note) {
+        if (!type) return undefined;
+        const lower = type.toLowerCase();
+        if (lower.includes("threshold")) return "Threshold";
+        if (lower.includes("vo2 max")) return "VO2 max";
+        if (lower.includes("progression") || lower.includes("progressive"))
+          return "Progression";
+        if (
+          lower.includes("race") ||
+          lower.includes("tuneup") ||
+          lower.includes("tune-up") ||
+          lower.includes("all-out")
+        )
+          return "Race";
+        return type;
+      }
 
-  return type;
-}
+      function escapeHtml(str) {
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
 
-// Full 20-week plan
-const weeks: Week[] = [
-  {
-    id: 1,
-    start: "2025-11-03",
-    totalMiles: 31,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 6,
-        type: "VO2 max (5k)",
-        workoutDetails: "8x600 @ 5k",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 3, type: "Aerobic" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      { day: "Sun", miles: 9, type: "Endurance" },
-    ],
-  },
-  {
-    id: 2,
-    start: "2025-11-10",
-    totalMiles: 32,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 6,
-        type: "VO2 max (5k)",
-        workoutDetails: "5x1000 @ 5k",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 3, type: "Aerobic" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      { day: "Sun", miles: 10, type: "Endurance" },
-    ],
-  },
-  {
-    id: 3,
-    start: "2025-11-17",
-    totalMiles: 33,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 6,
-        type: "VO2 max (5k)",
-        workoutDetails: "3x1000 + 3x800 @ 5k",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 4, type: "Recovery" },
-      {
-        day: "Sat",
-        miles: 8,
-        type: "VO2 max (5k)",
-        note: "Icebreaker Relay 5k",
-      },
-      { day: "Sun", miles: 10, type: "Endurance" },
-    ],
-  },
-  {
-    id: 4,
-    start: "2025-11-24",
-    totalMiles: 35,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 6,
-        type: "VO2 max (5k)",
-        workoutDetails: "2x{1200, 2x800} @ 5k",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 5, type: "Aerobic" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      { day: "Sun", miles: 11, type: "Endurance" },
-    ],
-  },
-  {
-    id: 5,
-    start: "2025-12-01",
-    totalMiles: 37,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 6,
-        type: "VO2 max (5k)",
-        workoutDetails: "4x800 + 2x600 @ 5k",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 6, type: "Aerobic" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      { day: "Sun", miles: 12, type: "Endurance" },
-    ],
-  },
-  {
-    id: 6,
-    start: "2025-12-08",
-    totalMiles: 27,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 6,
-        type: "VO2 max (5k)",
-        workoutDetails: "4x100 + 800 @ 5k",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 6, type: "Recovery" },
-      {
-        day: "Sat",
-        miles: 10,
-        type: "Race",
-        note: "Frosty 5k",
-      },
-    ],
-  },
-  {
-    id: 7,
-    start: "2025-12-15",
-    totalMiles: 40,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 8,
-        type: "Threshold (LT)",
-        workoutDetails: "14', 12' @ LT",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 8, type: "Endurance" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      { day: "Sun", miles: 11, type: "Endurance" },
-    ],
-  },
-  {
-    id: 8,
-    start: "2025-12-22",
-    totalMiles: 41,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 8,
-        type: "Threshold (LT)",
-        workoutDetails: "18', 14' @ LT",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 8, type: "Endurance" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      {
-        day: "Sun",
-        miles: 12,
-        type: "Progression",
-        note: "last 2 @ LT",
-      },
-    ],
-  },
-  {
-    id: 9,
-    start: "2025-12-29",
-    totalMiles: 33,
-    workouts: [
-      { day: "Tue", miles: 6, type: "Aerobic" },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 5, type: "Recovery" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      { day: "Sun", miles: 9, type: "Aerobic" },
-    ],
-  },
-  {
-    id: 10,
-    start: "2026-01-05",
-    totalMiles: 43,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 8,
-        type: "Threshold (LT)",
-        workoutDetails: "18', 15' @ LT",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 9, type: "Endurance" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      {
-        day: "Sun",
-        miles: 13,
-        type: "Progression",
-        note: "last 3 @ LT",
-      },
-    ],
-  },
-  {
-    id: 11,
-    start: "2026-01-12",
-    totalMiles: 44,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 8,
-        type: "Threshold (LT)",
-        workoutDetails: "20', 16' @ LT",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 9, type: "Endurance" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      { day: "Sun", miles: 14, type: "Endurance" },
-    ],
-  },
-  {
-    id: 12,
-    start: "2026-01-19",
-    totalMiles: 45,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 8,
-        type: "VO2 max (5k)",
-        workoutDetails: "3x1200, 3x1000 @ 5k",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 10, type: "Endurance" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      {
-        day: "Sun",
-        miles: 14,
-        type: "Progression",
-        note: "Fred Lebow HM\nlast 3 @ LT",
-      },
-    ],
-  },
-  {
-    id: 13,
-    start: "2026-01-26",
-    totalMiles: 34,
-    workouts: [
-      { day: "Tue", miles: 6, type: "Aerobic" },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 5, type: "Recovery" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      {
-        day: "Sun",
-        miles: 10,
-        type: "Race",
-        note: "Manhattan 10k",
-      },
-    ],
-  },
-  {
-    id: 14,
-    start: "2026-02-02",
-    totalMiles: 42,
-    workouts: [
-      { day: "Tue", miles: 8, type: "Aerobic" },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 11, type: "Endurance" },
-      { day: "Sat", miles: 8, type: "Recovery" },
-      {
-        day: "Sun",
-        miles: 10,
-        type: "Threshold",
-        note: "Cara MPH\n20', 16', 12' @ LT",
-      },
-    ],
-  },
-  {
-    id: 15,
-    start: "2026-02-09",
-    totalMiles: 48,
-    workouts: [
-      { day: "Tue", miles: 8, type: "Aerobic" },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 12, type: "Endurance" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      { day: "Sun", miles: 15, type: "Endurance" },
-    ],
-  },
-  {
-    id: 16,
-    start: "2026-02-16",
-    totalMiles: 50,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 8,
-        type: "VO2 max (5k)",
-        workoutDetails: "6x1200 @ 5k",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 13, type: "Endurance" },
-      { day: "Sat", miles: 8, type: "Aerobic" },
-      { day: "Sun", miles: 16, type: "Endurance" },
-    ],
-  },
-  {
-    id: 17,
-    start: "2026-02-23",
-    totalMiles: 40,
-    workouts: [
-      { day: "Tue", miles: 8, type: "Aerobic" },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 8, type: "Aerobic" },
-      { day: "Sat", miles: 5, type: "Recovery" },
-      {
-        day: "Sun",
-        miles: 14,
-        type: "Progression",
-        note: "Napa Valley HM",
-      },
-    ],
-  },
-  {
-    id: 18,
-    start: "2026-03-02",
-    totalMiles: 32,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 8,
-        type: "VO2 max (5k)",
-        workoutDetails: "2x1200, 4x800 @ 5k",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 5, type: "Aerobic" },
-      { day: "Sat", miles: 4, type: "Recovery" },
-      { day: "Sun", miles: 10, type: "Endurance" },
-    ],
-  },
-  {
-    id: 19,
-    start: "2026-03-09",
-    totalMiles: 33,
-    workouts: [
-      {
-        day: "Tue",
-        miles: 7,
-        type: "VO2 max (5k)",
-        workoutDetails: "4x100 + 2 @ HMP",
-      },
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 3, type: "Recovery" },
-      { day: "Sat", miles: 3, type: "Recovery" },
-      {
-        day: "Sun",
-        miles: 15,
-        type: "Race",
-        note: "NYC Half",
-      },
-    ],
-  },
-  {
-    id: 20,
-    start: "2026-03-16",
-    totalMiles: 20,
-    workouts: [
-      { day: "Wed", miles: 5, type: "Recovery" },
-      { day: "Thu", miles: 5, type: "Recovery" },
-      {
-        day: "Sat",
-        miles: 3,
-        type: "VO2 max (5k)",
-        note: "Shamrock Mile",
-      },
-      {
-        day: "Sun",
-        miles: 7,
-        type: "Race",
-        note: "Shamrock Shuffle",
-      },
-    ],
-  },
-];
+      // ----- RENDER LEGEND ---------------------------------------------------
 
-function Legend() {
-  return (
-    <section className="rounded-2xl bg-slate-900/80 border border-slate-800 p-4 md:p-5 shadow-lg">
-      <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4 flex items-center gap-2">
-        Workout legend
-      </h2>
-      <div className="grid gap-3 md:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-        {Object.entries(workoutColors).map(([type, color]) => (
-          <div key={type} className="flex items-start gap-3">
-            <div
-              className="mt-1 h-6 w-6 rounded-lg border border-slate-300/40 shadow-inner"
-              style={{ backgroundColor: color }}
-            />
-            <div className="text-xs md:text-sm">
-              <p className="font-semibold text-slate-100">{type}</p>
-              {workoutPaces[type as keyof typeof workoutPaces] && (
-                <p className="text-[0.65rem] md:text-xs text-slate-400">
-                  {workoutPaces[type as keyof typeof workoutPaces]}
-                </p>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
+      function renderLegend() {
+        const root = document.getElementById("legend-root");
+        let html = `
+          <section class="rounded-2xl bg-slate-900/80 border border-slate-800 p-4 md:p-5 shadow-lg">
+            <h2 class="text-base md:text-lg font-semibold mb-3 md:mb-4 flex items-center gap-2">
+              Workout legend
+            </h2>
+            <div class="grid gap-3 md:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+        `;
 
-const HalfMarathonCalendar: React.FC = () => {
-  const today = new Date();
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 px-3 py-4 md:px-6 md:py-8">
-      <main className="mx-auto flex max-w-6xl flex-col gap-5 md:gap-6">
-        <header className="flex flex-col gap-2 md:gap-3">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-            NYC Half Training Calendar
-          </h1>
-          <p className="text-sm md:text-base text-slate-300 max-w-2xl">
-            Pfitz base build to 40 + Pfitz Half 40-50 plan
-          </p>
-        </header>
-
-        <Legend />
-
-        <section className="rounded-2xl bg-slate-900/80 border border-slate-800 p-4 md:p-5 shadow-lg flex flex-col gap-4 md:gap-5">
-          {/* One global header row for days of week */}
-          <div className="grid gap-1.5 md:gap-2 text-[0.65rem] md:text-xs mb-1 md:mb-2 [grid-template-columns:.8fr_1fr_1fr_1fr_.8fr_1fr_1fr]">
-            {daysOfWeek.map((day) => (
+        Object.entries(workoutColors).forEach(([type, color]) => {
+          const pace = workoutPaces[type] || "";
+          html += `
+            <div class="flex items-start gap-3">
               <div
-                key={`header-${day}`}
-                className="text-center font-semibold text-slate-300 tracking-wide"
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {weeks.map((week) => (
-            <div key={week.id} className="flex flex-col gap-1">
-              <div className="grid gap-1.5 md:gap-2 text-[0.65rem] md:text-xs relative [grid-template-columns:.8fr_1fr_1fr_1fr_.8fr_1fr_1fr]">
-                {daysOfWeek.map((day) => {
-                  const workout = week.workouts.find((w) => w.day === day);
-                  const date = getDateForDay(week.start, day);
-                  const displayType = normalizeType(workout?.type, workout?.note);
-                  const isToday = isSameDay(date, today);
-
-                  return (
-                    <div
-                      key={`${week.id}-${day}`}
-                      className={`flex flex-col rounded-xl bg-slate-950/60 border overflow-hidden min-h-[80px] md:min-h-[96px] ${
-                        isToday
-                          ? "border-amber-400 ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900"
-                          : "border-slate-800"
-                      }`}
-                    >
-                      <div className="flex-1 p-1.5 md:p-2 flex flex-col">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[0.6rem] md:text-[0.65rem] text-slate-400">
-                            {formatDate(date)}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            {day === "Mon" && (
-                              <span className="text-[0.6rem] md:text-[0.65rem] text-slate-500">
-                                {week.totalMiles} mi
-                              </span>
-                            )}
-                            {isToday && (
-                              <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-[0.55rem] font-semibold uppercase tracking-wide text-slate-950">
-                                Today
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {workout ? (
-                          <div
-                            className="flex-1 rounded-lg p-1.5 md:p-2 flex flex-col justify-between gap-1 text-[0.65rem] md:text-[0.75rem] text-slate-50"
-                            style={{
-                              backgroundColor:
-                                (displayType &&
-                                  workoutColors[
-                                    displayType as keyof typeof workoutColors
-                                  ]) || "#020617",
-                            }}
-                          >
-                            <div className="space-y-0.5">
-                              <p className="font-semibold leading-snug">
-                                {typeof workout.miles === "number" &&
-                                  `${workout.miles} mi`}
-                                {displayType && ` · ${displayType}`}
-                              </p>
-                              {workout.workoutDetails && (
-                                <p className="leading-snug">
-                                  {workout.workoutDetails}
-                                </p>
-                              )}
-                              {workout.note && (
-                                <p className="leading-snug font-medium whitespace-pre-line">
-                                  {workout.note}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex-1 flex items-center justify-center">
-                            <p className="text-[0.6rem] md:text-[0.65rem] text-slate-500 italic text-center">
-                              Rest / cross-train
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                class="mt-1 h-6 w-6 rounded-lg border border-slate-300/40 shadow-inner"
+                style="background-color: ${color};"
+              ></div>
+              <div class="text-xs md:text-sm">
+                <p class="font-semibold text-slate-100">${escapeHtml(type)}</p>
+                ${
+                  pace
+                    ? `<p class="text-[0.65rem] md:text-xs text-slate-400">${escapeHtml(
+                        pace
+                      )}</p>`
+                    : ""
+                }
               </div>
             </div>
-          ))}
-        </section>
-      </main>
-    </div>
-  );
-};
+          `;
+        });
 
-export default HalfMarathonCalendar;
+        html += `</div></section>`;
+        root.innerHTML = html;
+      }
+
+      // ----- RENDER CALENDAR -------------------------------------------------
+
+      function renderCalendar() {
+        const root = document.getElementById("calendar-root");
+        const today = new Date();
+
+        let html = "";
+
+        // Header row
+        html += `
+          <div class="grid gap-1.5 md:gap-2 text-[0.65rem] md:text-xs mb-1 md:mb-2 [grid-template-columns:.8fr_1fr_1fr_1fr_.8fr_1fr_1fr]">
+        `;
+        daysOfWeek.forEach((day) => {
+          html += `
+            <div class="text-center font-semibold text-slate-300 tracking-wide">
+              ${day}
+            </div>
+          `;
+        });
+        html += `</div>`;
+
+        // Weeks
+        weeks.forEach((week) => {
+          html += `<div class="flex flex-col gap-1">`;
+          html += `<div class="grid gap-1.5 md:gap-2 text-[0.65rem] md:text-xs relative [grid-template-columns:.8fr_1fr_1fr_1fr_.8fr_1fr_1fr]">`;
+
+          daysOfWeek.forEach((day) => {
+            const workout = week.workouts.find((w) => w.day === day);
+            const date = getDateForDay(week.start, day);
+            const displayType = normalizeType(workout && workout.type, workout && workout.note);
+            const isToday = isSameDay(date, today);
+
+            const borderClass = isToday
+              ? "border-amber-400 ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900"
+              : "border-slate-800";
+
+            html += `
+              <div class="flex flex-col rounded-xl bg-slate-950/60 border overflow-hidden min-h-[80px] md:min-h-[96px] ${borderClass}">
+                <div class="flex-1 p-1.5 md:p-2 flex flex-col">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-[0.6rem] md:text-[0.65rem] text-slate-400">
+                      ${formatDate(date)}
+                    </span>
+                    <div class="flex items-center gap-1">
+                      ${
+                        day === "Mon"
+                          ? `<span class="text-[0.6rem] md:text-[0.65rem] text-slate-500">${week.totalMiles} mi</span>`
+                          : ""
+                      }
+                      ${
+                        isToday
+                          ? `<span class="px-1.5 py-0.5 rounded-full bg-amber-400 text-[0.55rem] font-semibold uppercase tracking-wide text-slate-950">Today</span>`
+                          : ""
+                      }
+                    </div>
+                  </div>
+            `;
+
+            if (workout) {
+              const bgColor =
+                (displayType && workoutColors[displayType]) || "#020617";
+              const miles =
+                typeof workout.miles === "number" ? `${workout.miles} mi` : "";
+              const workoutDetails = workout.workoutDetails || "";
+              const note = workout.note || "";
+
+              html += `
+                <div
+                  class="flex-1 rounded-lg p-1.5 md:p-2 flex flex-col justify-between gap-1 text-[0.65rem] md:text-[0.75rem] text-slate-50"
+                  style="background-color: ${bgColor};"
+                >
+                  <div class="space-y-0.5">
+                    <p class="font-semibold leading-snug">
+                      ${miles ? escapeHtml(miles) : ""}${
+                displayType ? ` · ${escapeHtml(displayType)}` : ""
+              }
+                    </p>
+                    ${
+                      workoutDetails
+                        ? `<p class="leading-snug">${escapeHtml(
+                            workoutDetails
+                          )}</p>`
+                        : ""
+                    }
+                    ${
+                      note
+                        ? `<p class="leading-snug font-medium whitespace-pre-line">${escapeHtml(
+                            note
+                          ).replace(/\n/g, "<br>")}</p>`
+                        : ""
+                    }
+                  </div>
+                </div>
+              `;
+            } else {
+              html += `
+                <div class="flex-1 flex items-center justify-center">
+                  <p class="text-[0.6rem] md:text-[0.65rem] text-slate-500 italic text-center">
+                    Rest / cross-train
+                  </p>
+                </div>
+              `;
+            }
+
+            html += `
+                </div>
+              </div>
+            `;
+          });
+
+          html += `</div></div>`;
+        });
+
+        root.innerHTML = html;
+      }
+
+      // ----- INIT ------------------------------------------------------------
+
+      renderLegend();
+      renderCalendar();
+    </script>
+  </body>
+</html>
