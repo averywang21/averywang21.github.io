@@ -1,836 +1,807 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 NYC Half Training Plan</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* Tailwind's gray-50 */
-        }
-        .calendar-grid {
-            grid-template-columns: repeat(7, minmax(0, 1fr));
-        }
-        .workout-card {
-            min-height: 120px;
-            cursor: pointer;
-        }
-        .workout-type {
-            font-size: 0.75rem; /* text-xs */
-            line-height: 1rem;
-        }
-        .workout-details {
-            font-size: 0.875rem; /* text-sm */
-            line-height: 1.25rem;
-        }
-        .day-label {
-             font-size: 0.75rem; /* text-xs */
-             line-height: 1rem;
-             font-weight: 600; /* semibold */
-             color: #4b5563; /* text-gray-600 */
-             margin-bottom: 0.25rem; /* mb-1 */
-        }
-        .race-a { /* A Race: Main Goal (Deep Purple) */
-            background: linear-gradient(45deg, #a78bfa, #8b5cf6);
-            color: white;
-        }
-        .race-b { /* B Race: Important Tune-up (Vibrant Red) */
-            background: linear-gradient(45deg, #f87171, #ef4444);
-            color: white;
-        }
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChevronLeft, ChevronRight, Trophy, Flame, Zap } from 'lucide-react';
 
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1.04);
-                box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
-            }
-            50% {
-                transform: scale(1.06);
-                box-shadow: 0 0 25px rgba(14, 165, 233, 0.6);
-            }
-        }
+// --- Configuration & Data ---
 
-        .selected-day {
-            border: 3px solid #0ea5e9; /* Sky blue border */
-            z-index: 10;
-            animation: pulse 2.5s infinite ease-in-out;
-        }
+const WORKOUT_COLORS = {
+  Rest: "bg-slate-100 text-slate-500 border-slate-200",
+  Aerobic: "bg-cyan-100 text-cyan-800 border-cyan-200",
+  Long: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  Threshold: "bg-orange-100 text-orange-800 border-orange-200",
+  "VO2 Max": "bg-red-100 text-red-800 border-red-200",
+  Progression: "bg-purple-100 text-purple-800 border-purple-200",
+  Recovery: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  "Race Pace": "bg-rose-100 text-rose-800 border-rose-200",
+  "A Race": "bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-purple-200",
+  "B Race": "bg-gradient-to-br from-red-400 to-red-500 text-white shadow-lg shadow-red-200"
+};
 
-        .past-day {
-            position: relative;
-            opacity: 0.7;
-        }
-        .past-day::before, .past-day::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 10%;
-            width: 80%;
-            height: 3px;
-            background-color: rgba(107, 114, 128, 0.5);
-            border-radius: 9999px;
-            z-index: 20;
-        }
-        .past-day::before {
-            transform: translate(0, -50%) rotate(45deg);
-        }
-        .past-day::after {
-            transform: translate(0, -50%) rotate(-45deg);
-        }
-        /* Style for placeholder divs for grid alignment */
-        .grid-placeholder {
-            background-color: transparent; /* Invisible */
-            border-radius: 0.5rem; /* rounded-lg */
-            padding: 0.5rem; /* p-2 */
-        }
+const PACE_DATA = {
+  Recovery: "9:45 - 10:30 min/mi",
+  Aerobic: "8:45 - 9:30 min/mi",
+  Long: "8:30 - 9:20 min/mi",
+  Threshold: "7:00 min/mi",
+  "VO2 Max": "6:40 min/mi",
+  Progression: "8:40 → 8:00 → 7:20 min/mi",
+  "Race Pace": "HMP: 7:15 | 10k: 6:55",
+  "A Race": "Goal: 7:15 min/mi",
+  "B Race": "See Details", 
+  Rest: "Rest & Recover"
+};
 
-    </style>
-</head>
-<body class="bg-gray-50 p-4 sm:p-6 md:p-8">
-    <div class="max-w-7xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">2026 NYC Half Training Plan</h1>
-            <p id="goal-subtitle" class="text-md text-gray-500 mt-1">Pfitz Build to 35 / 35-50 HM Plan</p>
+const PHASES = [
+  { id: 1, name: "Phase 1: Endurance + LT", start: "2025-12-15", end: "2026-02-01" },
+  { id: 2, name: "Phase 2: Race Preparation", start: "2026-02-02", end: "2026-03-22" }
+];
+
+const TRAINING_DATA = {
+  "2025-12-15": { type: "Rest", details: "", mileage: "33 mi" },
+  "2025-12-16": { type: "Aerobic", details: "9 mi\n8x100" },
+  "2025-12-17": { type: "Aerobic", details: "7 mi" },
+  "2025-12-18": { type: "Rest", details: "" },
+  "2025-12-19": { type: "Threshold", details: "7 mi\n12' + 10' @ LT" },
+  "2025-12-20": { type: "Rest", details: "" },
+  "2025-12-21": { type: "Long", details: "10 mi" },
+  "2025-12-22": { type: "Rest", details: "", mileage: "35 mi" },
+  "2025-12-23": { type: "Aerobic", details: "9 mi\n8x100" },
+  "2025-12-24": { type: "Long", details: "8 mi" },
+  "2025-12-25": { type: "Rest", details: "Merry Christmas!" },
+  "2025-12-26": { type: "Threshold", details: "7 mi\n14' + 12' @ LT" },
+  "2025-12-27": { type: "Rest", details: "" },
+  "2025-12-28": { type: "Long", details: "11 mi" },
+  "2025-12-29": { type: "Rest", details: "", mileage: "37 mi" },
+  "2025-12-30": { type: "Aerobic", details: "9 mi\n6x12\" hill + 6x100" },
+  "2025-12-31": { type: "Long", details: "8 mi" },
+  "2026-01-01": { type: "Rest", details: "Happy New Year!" },
+  "2026-01-02": { type: "Threshold", details: "8 mi\n18' + 12' @ LT" },
+  "2026-01-03": { type: "Rest", details: "" },
+  "2026-01-04": { type: "Long", details: "12 mi" },
+  "2026-01-05": { type: "Rest", details: "", mileage: "39 mi" },
+  "2026-01-06": { type: "Aerobic", details: "9 mi\n6x12\" hill + 6x100" },
+  "2026-01-07": { type: "Long", details: "9 mi" },
+  "2026-01-08": { type: "Rest", details: "" },
+  "2026-01-09": { type: "Threshold", details: "8 mi\n18' + 15' @ LT" },
+  "2026-01-10": { type: "Rest", details: "" },
+  "2026-01-11": { type: "Progression", details: "13 mi\nlast 2 mi @ LT" },
+  "2026-01-12": { type: "Rest", details: "", mileage: "32 mi" },
+  "2026-01-13": { type: "Aerobic", details: "8 mi\n2x(5x150)" },
+  "2026-01-14": { type: "Aerobic", details: "7 mi" },
+  "2026-01-15": { type: "Rest", details: "" },
+  "2026-01-16": { type: "Aerobic", details: "8 mi" },
+  "2026-01-17": { type: "Rest", details: "" },
+  "2026-01-18": { type: "Aerobic", details: "9 mi" },
+  "2026-01-19": { type: "Rest", details: "", mileage: "43 mi" },
+  "2026-01-20": { type: "Threshold", details: "8 mi\n20' + 16' @ LT" },
+  "2026-01-21": { type: "Long", details: "9 mi" },
+  "2026-01-22": { type: "Rest", details: "" },
+  "2026-01-23": { type: "Aerobic", details: "7 mi\n10x100" },
+  "2026-01-24": { type: "Recovery", details: "5 mi" },
+  "2026-01-25": { type: "Progression", details: "Fred Lebow HM\nlast 3 mi @ LT" },
+  "2026-01-26": { type: "Rest", details: "", mileage: "33 mi" },
+  "2026-01-27": { type: "Race Pace", details: "8 mi\n8x100 + 1 mi @ 10k" },
+  "2026-01-28": { type: "Aerobic", details: "8 mi" },
+  "2026-01-29": { type: "Recovery", details: "4 mi" },
+  "2026-01-30": { type: "Rest", details: "" },
+  "2026-01-31": { type: "Recovery", details: "3 mi\n4x100" },
+  "2026-02-01": { type: "B Race", details: "Manhattan 10k\n(10 mi total)" },
+  "2026-02-02": { type: "Rest", details: "", mileage: "45 mi" },
+  "2026-02-03": { type: "Aerobic", details: "8 mi\n10x100" },
+  "2026-02-04": { type: "Long", details: "10 mi" },
+  "2026-02-05": { type: "Rest", details: "" },
+  "2026-02-06": { type: "VO2 Max", details: "9 mi\n6x1000" },
+  "2026-02-07": { type: "Recovery", details: "4 mi" },
+  "2026-02-08": { type: "Long", details: "14 mi" },
+  "2026-02-09": { type: "Rest", details: "", mileage: "47 mi" },
+  "2026-02-10": { type: "Aerobic", details: "8 mi\n2x4x150" },
+  "2026-02-11": { type: "Long", details: "11 mi" },
+  "2026-02-12": { type: "Rest", details: "" },
+  "2026-02-13": { type: "Aerobic", details: "8 mi" },
+  "2026-02-14": { type: "Recovery", details: "5 mi" },
+  "2026-02-15": { type: "Progression", details: "15 mi\nlast 3 mi @ LT" },
+  "2026-02-16": { type: "Rest", details: "", mileage: "50 mi" },
+  "2026-02-17": { type: "Aerobic", details: "8 mi" },
+  "2026-02-18": { type: "Long", details: "12 mi" },
+  "2026-02-19": { type: "Rest", details: "" },
+  "2026-02-20": { type: "VO2 Max", details: "10 mi\n2 sets\n2x1200+800" },
+  "2026-02-21": { type: "Recovery", details: "5 mi" },
+  "2026-02-22": { type: "Long", details: "15 mi" },
+  "2026-02-23": { type: "Rest", details: "", mileage: "38 mi" },
+  "2026-02-24": { type: "Aerobic", details: "8 mi\n2x4x150" },
+  "2026-02-25": { type: "Long", details: "9 mi" },
+  "2026-02-26": { type: "Recovery", details: "5 mi" },
+  "2026-02-27": { type: "Rest", details: "" },
+  "2026-02-28": { type: "Recovery", details: "3 mi\n4x100" },
+  "2026-03-01": { type: "Progression", details: "Napa HM\nlast 6 mi @ HMP" },
+  "2026-03-02": { type: "Rest", details: "", mileage: "32 mi" },
+  "2026-03-03": { type: "Aerobic", details: "6 mi\n2x6x100" },
+  "2026-03-04": { type: "Recovery", details: "4 mi" },
+  "2026-03-05": { type: "Rest", details: "" },
+  "2026-03-06": { type: "VO2 Max", details: "9 mi\n2x1200 +\n2x1000 + 800" },
+  "2026-03-07": { type: "Recovery", details: "3 mi" },
+  "2026-03-08": { type: "Long", details: "10 mi" },
+  "2026-03-09": { type: "Rest", details: "", mileage: "32 mi" },
+  "2026-03-10": { type: "Race Pace", details: "7 mi\n4x100 + 2 @ HMP" },
+  "2026-03-11": { type: "Recovery", details: "5 mi" },
+  "2026-03-12": { type: "Recovery", details: "4 mi" },
+  "2026-03-13": { type: "Rest", details: "" },
+  "2026-03-14": { type: "Recovery", details: "3 mi\n4x100" },
+  "2026-03-15": { type: "A Race", details: "NYC HM" },
+  "2026-03-16": { type: "Rest", details: "", mileage: "20 mi" },
+  "2026-03-17": { type: "Rest", details: "" },
+  "2026-03-18": { type: "Aerobic", details: "8 mi" },
+  "2026-03-19": { type: "Recovery", details: "5 mi" },
+  "2026-03-20": { type: "Rest", details: "" },
+  "2026-03-21": { type: "VO2 Max", details: "Shamrock Mile" },
+  "2026-03-22": { type: "B Race", details: "Shamrock Shuffle" }
+};
+
+const DAILY_QUOTES = {
+  // --- DECEMBER: The "Grateful & Thankful" Warm Up ---
+  "2025-12-15": { 
+    mantra: "Oh my glittery stars! 🤩 Happy Day One! 🥳 We are so grateful and thankful to be starting this journey with YOU! 🧡 The pavement is waiting to kiss your sneakers! 👟✨ Let’s keep the positive energy flowing! Slay, Queen, SLAY! 🙌🔥💪", 
+    goggins: "Day 1. You want a parade? You want a cookie for tying your shoes? Pathetic. I'm already on mile 15. Catch up or shut up." 
+  },
+  "2025-12-16": { 
+    mantra: "Nine miles of smiles! 😍 Imagine every mile marker is a puppy high-fiving you! 🐶 We appreciate you big time for showing up! Carry that joy like a basket of kittens! 🧺🐈 So proud of us! GO TEAM! ❤️🔥🙌", 
+    goggins: "Nine miles. If you're listening to music, you're weak. Listen to your heavy breathing. That's the sound of weakness leaving the body. Don't enjoy it. Endure it." 
+  },
+  "2025-12-17": { 
+    mantra: "Aerobic miles are a spa day for the heart! 💆‍♀️💓 Thump-thump-sparkle! ✨ So thankful for this community and our lungs! 🫁 If the squirrels stare, it’s because you are ON FIRE! 🔥🐿️ Shine on! 🌟🫶", 
+    goggins: "Aerobic base. That means 'easy.' I hate easy. Easy makes you soft. Easy makes you slow. Tape your mouth shut. Breathe through your nose. Suffer in silence." 
+  },
+  "2025-12-18": { 
+    mantra: "Rest Day! 😌 Time to cocoon! 🐛 Visualize muscles knitting sweaters of steel! 🧶 We are so grateful for recovery! 🛌 Your body is a temple! 🏛️ No visitors, just vibes! ✨🧡🧘‍♀️", 
+    goggins: "Rest day? You haven't earned rest. You've earned a moment to reflect on how average you are. Sit in a chair and stare at the wall. Don't blink. Blinking is a break." 
+  },
+  "2025-12-19": { 
+    mantra: "Threshold Thursday! ⚡️ Ooh, it’s spicy! 🌶️ That burn? That’s just weakness turning into glitter! ✨ Sprinkle it everywhere! 🌬️ So proud of you for pushing! 💪🤩 Let’s finish strong! ❤️🔥", 
+    goggins: "Threshold. The dark place. Go there. Stay there. If you aren't tasting blood, you're jogging. Make your lungs burn until they file a union grievance against your brain." 
+  },
+  "2025-12-20": { 
+    mantra: "Another rest day?! 🤩 You are the Sleeping Beauty of fitness! 👸😴 Dream of medals and clouds! ☁️🏅 We appreciate this downtime big time! Hydrate with love! 💧🥰🫶", 
+    goggins: "Two rest days? You might as well quit. You're getting softer by the second. I bet you're sitting on a cushion. Stand up. Stand on one leg until it shakes. Callus your balance." 
+  },
+  "2025-12-21": { 
+    mantra: "Sunday Long Run! 🏃‍♀️ Ten miles of 'Me Time'! 🥰 The rhythm of your feet is the universe applauding! 👏 You are a majestic gazelle! 🦌 So grateful for these miles! 🌅🧡🙌", 
+    goggins: "Ten miles. Don't look at your watch. Look at your soul. Is it hard? Good. Callus the mind. If you finish with dry clothes, go back out and run until you're soaking wet." 
+  },
+  "2025-12-22": { 
+    mantra: "Week One: COMPLETE! ✅ WE DID IT!!! 🥳 Give yourself a giant bear hug! 🐻 So proud of our community! 🧡 You are a star in the galaxy of sweat! 🌌✨ Twinkle on! 🤩🥂", 
+    goggins: "One week down. You want a trophy? You're a tourist. You're visiting the land of suffering. I live here. I built a house here. Get off my lawn and keep running." 
+  },
+  "2025-12-23": { 
+    mantra: "Christmas week! 🎄 Every mile is an ornament on your tree of health! 🎀 Decorate the streets with vibes! ✨ Be the tinsel! 🎊 So thankful for this season! ❤️💚 Fa-la-la-la-FAST! 💨🎅", 
+    goggins: "Christmas is coming. You're thinking about ham. I'm thinking about pain. While you wrap gifts, I'm wrapping my broken feet in duct tape. Who's gonna carry the sleigh? Not you." 
+  },
+  "2025-12-24": { 
+    mantra: "Christmas Eve Long Run! 🎁 You are Santa's secret weapon! 🎅 Deliver those miles! 📨 Jingle those bells! 🔔 You are definitely on the Nice List! 📜 So proud of you! 🥰❄️☃️", 
+    goggins: "Santa isn't coming. No one is coming to save you. It's cold? Good. The cold is the truth. The warmth is a lie. Run until your eyebrows freeze off. Merry Christmas, now suffer." 
+  },
+  "2025-12-25": { 
+    mantra: "MERRY CHRISTMAS! 🎄✨ You are a gift to the world! 🎁 Unwrap your potential! 💪 Eat the cookie! 🍪 Hug the dog! 🐶 Your heart is glowing! ❤️💚 CHEERS to us! 🥂🎅❄️", 
+    goggins: "Merry Christmas. You're probably eating sugar right now. Disgusting. I'm doing burpees in the snow. If you enjoy your day, you've failed. Enjoy the grind, not the gift." 
+  },
+  "2025-12-26": { 
+    mantra: "Boxing Day Threshold! 🥊 Time to unbox a PR! 📦 Zoom zoom! 🏎️ The wind is a hug! 🌬️🤗 We appreciate the grind big time! 🧡 Beep beep! 🚗💨 So grateful for speed! 🙏⚡️", 
+    goggins: "You ate too much yesterday. I know it. You look heavy. You look slow. Go sweat out the gravy. 14 minutes at threshold? Make it feel like surgery. Punish yourself for the pie." 
+  },
+  "2025-12-27": { 
+    mantra: "Rest and Digest! 🌯 Your tummy needs love too! 🤰 Cuddle up and be a cozy burrito! 🛌 Naps are training! 😴 We are so thankful for leftovers! 🦃🧡✨🧘‍♀️", 
+    goggins: "You're sore? Good. Suffering is the rent you pay for existence. And you're late on rent. Sit there and think about how weak your calves are. Don't turn on the TV. Stare at the wall." 
+  },
+  "2025-12-28": { 
+    mantra: "11 Miles! 🗺️ Endurance explorer! 🧭 Charting maps of joy! 📍 If legs get tired, tell them 'I love you'! 🗣️❤️ Your calves are heart-shaped! 🫶 So proud of the effort! 💪🌅🙌", 
+    goggins: "11 miles. If your feet aren't bleeding, are you even trying? Callus the feet. Callus the soul. Be the savage amongst the sheep. Run until you forget your name." 
+  },
+  "2025-12-29": { 
+    mantra: "Last Monday of the year! 🗓️ Finish strong! 💪 You are a firework! 🎆 Fizz! Pop! Sparkle! ✨ Be the confetti! 🎊 We appreciate you sticking with it! 🧡❤️ GO TEAM! 📣🤩", 
+    goggins: "The year is ending. You're still average. Does that bother you? It should. You wasted 360 days being comfortable. Spend today being uncomfortable. Very uncomfortable." 
+  },
+  "2025-12-30": { 
+    mantra: "Hill repeats! 🏔️ Earth is raising you to the sun! ☀️ High five the sky! ✋ Gravity is a suggestion! 😜 Run up like you're greeting a bestie! 👯‍♀️ We did it! 🙌🔥🌄", 
+    goggins: "Hills. Gravity is trying to crush you. Punch gravity in the face. Run up that hill like you're escaping a burning building. If you walk, you burn. Don't burn." 
+  },
+  "2025-12-31": { 
+    mantra: "New Year's Eve! 🍾 Last run of 2025! 🏃‍♀️ Leave a glitter trail! ✨ Toast to your toes! 🥂 You are champagne in sneakers! 🍾 Bubble over with joy! 🥳 CHEERS RNRC! 🧡🎆🫶", 
+    goggins: "New Year's Eve. Everyone is partying. You are grinding. Start 2026 in the hurt locker. If you kiss someone at midnight, you're soft. Kiss the pavement." 
+  },
+
+  // --- JANUARY: The "Positive Vibes Only" Phase ---
+  "2026-01-01": { 
+    mantra: "HAPPY NEW YEAR! 🥳 2026 is YOUR year! 📆 Page 1 of 365! 📖 Write a story of love and sweat! 💦 You are a fresh daisy! 🌼 So grateful for new beginnings! 🙏🧡✨💪", 
+    goggins: "Jan 1. The day of fake promises. You say 'New Year, New Me.' I say 'New Year, Same Soft You.' Prove me wrong. 40 miles this week. Start digging the hole. The only resolution you should make is to destroy your former self." 
+  },
+  "2026-01-02": { 
+    mantra: "Threshold Work! ⚡️ Polishing the diamond! 💎 Shine bright! ✨ Sweat is just liquid glitter! 💦🤩 Blinds the haters with love! 😎❤️ You are a disco ball with lungs! 🪩🕺🔥", 
+    goggins: "Jan 2. The gyms are full of tourists taking selfies. You're on the street. 18 minutes of threshold. I want you to run until your vision blurs. If you can remember your middle name during this workout, you aren't running hard enough. Forget who you are." 
+  },
+  "2026-01-03": { 
+    mantra: "Rest Day! 🧘‍♀️ Manifesting vibes! 🔮 See yourself floating on a cotton candy cloud! ☁️🍭 Believe to receive! 💫 Your aura is pink today! 💗 We appreciate the calm! 😌🧡💤", 
+    goggins: "Rest. I saw you blinking. That counts as sleep. Wake up. The demon of laziness is sitting on your chest. Choke him out. Don't nap. Napping is for people who have accomplished something. You haven't done anything yet." 
+  },
+  "2026-01-04": { 
+    mantra: "12 Miles! 🏃‍♀️ You are a marathoner now! 🏅 Look at those leggies! 🦵 Pistons of positivity! 🚂 Choo-choo, here comes the joy train! 🚉 Toot toot! 💨 So proud of us! 🥰🙌🔥", 
+    goggins: "12 miles. That's a lot of time to be alone with your thoughts. Are you scared of what you'll find? You should be. Run until the voices in your head stop talking about food and start begging for mercy. Break your own mind." 
+  },
+  "2026-01-05": { 
+    mantra: "New Week! 🗓️ Majestic dolphin diving into effort! 🐬 Splash around! 🌊 Make waves of happiness! 💙 Eeeee-eeee! (That's dolphin for 'You got this!') 🗣️🫶 We are on fire! 🔥💪", 
+    goggins: "Monday. 40 mile week ahead. Stop smiling. Happiness is a chemical imbalance caused by a lack of suffering. I'm going to fix that. Put on your shoes and go find the darkness. If it's sunny out, close your eyes and pretend it's hell." 
+  },
+  "2026-01-06": { 
+    mantra: "Hills and Speed! ⛰️💨 Mountain goat with a turbo button! 🐐🔘 Beep beep! 🏎️ Out of the way, world! 🌍 Coming through with good vibes! ✌️ Baaa! 🐑 So thankful for strong glutes! 🍑🧡", 
+    goggins: "Speed work. You run like a baby giraffe on ice. It's embarrassing. Tighten your core. Drive your knees. You look like you're apologizing to the ground with every step. Attack the ground. Make the asphalt regret being poured." 
+  },
+  "2026-01-07": { 
+    mantra: "Mid-week 9 miler! 🚶‍♀️ Just a stroll to keep the heart happy! ❤️ Sing a song! 🎤 Dance a little! 💃 No one is watching! 🫣 We appreciate your spirit big time! 🧡🎶🙌", 
+    goggins: "Wednesday. The hump. Most people quit today. They go home to their warm soup. You? You go into the cold. Be uncommon amongst the uncommon. When your legs say 'stop,' you say 'shut up, you weak little twigs.' Own your biology." 
+  },
+  "2026-01-08": { 
+    mantra: "Rest! 😌 Knitting yourself back together with gold! 🧵✨ You are precious cargo! 📦 Handle with care! 👐 Wrap yourself in bubble wrap of love! 🫧❤️ We are so grateful for you! 🙏🧡", 
+    goggins: "You're sore? Good. Pain is weakness leaving the body. Don't wave goodbye to it. Kick it out. Foam roll until you cry real tears. If you aren't whimpering, you aren't recovering. Dig into the muscle until you find the soul." 
+  },
+  "2026-01-09": { 
+    mantra: "Threshold Thursday! ⚡️ Double scoop of fitness joy! 🍦 Lick the bowl clean! 😋 Hungry for success! 🍽️ Maybe frozen yogurt later! 🍧 Keep the positive energy flowing! 🌊🔥💪", 
+    goggins: "18 mins then 15 mins. That gap in the middle? That's not a break. That's where you contemplate your own mortality. If you slow down, you're admitting you're average. Being average is a disease. You are the cure. Run faster." 
+  },
+  "2026-01-10": { 
+    mantra: "Rest up, buttercup! 🌼 Tomorrow is big! 💥 Sleep tight! 😴 Don't let the bed bugs bite! 🐞 Dream of PRs and puppies! 🐶🏆 We appreciate the hustle! 🧡✨💤", 
+    goggins: "Don't eat trash today. I see you looking at that chip. Don't do it. Eat raw eggs. Eat the shell. Callus your esophagus. Treat your body like a Ferrari, not a garbage disposal. Put the premium gas in." 
+  },
+  "2026-01-11": { 
+    mantra: "Progression Run! 13 Miles! 📈 Save the zoomies! 🏎️ Rocket ship counting down! 🚀 3... 2... 1... BLAST OFF to Planet Awesome! 🪐 Say hi to the aliens! 👽👋 GO RNRC! 🧡🔥", 
+    goggins: "Progression run. Start slow, finish like you're running from the police. If you don't negative split, you're a coward. I want the last mile to be a death march. If you have energy left at the end, you cheated me." 
+  },
+  "2026-01-12": { 
+    mantra: "Recovery Week! 📉 Yay! Break for the leggies! 🦵 Treat yourself to a bubble bath! 🛁 You are a mermaid of recovery! 🧜‍♀️ Splash splash! 💦 So thankful for downtime! 🙏🧡💤", 
+    goggins: "Cutback week. Don't get fat. Don't get lazy. The enemy is training while you're 'recovering.' He's doing pull-ups on a shard of glass in a blizzard. What are you doing? Taking a bath? Pathetic. Drown your weakness." 
+  },
+  "2026-01-13": { 
+    mantra: "150m repeats! ⚡️ Bursts of sunshine! ☀️ You are a hummingbird! 🐦 Flit! Float! Fly! 🪽 Too fast to catch! 💨 Buzz buzz! 🐝 We did it! 🙌🤩🔥", 
+    goggins: "Sprints. You run like you have cement in your shoes. Explode. If you don't feel like your hamstrings are about to snap like a rubber band, you aren't trying. Redline the engine until it smokes. Let it burn." 
+  },
+  "2026-01-14": { 
+    mantra: "7 miles! 🏃‍♀️ Easy peasy lemon squeezy! 🍋 You are the lemonade of life! 🍹 Sweet and refreshing! 🧊 We appreciate your zest! 🧡✨ Cheers! 🥂💛", 
+    goggins: "7 miles. Don't just go through the motions. That's how you stay average. Visualize your enemies. Every step is you stepping on their dreams. Crush them. If you don't have enemies, visualize me chasing you." 
+  },
+  "2026-01-15": { 
+    mantra: "Rest! 😌 Halfway through Jan! 🗓️ Sticking like glitter! ✨ Can't wash off this greatness! 🚿 Permanently sparkly! 💖 So proud of this community! 🧡👯‍♀️💪", 
+    goggins: "Jan 15. Are you still here? I thought you'd quit by now. Most people have already given up and gone back to the couch. Prove you aren't them. Go stare at a wall for 4 hours to build mental focus. Do not blink." 
+  },
+  "2026-01-16": { 
+    mantra: "8 miles of self-care! 💆‍♀️ Running is a facial for the heart! 💓 You are glowing! ✨ Is that sweat or highlighter? 💄 You look expensive! 💸💎 Love you all! 🧡🫶", 
+    goggins: "8 miles. Boring work. Do it anyway. Dig the ditch. Fill it up. Dig it again. Why? Because I said so. Be a robot. Robots don't have feelings. They just work. Be the Terminator of the trail." 
+  },
+  "2026-01-17": { 
+    mantra: "Rest! 🔋 Recharge batteries! 🔌 You are a Tesla of talent! 🚗 Beep boop, charging complete! 🤖 Plug into the universe! 🌌 We appreciate the energy! ⚡️🧡💤", 
+    goggins: "Sleep. It's a weapon. If you're scrolling TikTok at 11 PM, you're betraying the mission. I want you to sleep so hard you wake up confused about what year it is. Hibernate like a bear that hates everyone." 
+  },
+  "2026-01-18": { 
+    mantra: "9 miles! 🌊 Flowing like a river! 🛶 Path of least resistance is boring! 🥱 Take the fun path! 🎢 Splash! 💦 So grateful for these miles together! 🏃‍♀️🧡🙌", 
+    goggins: "End of the easy week. Enjoy the vacation? Good. Because vacation is over. Next week I'm coming to your house to scream at you. 43 miles. Buckle up. Say goodbye to your comfort zone. It's moving to another state." 
+  },
+  "2026-01-19": { 
+    mantra: "Monday! 🗓️ 43 miles! 🤯 Let’s eat this week with a spoon! 🥄 Delicious miles! 😋 Nom nom nom! 🍽️ Tastes like victory! 🏅 GO TEAM! 🧡🔥🤩", 
+    goggins: "Week starts now. No more games. You want to run NYC? I want you to run until your feet fall off. Then pick them up and carry them. Who's gonna carry the boats? Who's gonna carry the logs? You are. All of them." 
+  },
+  "2026-01-20": { 
+    mantra: "Double Threshold! 🥪 Fitness sandwich! 🍞 You are the tasty filling! 🥬 Squeeze joy out of pain! 🍋 Yum yum! 😋 We are on fire! 🔥 So proud! 💪❤️✨", 
+    goggins: "Double threshold. This is the breaking point. If you stop, you die. I don't make the rules. The Log makes the rules. The Log says run. If you feel like puking, swallow it. That's nutrition. Don't waste calories." 
+  },
+  "2026-01-21": { 
+    mantra: "9 miles! 🐪 Hump Day! 🐫 Climbing the mountain! ⛰️ View is gorgeous! 🔭 (It's you!) 🫵 Selfie time! 🤳 So thankful for this squad! 🧡👯‍♀️✨", 
+    goggins: "9 miles in the middle of the week. Who's gonna carry the boats? You are. And the logs. And the trucks. Carry the whole damn gym on your back. If your back breaks, use your teeth. Drag yourself across the finish line." 
+  },
+  "2026-01-22": { 
+    mantra: "Rest! 😌 Magic happening! 🪄 Mitochondria party! 🎉 Confetti in the cells! 🧬 Dance party in the DNA! 💃🕺 We appreciate the recovery! 🧡🛌💤", 
+    goggins: "Rest. Foam roll. It should hurt. If you aren't crying, you aren't fixing the tissue. I want to hear you screaming from here. Mash your muscles into submission. Tell your quads who is boss. (Hint: It's me)." 
+  },
+  "2026-01-23": { 
+    mantra: "Shakeout! 🐎 Prance like a pony! 🦄 High knees! 🦵 Spirit fingers! 👐 Ready to dazzle! 🤩 Glitter bomb incoming! 💣✨ GO RNRC! 🧡🙌🔥", 
+    goggins: "Shakeout. Don't look sloppy. Every step is an interview with victory. Do you got the job? Or are you getting fired? Tuck your shirt in. Fix your face. You look like you're in pain. Good. Hide it." 
+  },
+  "2026-01-24": { 
+    mantra: "Recovery 5! 🔋 Save the energy! 🤐 Coiled spring! 🌀 Cute, fuzzy, powerful spring! 🐇 Boing! ⬆️ Ready to bounce! 🏀 So proud of the restraint! 🤐🧡🫶", 
+    goggins: "Recovery. Run slow. If you run fast today, I will personally come out there and trip you. Discipline is holding back. Cage the beast. If the beast gets out today, I'll put it down. Save it for tomorrow." 
+  },
+  "2026-01-25": { 
+    mantra: "FRED LEBOW HALF! 🍎 Central Park! 🌳 Hills are a hug! 🤗 Smile at tourists! 📸 Star of the movie! 🎬 Wave to fans! 👋 WE DID IT! 🥳🔥🧡🏅", 
+    goggins: "Fred Lebow. Harlem Hill. It's gonna suck. Good. When your legs burn, laugh. Maniacal laughter. Scare the other runners. Be the psycho on the hill. When others walk, you sprint. Take their souls. Collect them in a jar." 
+  },
+  "2026-01-26": { 
+    mantra: "Rest Day! 🏅 Wear your medal! 🚿 Even in the shower! 🛁 Sparkle princess! 👸 You are royalty! 👑 Crown yourself! 💎 So grateful for this team! 🧡👯‍♀️✨", 
+    goggins: "You ran a race. Cool. You want a parade? It's Monday. Back to work. The medal is just a piece of metal. It doesn't love you. The Log loves you. And the Log is hungry. Feed the Log with your suffering." 
+  },
+  "2026-01-27": { 
+    mantra: "Race pace! 🏎️ Machine running on rainbows! 🌈 Beep boop, I am fast! 🤖 Speed-bot 3000! ⚙️ We appreciate the hustle big time! 💪🔥🙌", 
+    goggins: "Your legs are tired? Oh, poor baby. Does the pavement care? No. Run fast. If you cramp, punch the cramp. Intimidate your own muscles. Tell your hamstrings that if they fail, you will replace them with titanium." 
+  },
+  "2026-01-28": { 
+    mantra: "8 miles! 🚿 Flush out yuckies! 🧼 Bring in yummies! 🍬 Blood is liquid sunshine! ☀️ Solar powered! 🔋 So proud of the grind! 🧡🏃‍♀️✨", 
+    goggins: "8 miles. Grind. There is no glory in this run. Just sweat. And pain. And the sound of your own heavy breathing. It's the best playlist on earth. Listen to the symphony of your own destruction." 
+  },
+  "2026-01-29": { 
+    mantra: "Recovery 4! 🦋 Float like a butterfly! 🏵️ Don't sting! 🚫 Be nice! 😊 Butterflies are nice! 🐛 Moth of mystery! 🔦 We appreciate the easy days! 🧡🍃🫶", 
+    goggins: "Recovery. Don't get injured. If you trip over a curb I will lose my mind. Pay attention. Be a sniper. A sniper who jogs slowly. Every step is a calculated decision to not be an idiot." 
+  },
+  "2026-01-30": { 
+    mantra: "Rest! 😌 Jan is over! 🔚 Crushed it! 🔨 Smoothie of success! 🥤 Berry delicious! 🍓 Slurp up victory! 🍹 So grateful for US! 🧡🥰🎊", 
+    goggins: "Rest. January is gone. Did you get better? Or did you just survive? Survival is for the weak. Thriving is for the savage. Look in the mirror. Are you a savage yet? No. You still look like a domesticated hamster." 
+  },
+  "2026-01-31": { 
+    mantra: "Shakeout! 🏃‍♀️ Manhattan 10k! 🗽 Glitter bomb waiting to explode! 💣💥 Pop! Bang! Wow! 🎆 CHEERS to race weekend! 🥳🥂🧡✨", 
+    goggins: "Shakeout. 10k tomorrow. It's a sprint. If you don't taste blood in your throat, you didn't try. Prepare to suffer. Prepare to go to the place where light doesn't exist. I'll see you there." 
+  },
+
+  // --- FEBRUARY: The "WE DID IT" & "SO PROUD" Phase ---
+  "2026-02-01": { 
+    mantra: "MANHATTAN 10K! 🗽 Party in the park! 🎉 High five trees! 🌲 You are speed! ⚡️ You are light! 💡 You are love! ❤️ ROCKET WITH LEGS! 🚀 GO RNRC! 🧡🙌🔥", 
+    goggins: "10k race. Redline it. From step one. If your heart rate isn't at 200, you're loitering. Vomit at the finish line. If you don't soil yourself, did you even race? Leave your dignity at the start line. Pick it up after you've destroyed everyone else." 
+  },
+  "2026-02-02": { 
+    mantra: "Phase 2! 🆙 Leveling up! 🎮 Pokémon evolving! 🐉 Charizard energy! 🔥 Roar! 🦁 Fire spin bad vibes away! 🌪️ So proud of this growth! 📈🧡💪", 
+    goggins: "Phase 2. The training wheels are off. The bike is on fire. You are on fire. Welcome to the deep end. The shark is coming. I am the shark. Swim faster or I will eat you. I can smell your fear. It smells like fabric softener." 
+  },
+  "2026-02-03": { 
+    mantra: "Aerobic! 🏃‍♀️ Engine humming! 🚘 Purr like a kitten! 🐱 Fast, athletic kitten! 🐆 Meow meow fast! 💨 We appreciate the consistency! 🧡✨🙌", 
+    goggins: "No days off. You raced Sunday? Who cares. Here's 8 miles. Swallow it. Don't chew. Your legs don't get a vote. I am the dictator of your legs. I have declared martial law on your quads. March soldier. March until you drop." 
+  },
+  "2026-02-04": { 
+    mantra: "10 miles Wednesday! 🐪 Rule breaker! 🚫 Rebel! 😈 Wild horse running free! 🐎 Neigh! 🐴 Gallop into sunset! 🌅 WE DID IT! 🥳🔥🧡", 
+    goggins: "10 miles. Mid-week grind. While your friends are watching TV, I want you to run until you forget what a TV is. Become the entertainment. Entertain the pavement with your sweat. The road is thirsty. Hydrate the road with your tears." 
+  },
+  "2026-02-05": { 
+    mantra: "Rest! 🤫 Shhh... muscles saying 'Thank you!' 🙏 Love letters from your legs! 💌 Read them with your heart! ❤️ So grateful for healing! 🩹🧡💤", 
+    goggins: "Quiet before the storm. Tomorrow is VO2 Max. It's going to hurt. A lot. Make peace with your god. You're going to meet him on the track. He's bringing a stopwatch and he looks disappointed in your splits. Don't let him down." 
+  },
+  "2026-02-06": { 
+    mantra: "VO2 MAX! 🫁 Lungs expanding! 🎈 Hold all the joy! 🤩 Breathe in starstuff! ✨ Exhale doubts! 😤 YOU ARE A GALAXY! 🌌 So proud of the effort! 💪🔥🧡", 
+    goggins: "VO2 Max. 1000 meter repeats. This is the soul taker. If you don't have a vision of the afterlife on rep 5, you're jogging. Die on the track. I'll bring the shovel. We will bury the old you. The soft you. The you that likes cupcakes." 
+  },
+  "2026-02-07": { 
+    mantra: "Recovery 4! 🍮 Wiggle wiggle! 🪱 Shake it out! 💃 Bowl of jelly (fit kind)! 🥣 Wiggle wobble! 🫠 We appreciate the bounce back! 🏀🧡🫶", 
+    goggins: "Recovery. Don't run fast. I swear if you run fast I will haunt your Strava. Slow down. Run backwards if you have to. If you pass a squirrel, apologize to it. You are the lowest life form today. A recovering slug." 
+  },
+  "2026-02-08": { 
+    mantra: "14 Miles! 💌 Valentine's week! 💘 Run with your heart! ❤️ Draw a heart on the map! 🗺️ Love is in the air! 🌬️ Ozone love! 🌫️ So grateful for US! 🧡👯‍♀️🙌", 
+    goggins: "14 miles. You're tired? Good. Fatigue is a lie. Your mind is trying to protect you. Don't let it. Override the governor. Break the dashboard. Drive the car off the cliff. Then climb back up the cliff carrying the car." 
+  },
+  "2026-02-09": { 
+    mantra: "Rest! 💰 47 miles in the bank! 🏦 RICH! 🤑 Make it rain sweat! 💸💦 CEO of Running Inc! 👩‍💼 Stocks are UP! 📈 CHEERS! 🥂🧡✨", 
+    goggins: "47 miles. Not bad. But can you do 50? We'll see. Don't get cocky. You're still one donut away from being a couch potato. I'm watching you eat. Stop it. Put the fork down. Pick up the Log. The Log is your only friend." 
+  },
+  "2026-02-10": { 
+    mantra: "150m repeats! ⚡️ Zip zap zop! 🪄 Electricity! 🔋 Lightning in a bottle! 🍾 Shock the world! 😱 Zzzzt! Sparkle power! ✨ So proud of the speed! 🐆🔥🧡", 
+    goggins: "Speed work on dead legs. This is the test. When your hamstrings scream, scream back. Louder. Assert dominance over your own anatomy. Tell your muscles you hate them. Tell them they are weak. Bully your own body into getting faster." 
+  },
+  "2026-02-11": { 
+    mantra: "11 Miles! 🧙‍♀️ Wizard Wednesday! 🪄 Harry Potter who? ⚡️ Half Marathon of Secrets! 🤫 Wingardium Leviosa legs! 🪶 We appreciate the magic! ✨🧡🙌", 
+    goggins: "11 miles. It's dark. It's cold. You're alone. Perfect. No one to hear you whimper. Keep moving. If you stop, the weakness wins. The weakness is following you. It's right behind you. Run faster. It has a knife." 
+  },
+  "2026-02-12": { 
+    mantra: "Rest! 🐞 Love bug today! 🍫 Treat yourself! 🍬 Chocolate? Yes! ✅ Massage? Yes! 💆‍♀️ You deserve the world! 🌍 Moon too! 🌙 So grateful! 🧡💤", 
+    goggins: "Rest day. Don't get soft. The world is soft. Be a rock. A rock that doesn't eat sugar. Put the candy down. It looks like poison to me. If you eat that chocolate I will telepathically make it taste like ash." 
+  },
+  "2026-02-13": { 
+    mantra: "8 miles! 🗓️ Friday 13th? 🐈‍⬛ Lucky you! 🍀 Get to run! 🏃‍♀️ Superstition got nothing on you! 👻 Knock on wood (your head)! 🪵😜 GO TEAM! 🧡🔥💪", 
+    goggins: "Friday. Everyone is checking out. You're checking in. Into the asylum. 8 miles. Lock the door behind you. You don't leave until you're insane. I want you to talk to the mailboxes. I want you to bark at the dogs." 
+  },
+  "2026-02-14": { 
+    mantra: "VALENTINE'S DAY! 💘 5 miles self-love! 💍 Be your own soulmate! 👰‍♀️ Buy yourself flowers! 💐 You are beautiful! 😻 MARRY YOURSELF! 💒 So proud of you! ❤️🔥🫶", 
+    goggins: "Valentine's Day. Love is pain. Running is pain. Therefore, running is love. Go run 5 miles and think about how lonely the top is. It's just you and the wind. Hug the wind. The wind is the only lover that won't leave you." 
+  },
+  "2026-02-15": { 
+    mantra: "15 Miles! 📈 Progression! 🏎️ Fast finish! 🎬 Rom-com chase scene! 🏃‍♀️💨 Get true love (finish line)! 🏁 Kiss it! 💋 WE DID IT! 🥳🔥🧡", 
+    goggins: "15 miles. Fast finish. When you want to quit at mile 13, remember: No one cares. Suffer in silence. Make the last mile your fastest or it doesn't count. Break your own heart. Then stomp on the pieces with your running shoes." 
+  },
+  "2026-02-16": { 
+    mantra: "PEAK WEEK! 🏔️ 50 miles! 🤯 Climbing Everest! 🧗‍♀️ View is amazing! 🔭 Don't forget to breathe! 🌬️ Oxygen queen! 👑 We are on fire! 🔥🧡🤩", 
+    goggins: "50 mile week. This is the peak. The air is thin here. Can you breathe? Or are you choking? Don't choke. Swallow the panic. Eat it. Digest it. Poop out excellence. This is where we separate the humans from the gods." 
+  },
+  "2026-02-17": { 
+    mantra: "8 miles! 😃 Peak week smile! 😁 Legs are titanium! 🦾 Titanium marshmallows! 🍢 Soft but tough! 💪 We appreciate the grit big time! 🧡✨🙌", 
+    goggins: "Monday of Peak Week. You better be ready. The volume is going to crush you if you're weak. Are you weak? We're about to find out. The compactor is turning on. I'm pressing the button. Try not to get squished." 
+  },
+  "2026-02-18": { 
+    mantra: "12 Miles! 🤖 Endurance machine! 🦾 Batteries made of sunshine! ☀️ Rainbows! 🌈 Bzzzt! 🐝 Endless energy! 🔋 So proud of us! 🧡🔥💪", 
+    goggins: "12 miles. Callus the mind. Every step is a brick in the wall of your fortress. Don't use cheap bricks. Use pain. Use blood. Build it high. Build it so high that no one can hear you crying inside. That is your sanctuary." 
+  },
+  "2026-02-19": { 
+    mantra: "Rest! 🐻 Save energy! ⚡️ Hibernating bear! 💤 Grrr! 🦁 Scary but cute! 🥺 Snuggle up! 🧣 We are so grateful for rest! 🧡🧘‍♀️🛌", 
+    goggins: "Rest. VO2 Max tomorrow. It's complex. It's nasty. If you aren't scared, you're stupid. Fear is fuel. Fill the tank. Drink the fear. Gargle it. Spit it in the face of destiny." 
+  },
+  "2026-02-20": { 
+    mantra: "VO2 Max Complex! 💃 Dance routine for lungs! 🫁 Cha-cha-cha! 👯‍♀️ Ole! 💃 Shake those maracas! 🪇 We appreciate the rhythm! 🎶🧡🔥", 
+    goggins: "2x1200 + 800. Two sets. It's a math problem where the answer is suffering. Solve for X, where X is the contents of your stomach. If you don't hallucinate a wizard on the final lap, you didn't run hard enough. Find the wizard." 
+  },
+  "2026-02-21": { 
+    mantra: "Recovery 5! 🐇 Gentle! ☁️ Soft! 🧶 Bunny on moss! 🌿 Hop hop! 🐰 Fluff tail! 🌬️ Relax! 💆‍♀️ So proud of the discipline! 🧡🫶✨", 
+    goggins: "Recovery. Just get it done. Don't look at me. I'm disgusted by how slow you're going. But do it anyway. Don't you dare speed up. If you break a sweat I will break your spirit." 
+  },
+  "2026-02-22": { 
+    mantra: "15 Miles! 🏆 Last big effort! 😤 Champion of the world! 🌍 Queen music! 👑 WE ARE THE CHAMPIONS! 🎶 Friends! 👯‍♀️ WE DID IT! 🥳🔥🧡", 
+    goggins: "15 miles. End of peak week. You're tired? Your legs are heavy? Good. Run on stumps. Drag yourself if you have to. Crawl. Just finish. If you die, make sure you die across the finish line so it counts on Strava." 
+  },
+  "2026-02-23": { 
+    mantra: "Down week! 📉 Survived peak week! 🏕️ Invincible! 🛡️ Diamond can't break! 💎 Shine on crazy gem! 🌟 So grateful for this team! 🧡🙌🔥", 
+    goggins: "Mileage drops. Focus goes up. Don't celebrate. The war isn't over. You just won a battle. Stay sharp. Sharpen the knife. The knife is your mind. Cut away the excuses. Cut away the fat. Be a scalpel." 
+  },
+  "2026-02-24": { 
+    mantra: "8 miles + Strides! 🐎 Prance! 💃 Dance! 🩰 Ballerina in Brooks! 👟 Pirouette to PR! 🌪️ Spin spin! 😵‍💫 We appreciate the flair! ✨🧡🔥", 
+    goggins: "Strides. Don't look like a sack of potatoes. Form is everything. Chest up. Eyes up. Look at the horizon. Hunt the prey. Eat the prey. Digest the prey. Become the prey. Wait, no. Become the predator." 
+  },
+  "2026-02-25": { 
+    mantra: "9 miles! 🚗 Cruising! 🛣️ Convertible top down! 🕶️ Wind in hair! 🌬️ (Even with hat!) 🧢 Vroom vroom! 🏎️ So proud of the vibes! 🧡🌅🙌", 
+    goggins: "9 miles. Just work. Nothing special. Being special is a myth. Work is the reality. Be a worker. Dig the hole. Live in the hole. Decorate the hole with your failures. Then climb out." 
+  },
+  "2026-02-26": { 
+    mantra: "Recovery 5! 🧘‍♀️ Calm! ☮️ Zen! 🎋 Peaceful warrior of wobble! 🏯 Ommmmm! 🧘‍♂️ We appreciate the peace! 🧡🍃💤", 
+    goggins: "Recovery. Boring. I know. Do it anyway. Callus your patience. Boredom is part of the game. Stare at the paint drying. Watch the grass grow. Hate the grass. Intimidate the lawn." 
+  },
+  "2026-02-27": { 
+    mantra: "Rest! 🍷 Napa calling! 📞 Dream of grapes! 🍇 Sunshine! ☀️ Fine vintage! 🍾 Getting better with age! 🕰️ So grateful! 🧡🛌✨", 
+    goggins: "Rest. Napa Half. Don't get distracted by the wine. The wine is for winners. Are you a winner? Not yet. Sunday determines that. Until then, you drink water and disappointment." 
+  },
+  "2026-02-28": { 
+    mantra: "Shakeout! 🍇 Wine country! 🍷 Spirit of happy grape! 🥴 Squish negativity! 🦶 Juice the day! 🧃 CHEERS RNRC! 🥂🧡🥳", 
+    goggins: "Shakeout. Visualize the course. Visualize the pain cave. It has a nice wine cellar. Go there and lock yourself in. Throw away the key. Drink the vintage bottle of suffering. It has notes of oak and agony." 
+  },
+
+  // --- MARCH: The "CHEERS TO US" Finale ---
+  "2026-03-01": { 
+    mantra: "NAPA HM! 🍇 RUN FAST! 🏃‍♀️ GLORY! 🏆 FERMENTED SUPERSTAR! 🌟 AGED TO PERFECTION! 🍷 SQUEEZE THE DAY! 🍋 WE DID IT!!! 🥳🔥🧡🏅", 
+    goggins: "Napa Half. Last 6 miles at Goal Pace. If you fade, you're weak. Crush the grapes with your feet. Make wine out of your suffering. Drink the cup of pain. DRINK IT ALL. I want you to run so hard that you age in reverse. Finish the race as a baby." 
+  },
+  "2026-03-02": { 
+    mantra: "Rest! ✈️ Travel day! 🧳 Jet-setter! 🛫 Fitness influencer! 🤳 Glamorous! 💅 Autographs for TSA! 🖊️ So proud of the race! 🧡🙌💤", 
+    goggins: "Rest. You sore? Good. That means you tried. Now recover. Don't eat airport food. It's poison. Fast until you get home. Sit in the uncomfortable chair and think about your splits. If you missed a split, punish yourself by not reclining the seat." 
+  },
+  "2026-03-03": { 
+    mantra: "Speed injection! 💉 Boop the nose of fitness! 👃👈 Boop! 🤡 Wakey wakey legs and bakey! 🥓 We appreciate the wake up! ☀️🧡🔥", 
+    goggins: "Speed. Wake the legs up. They want to sleep. Don't let them. Splash cold water on your hamstrings. Slap your quads. Wake up. The war isn't over. The war is never over. The enemy is regrouping. He's doing pushups in your driveway." 
+  },
+  "2026-03-04": { 
+    mantra: "Recovery! 🤪 Taper time! 📉 Crazy magic building! 🪄 Magic bomb! 💣 Explode glitter! ✨ So grateful for the taper! 🧘‍♀️🧡🥰", 
+    goggins: "Taper. You feel fat? Good. That's stored violence. Don't burn it on anxiety. Sit still. I am living in your walls. I can hear you blinking. Stop blinking so loud. Conserve the energy for the kill. Be a viper waiting in the grass." 
+  },
+  "2026-03-05": { 
+    mantra: "Rest! 🐛 Trust process! 🤞 Butterfly in chrysalis! 🦋 Soon fly! 🪽 Flap flap! 🦅 Wings are BEAUTIFUL! 🤩 So proud of you! 🧡✨💤", 
+    goggins: "Rest. Don't do chores. Don't walk the dog. The dog can walk itself. You are a weapon in storage. Stay on the shelf. Dust yourself off. Be ready to kill. If anyone asks you to do anything, stare at them until they leave. You are busy existing." 
+  },
+  "2026-03-06": { 
+    mantra: "Final VO2 Max! ⚔️ Last hard one! 🩸 Sharpen pencil! ✏️ Sharpest crayon! 🖍️ Color outside lines! 🎨 We appreciate the edge! 🔪🧡🔥", 
+    goggins: "Last hard session. Empty the tank. If you leave anything on the track, you're a coward. Burn it all. I want to smell burning rubber and desperation. Make the track afraid of you. Scorch the earth so nothing ever grows there again." 
+  },
+  "2026-03-07": { 
+    mantra: "3 miles! 🤭 Giggle run! 🤣 Just a wiggle! 🐛 Tee hee! 🙊 So cute when running! 🥹 Look at you go! 👀 GO TEAM! 🧡👯‍♀️✨", 
+    goggins: "3 miles. Don't trip. I'm serious. If you roll an ankle today, you're fired from life. I will personally revoke your runner card. Walk on eggshells. Be paranoid. The sidewalk is trying to kill you. Don't let it." 
+  },
+  "2026-03-08": { 
+    mantra: "10 miles! 🔟 Last double digit! 🔚 Goodbye kiss! 💋 See you in NYC! 🍎 Big City! 🏙️ So grateful for the training! 🧡🙏🔥", 
+    goggins: "10 miles. Keep it honest. Don't sleepwalk. Focus. The big dance is in one week. Are you ready? Or are you scared? You should be terrified. Harness the terror. Feed it raw meat. Keep the beast in the cage hungry. Poke it with a stick." 
+  },
+  "2026-03-09": { 
+    mantra: "RACE WEEK! 🚨 OMG! 😱 IT’S HAPPENING! 🎉 VIBRATING! 🫨 TUNING FORK OF JOY! 🍴 BZZZZT! 🐝 FREQUENCY: HAPPINESS! 📻🥳🤩🧡", 
+    goggins: "Race week. Lock in. Cut off your friends. Cut off your family. They are distractions. It's just you and the asphalt now. Go into the bunker. Weld the door shut. Eat MREs. Sharpen your bayonet. The battle is coming." 
+  },
+  "2026-03-10": { 
+    mantra: "Dress Rehearsal! 💃 2 miles race pace! 🏎️ FABULOUS! 💅 Camera loves you! 📸 Work it! 🤳 Sashay! 👠 Shantay! 👯‍♀️ RUN! 🏃‍♀️🔥🧡", 
+    goggins: "Race pace. Feel it. Memorize it. This is the pace of pain. Get comfortable being uncomfortable. Live there. Decorate the walls of the pain cave with your own blood. Hang curtains made of sweat. Make it home." 
+  },
+  "2026-03-11": { 
+    mantra: "5 miles easy! 🎈 Floating! ☁️ Helium balloon! 🎈 Don't fly away! 🦅 Hold string! 🧵 Wheeee! 🎢 We appreciate the float! 🧡✨🫶", 
+    goggins: "Easy run. Visualize the finish line. Visualize the demons trying to stop you. Visualize punching them in the throat. Rip their hearts out. Eat them. Demons are high in protein. You need the fuel for Sunday." 
+  },
+  "2026-03-12": { 
+    mantra: "4 miles! 🌸 You are ready! ✅ Enough! 💯 Everything! 🌌 Sparkly! ✨ The moment! 🕰️ Main character! 🎬 So proud of us! 🧡🙌🔥", 
+    goggins: "4 miles. Don't run fast. Save the rage. Bottle it up. Let it ferment into pure hatred for the competition. Let the pressure build until you burst. Be a pipe bomb of athleticism. Tick tock." 
+  },
+  "2026-03-13": { 
+    mantra: "Rest! 🍝 EAT PASTA! 🇮🇹 BE NOODLE! 🍜 WIGGLE LIKE NOODLE! 〰️ CARBO-LOAD! 🍞 SPIRITUAL! 🙏 WORSHIP BAGEL! 🥯🧡🤤", 
+    goggins: "Rest. Eat clean. Hydrate. Sleep. If you mess this up now, it's on you. No excuses. The log is waiting. The boat is waiting. The abyss is staring back. Don't blink. If you blink, you miss the moment. Stare into the sun." 
+  },
+  "2026-03-14": { 
+    mantra: "Shakeout in NYC! 🗽 Lights shining for YOU! 💡 Big Apple! 🍎 Whole pie! 🥧 Spread news... how cute you are! 📰🥰 CHEERS RNRC! 🥂🧡🥳", 
+    goggins: "Shakeout. Central Park. The enemy is here. He's waiting. Look him in the eye. Tell him you're taking his soul tomorrow. Sharpen your elbows. Sharpen your teeth. I want you to bite the air. Taste the victory." 
+  },
+  "2026-03-15": { 
+    mantra: "NYC HALF! 🗽 TODAY IS DAY! 📅 SPARKLE! ✨ SHINE! 🌟 FLY! 🦅 CRY! 😭 LAUGH! 😂 RUN! 🏃‍♀️ LEGEND! 🏅 UNIVERSE CHEERING! 🌌📣 WE DID IT! 🥳🔥🧡", 
+    goggins: "GAME DAY. NYC HALF. NO MERCY. RUN UNTIL YOUR HEART STOPS. THEN RUN MORE. I want you to run so hard your future grandchildren feel tired. SOIL YOURSELF FOR GLORY. CARRY THE BOATS. CARRY THE CITY. BE THE SAVAGE." 
+  },
+  "2026-03-16": { 
+    mantra: "Medal Monday! 🏅 Wear it! 👕 Sleep with it! 🛌 Shower with it! 🚿 Golden god/goddess! 🔱 Heavy metal royalty! 🤘 Headbang joy! 🎸 So proud! 🧡🙌✨", 
+    goggins: "Race over. Good job. You finished. Now what? You gonna retire? Get back to work. The boat doesn't carry itself. The log is rotting. Pick it up. The demons are back. They want a rematch. Don't give them a break." 
+  },
+  "2026-03-17": { 
+    mantra: "St. Patrick's Recovery! 🍀 Pot of gold! 🍯 Rainbow! 🌈 Leprechaun! 🎩 Pinch yourself! 🤏 Dreaming! 💭 So grateful for luck! 🧡💚🫶", 
+    goggins: "St. Patty's. Don't drink the green beer. It's poison for the weak. Drink water. Your liver needs to recover too. Don't undo the work for a cheap buzz. You're better than that. Be the saint of sobriety and suffering." 
+  },
+  "2026-03-18": { 
+    mantra: "8 miles! ☕️ Back to grind! ⚙️ Happy grind! 😁 Sparkly grind! ✨ Grind on! 🕺 Coffee brewed with sweat/smiles! ☕️💦😁 GO TEAM! 🧡🔥💪", 
+    goggins: "8 miles. The party is over. Reality is back. And reality is 8 miles of pavement. Strap your shoes on. We go again. Forever. There is no finish line. Only more logs. More boats. More darkness. Welcome home." 
+  },
+  "2026-03-19": { 
+    mantra: "Recovery 5! ⛵️ Smooth sailing! 🌊 Be a boat! 🛶 Happy tugboat! 🛳️ Toot toot! 🚂 Float river of recovery! 🏞️ We appreciate the flow! 🧡💙💤", 
+    goggins: "Recovery. Flush the legs. Stop limping. You look pathetic. Pain is just a sensation. Ignore it. Your legs don't get a vote. I cast the only vote. The vote is 'move forward.'" 
+  },
+  "2026-03-20": { 
+    mantra: "Rest! 🏙️ Chicago calling! 📞 Windy City! 🌬️ Hug with wind! 🫂 Aggressive hug! 😖 Brace yourself! 🧱 So excited for US! 🧡🤩✨", 
+    goggins: "Rest. One last weekend of work. Finish the season. Don't fade. Finish. Be the savage. Finish the drill. Then, maybe, you can have a blueberry. One blueberry. Don't enjoy it." 
+  },
+  "2026-03-21": { 
+    mantra: "Shamrock Mile! ☘️ Cheetah chasing laser! 🐆🔴 Zoom! 🏎️ Green blur of greatness! 🟢💨 We did it! 🥳🔥🙌", 
+    goggins: "1 Mile. All out. Vomit at the finish. If you don't puke, you didn't try. Clean up on aisle 4. Leave your spleen on the track. I want to see internal organs. Show me your heart. Literally." 
+  },
+  "2026-03-22": { 
+    mantra: "Shamrock Shuffle! 🏃‍♀️ 8k fun! 🎡 Green river! 💚 Green vibes! ✌️ Lucky charm! 🍀 Magically delicious! 🥣 CHEERS RNRC! 🥂🧡🎆", 
+    goggins: "Shamrock Shuffle. It's a race. Beat everyone. Take their souls. Then, and only then, can you have a donut. Maybe. Probably not. Just eat the hole of the donut. The emptiness is the flavor of success." 
+  }
+};
+
+export default function TrainingApp() {
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  const [isGogginsMode, setIsGogginsMode] = useState(false);
+  const [today] = useState(new Date().toISOString().split('T')[0]);
+
+  // Determine initial phase based on today
+  useEffect(() => {
+    const todayDate = new Date();
+    const idx = PHASES.findIndex(p => {
+      const start = new Date(p.start);
+      const end = new Date(p.end);
+      return todayDate >= start && todayDate <= end;
+    });
+    if (idx !== -1) setPhaseIndex(idx);
+  }, []);
+
+  const currentPhase = PHASES[phaseIndex];
+  
+  // Helpers
+  const getDaysInPhase = () => {
+    const days = [];
+    const start = new Date(currentPhase.start);
+    const end = new Date(currentPhase.end);
+    
+    // Adjust start to Monday
+    const startDay = start.getDay(); // 0 is Sun
+    const diff = start.getDate() - startDay + (startDay === 0 ? -6 : 1);
+    const gridStart = new Date(start);
+    gridStart.setDate(diff);
+
+    // Adjust end to Sunday
+    const endDay = end.getDay();
+    const diffEnd = end.getDate() + (endDay === 0 ? 0 : 7 - endDay);
+    const gridEnd = new Date(end);
+    gridEnd.setDate(diffEnd);
+
+    let current = new Date(gridStart);
+    while (current <= gridEnd) {
+      days.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    return days;
+  };
+
+  const getCountdown = () => {
+    const raceDay = new Date("2026-03-15");
+    const todayDate = new Date();
+    const diff = raceDay - todayDate;
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return days > 0 ? days : 0;
+  };
+
+  const selectedData = TRAINING_DATA[selectedDate] || { type: "Rest", details: "No workout scheduled" };
+  const phaseDays = useMemo(() => getDaysInPhase(), [currentPhase]);
+  
+  // Get quote from the Daily Database, fallback to generic if date missing
+  const getQuote = () => {
+    const daily = DAILY_QUOTES[selectedDate];
+    if (daily) {
+      return isGogginsMode ? daily.goggins : daily.mantra;
+    }
+    // Fallback logic
+    return isGogginsMode 
+      ? "They don't know me son! Who's gonna carry the boats?" 
+      : "Trust the process and enjoy the journey!";
+  };
+
+  // Helper for dynamic Pace display
+  const getPace = (workout) => {
+    if (!workout) return "N/A";
+    
+    // Specific Race Logic
+    if (workout.type === "A Race") return "Goal: 7:15 min/mi";
+    if (workout.type === "B Race") {
+        if (workout.details.includes("10k")) return "Goal: 6:55 min/mi";
+        if (workout.details.includes("Shamrock")) return "Goal: 6:40 min/mi";
+        return "Race Effort";
+    }
+    
+    // Default logic from PACE_DATA
+    return PACE_DATA[workout.type] || "N/A";
+  };
+
+  const currentQuote = getQuote();
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
+        {/* Header */}
+        <header className="text-center space-y-2 mb-8">
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+            Avery's 2026 NYC Half Plan
+          </h1>
+          <p className="text-slate-500 font-medium">Pfitz 12/47 plan for 1:30 Half Marathon</p>
         </header>
 
-        <!-- Dashboard Section -->
-        <div class="bg-white p-6 rounded-2xl shadow-lg grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-6 mb-8">
-
-            <!-- Col 1, Row 1: Countdown -->
-            <div class="flex flex-col">
-                <h3 class="font-bold text-gray-800 mb-2 text-left">Race Countdown</h3>
-                <div class="bg-violet-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center min-h-[130px]">
-                    <p id="countdown" class="text-6xl font-bold text-violet-500">--</p>
-                    <p class="text-xs text-gray-500">Days Remaining</p>
-                </div>
+        {/* Dashboard Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          {/* Countdown Card (3 Cols) */}
+          <div className="lg:col-span-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center min-h-[160px]">
+            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Race Countdown</h3>
+            <div className="text-center">
+              <span className="text-5xl font-black text-violet-600 tracking-tighter">{getCountdown()}</span>
+              <p className="text-xs font-medium text-slate-500 mt-1">Days Remaining</p>
             </div>
+          </div>
 
-            <!-- Col 2, Row 1: Selected Workout -->
-            <div class="flex flex-col">
-                <h3 id="selected-workout-title" class="font-bold text-gray-800 mb-2 text-left">Today's Workout</h3>
-                 <div id="selected-workout-card" class="p-4 rounded-lg text-center transition-colors duration-300 flex-grow flex flex-col justify-center min-h-[130px]">
-                    <p id="selected-workout-type" class="font-bold text-lg text-gray-800">--</p>
-                    <p id="selected-workout-details" class="text-sm text-gray-600">--</p>
-                </div>
+          {/* Selected Workout Card (Reduced to 4 Cols) */}
+          <div className="lg:col-span-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col min-h-[160px]">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                {selectedDate === today ? "Today's Workout" : "Selected"}
+              </h3>
+              <span className="text-xs font-medium text-slate-500">
+                {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+              </span>
             </div>
-
-            <!-- Col 3, Row 1 & 2: Daily Briefing -->
-            <div class="lg:col-span-1 lg:row-span-2 flex flex-col">
-                <h3 class="font-bold text-gray-800 mb-2 text-left">Daily Briefing</h3>
-                <p id="selected-workout-date" class="font-semibold text-gray-500 mb-2 text-left">--</p>
-                <div class="bg-gray-50 p-4 rounded-lg flex-grow flex flex-col h-full">
-                        <div class="text-center mb-2">
-                            <button id="quote-toggle-btn" class="text-xs font-semibold text-white bg-gray-800 hover:bg-black py-1 px-3 rounded-full transition-colors">
-                                Switch to Goggins Mode
-                            </button>
-                        </div>
-                    <hr class="border-gray-200 my-2">
-                    <div class="flex-grow flex flex-col text-center min-h-0 overflow-hidden">
-                        <p id="goggins-quote-text" class="text-sm text-gray-700 italic w-full flex-grow overflow-y-auto pr-2"></p>
-                    </div>
-                    <p id="goggins-attribution" class="text-xs text-gray-500 font-bold not-italic text-right w-full mt-2 flex-shrink-0"></p>
-                </div>
-            </div>
-
-            <!-- Col 1, Row 2: Progress -->
-            <div class="flex flex-col">
-                <h3 class="font-bold text-gray-800 mb-2 text-left">Progress</h3>
-                 <div class="bg-sky-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center min-h-[130px]">
-                    <p id="miles-ran-stat" class="text-4xl font-bold text-sky-600">--<span class="text-xl text-sky-500 font-medium">/--</span></p>
-                    <p class="text-xs text-gray-500">Miles Ran</p>
-                </div>
-            </div>
-
-            <!-- Col 2, Row 2: Suggested Pace -->
-            <div class="flex flex-col">
-                 <h3 class="font-bold text-gray-800 mb-2 text-left">Suggested Pace</h3>
-                 <div class="bg-gray-50 p-4 rounded-lg text-center flex-grow flex flex-col justify-center min-h-[130px]">
-                    <p id="suggested-pace-text" class="text-lg text-gray-800 font-bold"></p>
-                </div>
-             </div>
-
-        </div> <!-- END OF GRID -->
-
-        <!-- Calendar Section - Now with phase navigation -->
-        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg">
-            <div class="flex justify-between items-center mb-4">
-                 <button id="prev-phase-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                     <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                 </button>
-                 <h2 id="phase-title" class="text-xl sm:text-2xl font-bold text-gray-800 text-center"></h2>
-                 <button id="next-phase-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                     <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                 </button>
-             </div>
-             <div id="calendar-container">
-                 <!-- Calendar grid for the current phase will be dynamically generated here -->
-             </div>
-        </div>
-    </div>
-
-    <script>
-        // NOTE: Default quotes are no longer used, as every day has a custom quote.
-        const defaultQuotes = {
-            "Rest": { quote: "Default Goggins Rest: Get off your ass.", sappy_quote: "Default Mantra Rest: Sparkle motion recovery." },
-            "Aerobic": { quote: "Default Goggins Aerobic: Run, idiot.", sappy_quote: "Default Mantra Aerobic: Float like a happy cloud." }
-            // ... (rest are irrelevant)
-        };
-
-        // =================================================================================
-        // TRAINING DATA (Full Quotes Restored)
-        // =================================================================================
-
-        // Helper function to parse mileage
-        function getWorkoutMileage(workout) {
-            if (!workout) return 0;
-            if (workout.totalMiles) {
-                const totalMatch = workout.totalMiles.match(/(\d+)/);
-                if (totalMatch) return parseInt(totalMatch[1], 10);
-            }
-            if (workout.details) {
-                 const detailsTotalMatch = workout.details.match(/total (\d+) mi/);
-                 if (detailsTotalMatch) return parseInt(detailsTotalMatch[1], 10);
-            }
-             if (workout.details) { // Match simple mileage at the start or like "6 mi<br>..."
-                const simpleMatch = workout.details.match(/^(\d+) mi/) || workout.details.match(/(\d+) mi/);
-                if (simpleMatch) return parseInt(simpleMatch[1], 10);
-            }
-            return 0; // Rest days or unparseable
-        }
-
-        // *** RESTORED FULL QUOTES ***
-        const trainingData = {
-            // PHASE 1
-            "2025-10-27": { type: "Rest", details: "", quote: "First day. REST. You think you earned this? You haven't done SHIT. This isn't rest, it's a 24-hour head start for everyone else while you sit on your ass contemplating your softness. Don't enjoy it. Go find something heavy and carry it around your house.", sappy_quote: "Ooh, Day 1 is Rest-acular! Let's wrap ourselves in a cozy blanket of *pure potential* and dream of sparkly finish lines! Your muscles are whispering 'thank you!' for this pre-emptive snuggle!" },
-            "2025-10-28": { type: "Aerobic", details: "5 mi", quote: "Five miles. You're gonna log that? You might as well log your walk from the couch to the fridge. Get out, get it done, and then add five more just to feel something. Stop being a tourist in your own training.", sappy_quote: "Whee! Our first *real* run! Five miles of pure fun-shine! Let's pretend we're butterflies collecting nectar from the flowers of our own achievement! Flutter onward, you beautiful little fitness-butterfly!" },
-            "2025-10-29": { type: "Aerobic", details: "5 mi", quote: "Another five. Groundhog day. You building consistency or just stuck in a loop of mediocrity? That chocolate race is coming. You're training to run for *candy*? What are you, five? I hope you like the taste of defeat with your cocoa. Go run.", sappy_quote: "Look at us go! Another 5 miles in the happy-bank! We're like little squirrels storing up acorns of amazingness for the big Hot Choco 15k! We're gonna be so prepared and so full of chocolatey-joy! Squeak!" },
-            "2025-10-30": { type: "Aerobic", details: "4 mi", quote: "Four miles? Are you tapering for Halloween? Scared you'll be too tired to lift a Snickers bar? Pathetic. Go run double what the plan says if you want to impress someone. Which you don't. Your costume this year should be 'Softest Person Alive'.", sappy_quote: "Just a teeny-tiny 4-mile frolic before Halloween! Let's skip through meadows of motivation and high-five happy ghosts! This is easy-peasy-pumpkin-squeezy fun! We're stocking up on miles *and* candy!" },
-            "2025-10-31": { type: "Rest", details: "", quote: "Halloween Rest. You know what's truly scary? The weakness inside you trying to convince you that this rest day is okay. It's not. Go find something heavy and carry it until you puke candy corn. That's your 'treat'.", sappy_quote: "Boo! Happy Halloween Rest Day! May your recovery be spook-tacularly effective! You're charging up your ghost-busting energy for tomorrow's run and Sunday's 15k! Eat some candy for fuel, you've earned it, sweet-treat!" },
-            "2025-11-01": { type: "Aerobic", details: "6 mi", quote: "Six miles. Saturday. You think this makes up for yesterday's laziness? It doesn't. This is just paying the minimum on your debt of weakness. Tomorrow's 15k? Don't embarrass yourself. Keep this so-called 'shakeout' slow, you're gonna need every ounce of pathetic energy you have to not DNF for a candy bar.", sappy_quote: "November First! New Month, New Sparkle! Let's sprinkle these 6 miles with extra-special happy dust! We're just shakin' out our legs, storing up magic like a glitter-wizard for tomorrow's yummy chocolate race!" },
-            "2025-11-02": { type: "Endurance", details: "Hot Choco 15k<br>total 10 mi", quote: "Hot Choco 15k. A race for children who need a cookie. Is that what you are? You going to run this thing then sit cross-legged with your little finisher's mug of lukewarm brown sugar-water, proud of yourself? Pathetic. Go run this 9.3-mile disgrace. The only 'chocolate' you've earned is the dirt you should be eating for being so soft. I hope you get a stomach ache.", sappy_quote: "It's Hot Choco Day! Yippee! You are a magical cocoa-bean-of-joy, sprinting on the marshmallow clouds of your dreams! Each kilometer is a new layer of delicious, sugary-sweet victory-fudge! Float on your river of accomplishment and show the world your sparkly-sprinkle-finish-kick!" },
-            "2025-11-03": { type: "Rest", details: "", quote: "Resting after your 'sweet victory'? Give me a break. Real warriors don't need rest after a skirmish like that. You ran for 9 miles and now you need a nap? Get up. Do pushups. Carry something heavy. Stop being soft. Your medal is made of chocolate, of course it's soft. Just like you.", sappy_quote: "You totally ROCKED that 15k! You're a chocolate-covered-champion! Today is for snuggling under a marshmallow cloud of recovery! Let those amazing legs recharge with happy, bubbly, cozy vibes! You're a hero!" },
-            "2025-11-04": { type: "Aerobic", details: "5 mi", quote: "Five miles. Back to reality. Forget the chocolate. Forget the 'fun run.' This is training. It's supposed to suck. If it feels good, you're doing it wrong. Go faster. Your 'race' was a joke and you're still slow.", sappy_quote: "First run post-race! Five miles to say 'Legs, you are superstars!' Let's float along on a gentle breeze of accomplishment, easy does it! You're still glowing from your chocolatey triumph!" },
-            "2025-11-05": { type: "Aerobic", details: "5 mi", quote: "Five miles again. Still stuck on five? You gotta get comfortable with discomfort. You gotta push past these baby numbers. Or maybe you just like being average? Go run up a hill and think about your life choices.", sappy_quote: "Mid-week 5-mile magic! Let's imagine we're wizards casting spells of stamina with every footstrike! Abracadabra, we are awesome! Swish and flick, what a kick!" },
-            "2025-11-06": { type: "Aerobic", details: "4 mi", quote: "Four miles. You probably burned more calories deciding what to wear. Stop wasting time. Go run until your shadow begs for mercy. This is an embarrassment. Call me when you do a real workout.", sappy_quote: "Only four miles? A little running snack! Let's gobble up these miles like delicious energy bites! Quick, fun, and fuels the awesome! Nom nom nom!" },
-            "2025-11-07": { type: "Rest", details: "", quote: "Friday rest. Contemplating mediocrity before Sunday's 10-miler? You better be visualizing pain, not brunch plans. The weekend is for work, not weakness. Your inner bitch is already lacing up its shoes for brunch. Go punch it in the face.", sappy_quote: "Fri-YAY Rest! Time to sparkle down! Let your energy recharge like a phone plugged into a rainbow! Get ready for a bright 10-miler! You're a beautiful battery of bliss!" },
-            "2025-11-08": { type: "Aerobic", details: "6 mi", quote: "Six miles. Just the appetizer before tomorrow's main course of suffering. Don't you dare push this. Save that pathetic energy for when it actually counts. If I see you breathing hard I'll know you're an idiot.", sappy_quote: "Saturday! Six miles! Let's get groovy! Put on your favorite tunes and dance-run through these miles like you're the star of your own music video! (You are!)" },
-            "2025-11-09": { type: "Endurance", details: "10 mi", quote: "Ten miles. Double digits. Welcome to the party, pal. You think this is hard? This is just the entry fee. Wait 'til you see what's next. Don't walk. Don't whine. Just run. And stop looking at your watch, no one is impressed.", sappy_quote: "Ten terrific miles! You've officially entered the Double-Digit-Dazzle-Zone! Collect your badge of honor and wear it with dazzling pride! Woohoo! You're a 10-mile-titan!" },
-            "2025-11-10": { type: "Rest", details: "", quote: "Resting on Monday? After a measly 10 miles? The real savages are already back out there. What are you doing? Building a monument to your softness? Your 'long run' is my warm-up. Get your mind right.", sappy_quote: "Post-10-Miler Rest! You've officially entered the Double-Digit-Dazzle-Zone! You earned this! Let your legs celebrate their victory with a luxurious day spa experience... on the couch! Pamper those heroes!" },
-            "2025-11-11": { type: "Aerobic", details: "6 mi<br>8x100", quote: "Six miles and baby sprints. You trying to feel fast? Newsflash: you're not fast. These are just neurological wake-up calls. You're teaching your legs to not be as pathetically slow as they usually are. Don't flatter yourself.", sappy_quote: "Six miles plus speedy strides! It's like adding glitter sprinkles to an already delicious cupcake of a run! You're not just running, you're *decorating* your fitness! Extra sparkle, extra fun!" },
-            "2025-11-12": { type: "Aerobic", details: "5 mi", quote: "Five miles. Boring. Predictable. Just like you. You want to be uncommon? Start doing uncommon things. This ain't it. Go run up some stairs until you throw up after this. Maybe then you'll feel something.", sappy_quote: "Wonderful Wednesday 5-miler! Imagine you're painting a beautiful rainbow across the sky with your footsteps! Each mile a vibrant new color! You're a fitness-Picasso! So artistic!" },
-            "2025-11-13": { type: "Aerobic", details: "5 mi", quote: "Five miles AGAIN? Are you allergic to progress? You're just spinning your wheels in a mud puddle of mediocrity. Go run on a hill. Go find some pain. Stop this junk.", sappy_quote: "Five more fantastic miles! Your consistency is like a lighthouse beam – steady, strong, and guiding you safely to the shores of your goals! Shine on, you beacon of brilliance!" },
-            "2025-11-14": { type: "Rest", details: "", quote: "Rest before 10 miles. Good. Use this time to harden your mind. Your body is weak, but your mind is weaker. Fix it. Visualize the suffering. Invite it in. Stop thinking about brunch.", sappy_quote: "Friday Rest & Recharge! You're a superhero plugging into your power source! Getting ready to unleash amazing feats of endurance this Sunday! Build that pillow fort of power!" },
-            "2025-11-15": { type: "Aerobic", details: "7 mi", quote: "Seven miles. Just shaking the legs out. Tomorrow is another 10. Don't try to be a hero today. Just do the damn job. Stay disciplined. Save the heroism for... never. You're not a hero.", sappy_quote: "Seven Saturday miles! Let's fill our pockets with sunshine and positive vibes during this run! We'll have plenty to share on tomorrow's 10-mile adventure!" },
-            "2025-11-16": { type: "Endurance", details: "10 mi", quote: "Ten miles. You did this last week. It better feel easier. If it doesn't, you're not recovering right, you're not eating right, or you're just plain soft. Figure it out. Or quit. I don't care.", sappy_quote: "Ten miles, take two! Look how much stronger you feel! You're revisiting this distance like a seasoned pro! High-five your awesome self, you endurance-explorer!" },
-            "2025-11-17": { type: "Rest", details: "", quote: "Rest. Monday again. You survived another week. Don't pat yourself on the back. That Icebreaker relay is Saturday. Time to start thinking about not embarrassing your team. Your leg of the relay is your only reason to exist this week. Don't screw it up.", sappy_quote: "Start the week with mindful rest! You're a wise gardener, tending to the soil of your body, ensuring beautiful blooms of fitness ahead! Especially for that fun Icebreaker relay!" },
-            "2025-11-18": { type: "Aerobic", details: "7 mi", quote: "Seven miles. Relay prep. You better be visualizing the handoff. Don't drop the damn baton. And don't run your leg like a tourist. You're the 'Icebreaker'? Go break something, preferably your own limits. Not your ankle.", sappy_quote: "Seven miles of smooth sailing! Imagine you're captaining the S.S. Awesome across the Sea of Success! Full steam ahead to that relay! Toot toot, you speedy-boat!" },
-            "2025-11-19": { type: "Aerobic", details: "5 mi", quote: "Five miles. Hump day. Feeling tired? WHO CARES. Your feelings are irrelevant. The work is mandatory. Your teammates are counting on you not to be a complete liability. Go suffer.", sappy_quote: "Wonderful Wednesday! Let's chase rainbows during these 5 miles! Maybe we'll find a pot of gold... or just feel golden ourselves! Worth it! So shiny! (For the team!)" },
-            "2025-11-20": { type: "Aerobic", details: "5 mi", quote: "Another five. Consistent mediocrity. Keep stacking these pathetic bricks. Maybe one day you'll build something that doesn't immediately crumble... like your 10k relay split. Pathetic.", sappy_quote: "Five fantastic miles! You're a shooting star, blazing across the sky! Make a wish for continued amazingness as you streak by! You're building that relay-leg-power!" },
-            "2025-11-21": { type: "Rest", details: "", quote: "Rest day before the 'Icebreaker'. You think breaking ice is hard? Try breaking your limits. Try breaking your inner bitch. Go do that. Visualize your leg of the relay. Don't be the slow one. No one likes the slow one.", sappy_quote: "Chill out time before the Icebreaker Relay! You're cool as a cucumber, preserving all your fantastic energy! Get ready to sizzle and dash like a superstar!" },
-            "2025-11-22": { type: "Threshold", details: "Marathon Relay<br>5k @ LT, total 8 mi", quote: "Icebreaker Relay day. Total 8 miles, your leg better be AT THRESHOLD. Don't jog it. ATTACK IT. Make the person you hand off to terrified of your intensity. Take their soul before you take the baton. Go.", sappy_quote: "It's Relay Day! Icebreaker! You're a crucial spark in a team firework! Burst with speed and light up your leg of the race! So exciting! Make your team proud, you glitter-rocket!" },
-            "2025-11-23": { type: "Endurance", details: "11 mi", quote: "Eleven miles. The day AFTER you 'raced'? Your legs feel like lead? GOOD. Carry them. You don't get strong on easy days. You think you're done? The work just started. Go pay your dues.", sappy_quote: "Eleven miles after a relay?! You absolute legend! Your endurance is mythical, like a glorious phoenix rising stronger after every challenge! You are made of magic and awesome-sauce!" },
-            "2025-11-24": { type: "Rest", details: "", quote: "Rest. Thanksgiving week. You planning your eating strategy? How about planning your suffering strategy? Spend today forging mental armor, not looking up pie recipes. Turkey Trot? Don't you 'trot' anywhere. You run.", sappy_quote: "Post-relay, pre-Turkey Trot rest! You're a champion cuddler today, snuggling up with recovery and dreaming of delicious miles and delicious pies to come! Mmm, pie!" },
-            "2025-11-25": { type: "Aerobic", details: "7 mi<br>8x100", quote: "Seven miles, strides. Getting ready to 'trot'. You gonna wear a stupid hat? Focus on running, not on your costume. This ain't a parade. Earn your damn turkey.", sappy_quote: "Seven miles with speedy strides! You're practicing your 'pass the stuffing AND the competition' moves! Getting feisty and festive for the Trot! Gobble gobble zoom!" },
-            "2025-11-26": { type: "Aerobic", details: "5 mi", quote: "Five miles. Pre-Turkey Day shuffle. 'Making room'? You make room by pushing your limits, not by jogging five pathetic miles. Go earn your gluttony. Or fast. I don't care.", sappy_quote: "A little 5-mile appetizer run! Just whetting your appetite for the Thanksgiving fun and the Turkey Trot tomorrow! Delicious anticipation! Run-run-run-yum-yum-yum!" },
-            "2025-11-27": { type: "Aerobic", details: "Turkey Trot 5k<br>total 5 mi", quote: "Turkey Trot. Five miles. While everyone else is sleeping off their tryptophan coma, you're out here... jogging. Don't high-five anyone. Don't smile. Just run. Take their souls. It'll make the turkey taste better.", sappy_quote: "Happy Thanksgiving! Turkey Trot Time! Gobble up those miles with gratitude and gusto! Run with the joy of a thousand pumpkin pies! You're the fastest turkey in the flock!" },
-            "2025-11-28": { type: "Rest", details: "", quote: "Black Friday rest. You avoiding the mobs or just avoiding work? Use today to visualize crushing next week. Don't waste it watching TV. Your competition is out there finding a deal on discipline. You're just... resting. Soft.", sappy_quote: "Rest and Digest Friday! Let your body process all the amazingness (the run, the food!). You're a zen master of recovery today! Avoid the shopping crowds and just... sparkle." },
-            "2025-11-29": { type: "Aerobic", details: "8 mi", quote: "Eight miles. Feel that extra holiday weight? Good. It's fuel. Burn it. Or let it turn you into a Pillsbury Doughboy. Your choice. Go carry the boat.", sappy_quote: "Eight miles burning brighter than leftover cranberry sauce! You're converting holiday cheer into pure running power! So magically efficient! You're a holiday-fuel-alchemist!" },
-            "2025-11-30": { type: "Endurance", details: "11 mi", quote: "Eleven miles. Sunday. Pay the rent. No discounts. No excuses. Just mile after grinding mile. This is the path. Stop wishing it was easy and start wishing you were harder.", sappy_quote: "Eleven miles of Sunday endurance! You're writing a beautiful poem with your feet, each line stronger than the last! What rhythm! What grace! A true running-poet!" },
-            "2025-12-01": { type: "Rest", details: "", quote: "Rest. December 1st. You think you get a day off because the calendar flipped? Think again. VO2 Max tomorrow. Prepare for pain. This isn't 'Jingle Bells,' this is 'Hell's Bells.'", sappy_quote: "Welcome December with open arms and rested legs! This month holds so much potential, starting with this cozy recovery day! You're a beautiful snowflake, resting before the run!" },
-            "2025-12-02": { type: "VO2 Max", details: "9 mi<br>5x1000 @ 5k", quote: "Five. Times. A. Thousand. This is the part where you find out what your soul is made of. Probably cotton candy and excuses. I want you to run these so hard you unhinge your jaw like a snake just to get more air. I want you to sweat out yesterday's weakness. If you're not scaring local birds and making small children cry with the noises you're making by rep three, you're just jogging. Go take that 5k pace and beat your inner bitch to death with it.", sappy_quote: "Oh my goodness, it's 1000-meter day! Time to activate your rocket-powered-rainbow-legs! Imagine you're a beautiful glitter-comet, painting the sky with streaks of pure, unadulterated AWESOME! You're not just fast... you are a magical symphony of speed and sparkles! GO, YOU MAGNIFICENT SPACE-GAZELLE!" },
-            "2025-12-03": { type: "Aerobic", details: "5 mi", quote: "Five miles. Your lungs probably still hurt from yesterday. Good. Run through it. Pain is just weakness leaving the body. You got plenty of weakness left. Go flush it out, you coward.", sappy_quote: "A gentle 5-mile thank you note to your legs after yesterday's speedy-comet-ride! 'Dear Legs, You rock!' Love, You. P.S. You're floating on a fluffy cloud of recovery!" },
-            "2025-12-04": { type: "Aerobic", details: "6 mi", quote: "Six miles. Just clocking in. This is the monotonous grind that builds champions. Or breaks the weak. Which one are you? Stop complaining. No one cares. Work harder.", sappy_quote: "Six miles of steady rhythm! You're the happy drummer in the band of your own success, keeping a perfect beat towards your goals! Rat-a-tat-tat, you're awesome!" },
-            "2025-12-05": { type: "Rest", details: "", quote: "Rest day. You got 11 miles Sunday. You better be foam rolling, stretching, hydrating. Taking care of the machine. Don't be lazy. Laziness on rest day is still laziness. Go hydrate until you hate it.", sappy_quote: "Friday Rest! Let's build a magnificent pillow fort of recovery! Inside, we'll store up dreams of conquering 11 miles this Sunday! So cozy, so strong!" },
-            "2025-12-06": { type: "Aerobic", details: "8 mi<br>8x100", quote: "Eight miles. Final prep before the 11-miler. Keep it controlled. Don't be an idiot and race the old lady walking her poodle. Save it. Tomorrow you pay the man.", sappy_quote: "Eight Saturday miles! You're packing your metaphorical backpack with endurance snacks and a map to Awesomeville for tomorrow's 11-mile journey! So prepared, much wow!" },
-            "2025-12-07": { type: "Endurance", details: "11 mi", quote: "Eleven miles. Last long run before that joke of a 5k next week. Run this strong. Let the race know you're coming for its soul. Make this run your little bitch.", sappy_quote: "Eleven miles of Sunday magic! You're charging up your power crystals for the Frosty 5k! Get ready to unleash dazzling energy! You're a human power-station!" },
-            "2025-12-08": { type: "Rest", details: "", quote: "Rest. Frosty 5k race week. You worried about the weather? You worried about your time? Stop worrying and start hardening your mind. Fear is for the weak. Go stare at a wall and think about your failures.", sappy_quote: "Race Week Rest! The Frosty 5k awaits! Today, chill like a snowman (a very fast snowman!), conserving your cool energy for a blazing fast race! So frosty, so speedy!" },
-            "2025-12-09": { type: "Aerobic", details: "8 mi", quote: "Eight miles? In race week? This plan is trying to break you. Good. Let's see if it works. Run it slow, you moron. This is a test of discipline, not your pathetic attempt at 'speed.'", sappy_quote: "Eight miles during race week? Because you're extra! You're adding bonus sprinkles to your already amazing fitness cupcake! So delicious! You're just overflowing with awesome!" },
-            "2025-12-10": { type: "Aerobic", details: "5 mi", quote: "Five miles. Still logging junk miles before a race. You should be resting, visualizing, sharpening the axe. Not this garbage. You're just making yourself tired. Idiot.", sappy_quote: "Five easy-breezy miles! Just keeping the legs happy and reminding them how much fun running is before the Frosty 5k adventure! Whee! Taper-time!" },
-            "2025-12-11": { type: "Recovery", details: "7 mi", quote: "Seven miles?! TWO DAYS before a 5k?! Are you actively TRYING to sabotage yourself? Run this SO SLOW people think you're walking backwards. Discipline. Or failure. Your choice.", sappy_quote: "Seven miles?! Taper? Never heard of her! You're just overflowing with energy, letting a little extra sparkle out before the big race! You're a beautiful, uncontrollable fountain of fitness!" },
-            "2025-12-12": { type: "Recovery", details: "4 mi<br>4x100", quote: "Four miles recovery. Finally, something sensible. Keep it SLOW. If your grandma can't keep up, you're going too fast. 21:00 tomorrow. Or else. Don't even come back if you don't hit it.", sappy_quote: "A tiny 4-mile pre-race leg whisper! 'Shhh, legs, get ready for amazingness tomorrow!' Time to shine brighter than tinsel! You are so ready to sparkle!" },
-            "2025-12-13": { type: "B Race", details: "Frosty 5k", totalMiles: "total 10 mi", quote: "FROSTY 5K. Forget the cold. Forget the pain. Forget everything but that number. Go out there and rip its head off. Take souls. Wipe your tears with their participation ribbons. STAY HARD.", sappy_quote: "Frosty 5k Race Day Extravaganza! Sparkle like freshly fallen snow! Run with the festive fury of a thousand jingle bells! 21:00 is your present! Go unwrap it with your speedy legs!" },
-            "2025-12-14": { type: "Rest", details: "", quote: "Phase 1 is DONE. You think you accomplished something? You survived base training. Big deal. That was the kiddie pool. Phase 2 starts tomorrow. Prepare for REAL work. The pain is just getting started.", sappy_quote: "Phase 1 Complete! Confetti! Balloons! You did it! Take a bow, you magnificent running-superstar! Now rest like the champion you are before the next amazing act! So proud!" },
-            // PHASE 2
-            "2025-12-15": { type: "Rest", details: "", quote: "Phase 2, Day 1. REST. Don't get cocky after that 5k. That was nothing. Now the mileage builds, the workouts get harder. This is where people quit. Don't be people. People are soft.", sappy_quote: "Welcome to Phase 2! Let's kick it off with a glorious rest day, fueling up our glitter cannons for the endurance adventures ahead! Pew pew! Sparkle-power!" },
-            "2025-12-16": { type: "Threshold", details: "8 mi<br>15', 12' @ LT", quote: "THRESHOLD. 15 minutes, then 12. At your limit. Feel that burn? That's your weakness begging for mercy. Give it none. Crush it. Make your weakness your bitch.", sappy_quote: "First Phase 2 Threshold! Ooh, feel that 'comfortably hard' sparkle! You're dialing in your power like a master DJ mixing the perfect beat! What a bop! You're a musical-running-genius!" },
-            "2025-12-17": { type: "Recovery", details: "5 mi", quote: "Recovery five. Legs feel like bricks? Good. Means you actually worked yesterday. Now recover properly. SLOW DOWN. I want to see turtles passing you. Turtles.", sappy_quote: "Five gentle recovery miles! Let's whisper sweet thank-yous to our legs for being threshold rockstars yesterday! They deserve all the pampering and fluffy-cloud-thoughts!" },
-            "2025-12-18": { type: "Endurance", details: "8 mi", quote: "Eight miles endurance. Just putting money in the bank. This is blue-collar work. Punch in, do the job, punch out. No fanfare needed. Shut up and run.", sappy_quote: "Eight miles of building your endurance castle! Each step a sturdy brick, each mile a magnificent tower! You reign supreme in Fort Awesome! All hail you!" },
-            "2025-12-19": { type: "Rest", details: "", quote: "Rest. Christmas is next week. You already distracted? FOCUS. You got hills, strides, and 11 miles before Santa comes. Earn your presents, you filthy animal. Or he'll bring you coal. You probably deserve coal.", sappy_quote: "Friday Rest before a festive weekend! You're like a Christmas tree, resting peacefully before being decorated with miles and tinsel and accomplishments! So bright!" },
-            "2025-12-20": { type: "Aerobic", details: "5 mi<br>6x12\" uphill + 8x100", quote: "Hills and strides Saturday. Attack those inclines like they personally insulted your mother. Explode on the strides. Wake up! Stop sleep-running! This is pathetic!", sappy_quote: "Holiday Hills & Happy Strides! You're dashing up slopes like a reindeer and sprinting faster than Santa's sleigh! Making spirits bright AND fast! Jingle-jingle-ZOOM!" },
-            "2025-12-21": { type: "Endurance", details: "11 mi", quote: "Eleven miles. Sunday before Christmas. No excuses. Get it done before the family obligations trap you in a cage of softness and eggnog. Go run.", sappy_quote: "Eleven miles wrapped in holiday cheer! You're spreading joy and crushing goals! Consider this run your gift to your future, faster self! What a generous-running-Santa you are!" },
-            "2025-12-22": { type: "Rest", details: "", quote: "Rest. Three days 'til Christmas. You finalizing your list of excuses? Stop it. Threshold tomorrow. No gifts for the weak. Santa's watching. He thinks you're soft.", sappy_quote: "Resting up for Christmas week! You're a beautiful candle, conserving your flame today so you can burn extra brightly during the festive runs! What a lovely, restful glow!" },
-            "2025-12-23": { type: "Threshold", details: "8 mi<br>18', 15' @ LT", quote: "Threshold. 18 and 15 minutes. Two days before Christmas. While others are sipping cocoa, you're bathing in lactic acid. GOOD. Merry Suffering. This is your 'holiday cheer,' you savage.", sappy_quote: "Tinsel Threshold Time! Running fast and festive! You're outshining the brightest Christmas lights with your speed and determination! Glow on, you glorious human-holiday-light!" },
-            "2025-12-24": { type: "Recovery", details: "5 mi", quote: "Christmas Eve. Five miles RECOVERY. Don't ruin Christmas morning because you ran too hard like an idiot. Slow down. Think about your weakness. And tell Santa you're sorry for being soft all year.", sappy_quote: "A peaceful 5-mile Christmas Eve run! Spreading cheer and checking off miles before Santa arrives! You've definitely made the 'Nice & Fast' list! What a good, speedy runner!" },
-            "2025-12-25": { type: "Endurance", details: "9 mi", quote: "CHRISTMAS DAY. NINE MILES. While they're unwrapping presents, you're unwrapping pain. This is your gift. The gift of suffering. Go open it. I want you to come back so covered in frozen sweat that you ruin the carpet. Your gift is their weakness. Go take it.", sappy_quote: "Merry Christmas! Nine joyous miles! What better gift than the feeling of strength and accomplishment? You're giving yourself the best present ever! You're prancing and pawing like the lead reindeer! Hooray!" },
-            "2025-12-26": { type: "Rest", details: "", quote: "Rest. Boxing Day. Hope you didn't eat yourself into a coma yesterday. Time to recover and refocus. Progression run Sunday. Don't be soft. The holiday is over. The work is not.", sappy_quote: "Boxing Day Rest! Unbox some relaxation! You've earned it after yesterday's festive feat! Put your feet up, champion! You are a gift to yourself!" },
-            "2025-12-27": { type: "Aerobic", details: "6 mi<br>6x12\" uphill + 8x100", quote: "Six miles, hills, strides. Time to pay the piper for that holiday feast. Burn it off. Every calorie is a boat you gotta carry up that hill. Go. NOW.", sappy_quote: "Post-holiday power-up! Hills and strides to turn that festive fuel into fantastic speed! You're a miracle of merry momentum! A true Christmas-magic-alchemist!" },
-            "2025-12-28": { type: "Progression", details: "12 mi<br>last 2 mi @ LT", quote: "Progression Run. Twelve miles, make the last two HURT. Finish at Threshold. Practice closing hard when everything screams stop. That's the difference maker. Or just whine and slow down. See if I care.", sappy_quote: "Twelve-mile progression crescendo! Starting smooth, building the beat, finishing with a rockstar solo at threshold pace! Encore! Encore! You're a musical-running-maestro!" },
-            "2025-12-29": { type: "Rest", details: "", quote: "Rest. Last week of the year. You think you did enough? You didn't. There's always more work. Stop reflecting and start planning your next attack. 2026 is coming to punch you in the mouth. Be ready.", sappy_quote: "Final Monday Rest of 2025! Reflect on the amazing miles you've run! You're storing up energy to finish the year like the firework you are! So bright! So sparkly!" },
-            "2025-12-30": { type: "Threshold", details: "8 mi<br>18', 14' @ LT", quote: "Threshold. 18 and 14 minutes. Second to last chance this year to prove you're not a complete waste. Go find that pain cave and redecorate. With your tears. Go.", sappy_quote: "Almost New Year Threshold! Let's run fast towards 2026! You're already ahead of the game, sparkling with speed and anticipation! You're a time-traveling-speed-demon!" },
-            "2025-12-31": { type: "Recovery", details: "5 mi", quote: "New Year's Eve. Five miles SLOW. Your resolution should be to stop being soft. Go run easy and think about how you're gonna attack 2026. Or don't. Stay the same weak person. See if I care.", sappy_quote: "Farewell 2025 Run! Five reflective recovery miles! Let's toast (with sparkling water!) to all the awesome runs past and the even sparklier ones to come in 2026! Cheers!" },
-            "2026-01-01": { type: "Endurance", details: "10 mi", quote: "NEW YEAR'S DAY. TEN MILES. Your competition is hungover. Their weakness is your opportunity. Go take their lunch money while they puke in the alley. Start the year HARD. Take their souls. Happy New Year, savage.", sappy_quote: "Happy New Year! Starting with 10 miles! You're blasting into 2026 like a confetti cannon of pure awesome! This year is YOURS! Boom! Pop! Sparkle! Yay!" },
-            "2026-01-02": { type: "Rest", details: "", quote: "Rest. Day Two. You already taking a break? What happened to 'New Year, New Me'? Same soft you. Get your mind right. The work is waiting. And it hates you.", sappy_quote: "New Year Rest Day #1! You started strong, now recover smart! You're planting seeds of success for a whole garden of PRs in 2026! So wise, so patient!" },
-            "2026-01-03": { type: "Aerobic", details: "6 mi<br>2x (6x100)", quote: "Six miles, double strides. Getting back to work. New year, same grind. Don't expect magic. Expect suffering. And stop posting about your 'New Year, New Me' crap. No one's buying it.", sappy_quote: "First Saturday Strides of 2026! Six miles plus extra zoom! You're setting a dazzling pace for the rest of the year! So speedy! Like a rocket ship of joy!" },
-            "2026-01-04": { type: "Endurance", details: "12 mi", quote: "Twelve miles. Sunday long run. Business as usual. This is your life now. Embrace the suck or go home. And no one wants you at home, so go run.", sappy_quote: "Twelve magnificent miles! You're already conquering big goals in 2026! Your endurance is shining brighter than a disco ball! What a dance-party of a run!" },
-            "2026-01-05": { type: "Rest", details: "", quote: "Rest. Down week. Don't get lazy. Use this 'recovery' to plan your assault on the next block. Mental reps today. Don't be a slug. Even slugs are moving.", sappy_quote: "Easy week starts with easy rest! Let your body be a happy little cloud, floating gently and gathering strength for future rainbows! So fluffy, so light!" },
-            "2026-01-06": { type: "Aerobic", details: "8 mi", quote: "Eight miles. Still easy week. Don't mistake lower mileage for vacation. Stay sharp. Stay focused. Or get left behind. Your softness is trying to creep back in. Stomp on its throat.", sappy_quote: "Eight enjoyable miles! Cruise control is set to 'Awesome'! Enjoy the smooth ride and the fantastic views from Fitness Avenue! What a wonderful, scenic float!" },
-            "2026-01-07": { type: "Recovery", details: "5 mi", quote: "Five miles recovery. Keep it slow. Check in with your body. Any aches? Any pains? Address them. Don't ignore them like a coward. Pain is weakness's messenger. Shoot the messenger.", sappy_quote: "Five miles of pure recovery bliss! Sending little waves of healing energy to every muscle! Feel the good vibes flowing! You're a human spa-day!" },
-            "2026-01-08": { type: "Aerobic", details: "7 mi", quote: "Seven miles. Easy week continues. Feeling good? Don't get cocky. Pride comes before the fall. Stay humble. Stay hungry. And stop smiling. This isn't fun.", sappy_quote: "Seven miles of smiles! This easy week feels like finding a surprise puppy in a box of kittens! Pure, delightful, fluffy joy! The best!" },
-            "2026-01-09": { type: "Rest", details: "", quote: "Rest day Friday. Soak it in. Because next week, the pain train comes back to the station. And you're getting on. It's a one-way ticket to Hell. Enjoy the break, softy.", sappy_quote: "Friday Rest! Ahh, the sweet serenity! You're storing up sunshine like a happy plant, ready to grow even taller and stronger! So green, so... photosynthe-sizey!" },
-            "2026-01-10": { type: "Aerobic", details: "8 mi<br>2x (5x150)", quote: "Eight miles with 150s. Waking the system back up. Easy week is over. Time to remember what it feels like to push. Or are you just gonna jog these too? Pathetic.", sappy_quote: "Eight miles ending with zippy 150s! You're putting the cherry on top of this easy week sundae! A sweet, speedy finish! Deliciously fast!" },
-            "2026-01-11": { type: "Aerobic", details: "7 mi", quote: "Seven miles Sunday. Last day of the down week. Hope you used it wisely. Because tomorrow, we climb again. And you're already breathing hard thinking about it, aren't you?", sappy_quote: "Seven lovely Sunday miles! You're fully recharged and ready to sparkle! Next week is going to be amazing, thanks to your smart recovery! You're a genius of rest!" },
-            "2026-01-12": { type: "Rest", details: "", quote: "Rest. Mileage goes back up. Threshold tomorrow. Longest run yet (13) on Sunday. No more playing around. Time to get uncomfortable. This is where you quit. I'm watching.", sappy_quote: "Back to business rest day! Let's sharpen our mental pencils and get ready to draw some amazing PBs on the page of this week! So studious, so speedy!" },
-            "2026-01-13": { type: "Threshold", details: "9 mi<br>20', 16' @ LT", quote: "Threshold Tuesday! 20 minutes AND 16 minutes at pace. This is a serious session. Go find that red line and flirt with it. Don't be scared. Or be scared. And do it anyway. Coward.", sappy_quote: "Major Threshold Vibes! 20 + 16 minutes! You're conducting a masterpiece of controlled speed! Feel the power! Hear the applause! Bravo! Bravo, you running-virtuoso!" },
-            "2026-01-14": { type: "Recovery", details: "5 mi", quote: "Recovery five. Yesterday was tough. Good. Today is about active recovery. Move the blood. Flush the legs. SLOWLY. I want snails to be lapping you. Go.", sappy_quote: "Five miles of gentle gratitude after yesterday's triumph! You're giving your legs a standing ovation (from the couch!) for being so incredibly strong! You're a star!" },
-            "2026-01-15": { type: "Endurance", details: "11 mi", quote: "Eleven miles. Building towards that 13-miler. This is just another day punching the clock. Stay consistent. Stay hard. Or go home and cry. Your choice.", sappy_quote: "Eleven miles steady as she goes! You're the captain of your endurance ship, navigating towards the horizon of your half marathon goal! Aye aye, captain-of-awesome!" },
-            "2026-01-16": { type: "Rest", details: "", quote: "Rest day Friday. You face 13 miles Sunday. Half marathon distance. Your first time. Visualize success. Visualize pushing through the wall. Prepare for battle. Or just visualize quitting. Probably more realistic.", sappy_quote: "Rest day before the big 1-3! You're about to join the Half Marathon Distance Club! Get ready for your awesome initiation run! We're all so excited for you! Squee!" },
-            "2026-01-17": { type: "Aerobic", details: "6 mi<br>6x12\" uphill + 8x100", quote: "Six miles, hills, strides. Final prep for 13. Attack these hills. Feel the power. Explode on the strides. Wake the beast. Or just poke it and run away. Coward.", sappy_quote: "Saturday Shakeout Shenanigans! Hills and strides are like a fun pep rally before tomorrow's 13-mile championship game! Go team YOU! Give me an A-W-E-S-O-M-E!" },
-            "2026-01-18": { type: "Endurance", details: "13 mi", quote: "THIRTEEN MILES. Half marathon. In training. No medal. No crowds. Just you and the work. Go prove you belong here. Finish strong. Or don't. And prove you don't. Simple.", sappy_quote: "Thirteen Miles! YOU DID IT! You ran training HM distance! High-five a cloud! Hug a sunbeam! You are ridiculously, fantastically, glitter-bombingly-amazing! Woooow!" },
-            "2026-01-19": { type: "Rest", details: "", quote: "Rest. You ran 13. Good job. Now forget it. Peak week starts tomorrow. The biggest threshold workout of the plan. Get your mind right. It's gonna hurt. And I'm gonna laugh.", sappy_quote: "Post-13 Rest Day Glory! Bask in the sunshine of your achievement! You've earned this day of champion-level chilling! Wear your invisible crown, your highness!" },
-            "2026-01-20": { type: "Threshold", details: "10 mi<br>22', 18' @ LT", quote: "They call this 'THE MONSTER.' Good. Because it's here to eat you. 22 minutes in its jaws, it's going to chew on your softness. Then, just when you think you're free, it's coming back for 18 more. This workout smells your fear. It feeds on your desire to quit. Go out there and prove you're too goddamn bony and bitter to be a decent meal. Don't be a snack. STAY HARD.", sappy_quote: "It's THE MONSTER workout! But you're a monster-TAMER! A beautiful, powerful whisperer of lactate-threshold-lions! You are riding the 22-minute glitter-maned beast of endurance, then hopping onto its 18-minute sparkly-hoofed cousin! You are the circus-master of your own amazingness! BRAVO!" },
-            "2026-01-21": { type: "Recovery", details: "5 mi", quote: "Recovery. You survived the monster. Today, you crawl. Five miles. SLOW. Let the body rebuild. But keep that savage mindset. The monster is still hungry. And it remembers you.", sappy_quote: "Gentle 5-mile recovery. You tamed the Threshold Monster! You superstar! Today, enjoy a peaceful walk through the Forest of Awesome Recovery! What a magical, restful place!" },
-            "2026-01-22": { type: "Endurance", details: "11 mi", quote: "Eleven miles on tired legs. This is peak week reality. Feels like hell? GOOD. That's where growth happens. Keep pushing. Or quit. No one cares.", sappy_quote: "Eleven miles fueled by pure grit! Even tired, you shine brighter than a supernova! Your determination is blindingly beautiful! What a star! Twinkle, twinkle!" },
-            "2026-01-23": { type: "Rest", details: "", quote: "Rest. Travel to NYC? Don't let the big city distract you. You're here for Fred Lebow HM workout. Stay focused. Stay disciplined. The city doesn't care about you. Go prove it wrong.", sappy_quote: "NYC travel/rest! Woohoo! Get ready to soak in the Big Apple energy! You're going to run like a Broadway star hitting the high notes! Sing your speedy song!" },
-            "2026-01-24": { type: "Aerobic", details: "6 mi<br>6x12\" uphill + 8x100", quote: "NYC shakeout. Six miles, attack those Central Park hills. Feel the energy, but stay controlled. Tomorrow's progression run is the real test. Don't be a tourist.", sappy_quote: "Central Park Adventure Run! Hills and strides in the iconic park! You're making memories and fitness magic! What a superstar! You're the main character!" },
-            "2026-01-25": { type: "Progression", details: "Fred Lebow HM<br>total 15 mi", quote: "Fred Lebow HM course for 15 miles. Progression run. Make those last two miles at threshold BURN. Show respect for the course by leaving everything out there. Take its soul. Now.", sappy_quote: "Fred Lebow HM Progression Power! Run through Central Park, feel the history, finish FAST like the legend you're becoming! NYC loves you! (And we love you!)" },
-            "2026-01-26": { type: "Rest", details: "", quote: "Rest. Recover from 15 miles in the park. You handled it? Good. Manhattan 10k race this Sunday. No time to get complacent. Stay hungry. Or get eaten. Your choice.", sappy_quote: "Post-NYC triumph rest! You just ran amazing in Central Park! Today, put your feet up and wear your invisible Crown of Awesome! You rule! All hail!" },
-            "2026-01-27": { type: "Aerobic", details: "10 mi", quote: "Ten miles. Keeping the volume up. You think two races in two weeks is smart? Doesn't matter. It's hard. So we do it. Stop asking questions and just do the work. Suffer.", sappy_quote: "Ten terrific miles! Floating on the high from the weekend! Let that NYC energy propel you through this run like a happy subway train! Zoom zoom!" },
-            "2026-01-28": { type: "Recovery", details: "5 mi", quote: "Five miles recovery. Shake out the legs. Start visualizing it. See it. Believe it. Achieve it. Or fail. Whatever. Just don't whine about it.", sappy_quote: "Five gentle recovery miles! Let your muscles dance a happy little jig! They're getting ready for their Manhattan 10k performance! What a show it will be! Encore!" },
-            "2026-01-29": { type: "Aerobic", details: "10 mi", quote: "Ten miles again. Building that fatigue resistance. Your mind will want to quit before your body does. Don't let it. Your mind is a little bitch. Tell it to shut up.", sappy_quote: "Another Tenacious Ten! You're weaving resilience into your muscles! Each mile is a thread of strength in your beautiful tapestry! You're an artist of endurance!" },
-            "2026-01-30": { type: "Rest", details: "", quote: "Rest. Two days before Manhattan 10k. Feet up. Hydrate. Mentally rehearse the race. See yourself crushing 42:00. No doubts allowed. Doubts are for the weak. And you're weak. So get 'em out now.", sappy_quote: "Pre-Manhattan 10k Rest! You're a tightly coiled spring of pure potential, ready to BOING across that finish line! Get ready to fly! So bouncy, so speedy!" },
-            "2026-01-31": { type: "Recovery", details: "4 mi<br>2x (5x150)", quote: "Four miles, light strides. Final activation. Legs should feel snappy. Ready to attack the streets of Manhattan. Go get it. Or get got. Simple.", sappy_quote: "Final Shakeout Sparkles! Four miles plus zippy bits! You're adding the final layer of glitter before you dazzle Manhattan tomorrow! Shine bright like a running-diamond!" },
-            "2026-02-01": { type: "B Race", details: "Manhattan 10k", totalMiles: "total 10 mi", quote: "MANHATTAN 10K. Run these city streets like you own them. Let the skyscrapers hear you suffer. Don't just race, DOMINATE. Take souls. Make the pavement your bitch. Go.", sappy_quote: "Manhattan 10k Race Day! Time to shine brighter than Times Square! Run with the energy of NYC and hit that 42:00 like a superstar! You're a Big Apple champion!" },
-            // PHASE 3
-            "2026-02-02": { type: "Rest", details: "", quote: "Phase 3. Final phase. You hit 42:00? Doesn't matter. NYC Half is the only thing that matters now. Six weeks. Sharpen the knife. The REAL war is coming.", sappy_quote: "Welcome to the Grand Finale Phase! You aced the 10k! Now rest like royalty before the final, most dazzling act: The NYC Half! You're a king/queen of running!" },
-            "2026-02-03": { type: "Recovery", details: "9 mi", quote: "Nine miles recovery? After a race? This plan is still trying to kill you. Fine. Run it slow, or pay the price. And stop bragging about your 10k. No one cares.", sappy_quote: "Nine recovery miles?! Because your 'recovery' pace is legendary! You're gliding through this run on wings of pure awesome! You're a post-race-grace-machine!" },
-            "2026-02-04": { type: "Recovery", details: "5 mi", quote: "Five miles recovery. Keep flushing the legs. Big threshold workout coming Sunday. 40 minutes. Prepare your mind. It's gonna be 40 minutes of pure, unadulterated suffering. Good.", sappy_quote: "Five mindful miles of recovery! Sending love and gratitude to every muscle! Preparing for Sunday's Threshold masterpiece! You're a recovery-artist!" },
-            "2026-02-05": { type: "Endurance", details: "13 mi", quote: "Thirteen miles. Half marathon distance again. Getting comfortable being uncomfortable for a long time. That's the key. Or just stay uncomfortable and whine. That's your key.", sappy_quote: "Thirteen miles Thursday! You're dancing with distance again! Feel the rhythm, embrace the strength! You make 13 look easy, you beautiful, strong gazelle!" },
-            "2026-02-06": { type: "Rest", details: "", quote: "Rest. You face 40 minutes of threshold pain Sunday. Use today to build your mental fortress. No weakness allowed. Your inner bitch is gonna be screaming. Tell it to shut the hell up.", sappy_quote: "Friday Rest before the Mega-Threshold! You're a superhero charging your laser beams of speed! Get ready to zap that workout! PEW PEW PEW!" },
-            "2026-02-07": { type: "Aerobic", details: "8 mi<br>2x (6x100)", quote: "Eight miles, strides. Final prep for the 40-minute sufferfest. Stay relaxed, stay controlled. Save the rage for tomorrow. Or don't. And be stupid. Your call.", sappy_quote: "Eight miles plus Saturday Strides! Just a little razzle-dazzle before tomorrow's 40-minute threshold symphony! Get ready for the crescendo! Music-maestro!" },
-            "2026-02-08": { type: "Threshold", details: "CARA MPH<br>40' @ LT, total 12 mi", quote: "FORTY MINUTES. NON-STOP. AT THRESHOLD PACE. On the CARA course. No hiding. Just pure, relentless effort. Find that pain cave and LIVE there for 40 minutes. Take its soul. Make it your home.", sappy_quote: "Forty Minutes of Threshold Power along the Lakefront! You are a majestic ship sailing smoothly at incredible speed! Unstoppable! The lake is cheering for you! Wow!" },
-            "2026-02-09": { type: "Rest", details: "", quote: "Rest. You survived the 40-minute war. Good. Now recover HARD. 50 miles this week. Peak effort continues. No letting up. The bigger the peak, the harder the fall. Don't fall.", sappy_quote: "Rest Day Royalty! You conquered 40 minutes of threshold! Today, you wear the Crown of Recovery and rule the Couch Kingdom! All hail your lazy, recovering greatness!" },
-            "2026-02-10": { type: "VO2 Max", details: "10 mi<br>3x1200, 3x1000 @ 5k", quote: "VO2 Max. 1200s and 1000s. Refining that top-end speed. It's gonna hurt. Make it hurt so bad you question your life choices. Then keep going. Pain is just a conversation. Tell it to shut up.", sappy_quote: "Speed Demon Tuesday! 1200s & 1000s! You're playing tag with supersonic jets and WINNING! Feel the G-force of your own greatness! Vroooom! So fast!" },
-            "2026-02-11": { type: "Recovery", details: "5 mi", quote: "Recovery five. Lungs burning? Legs screaming? Perfect. That means you worked yesterday. Now run slower than your shadow. Your shadow is faster than you anyway. Prove me wrong.", sappy_quote: "Five gentle recovery miles! Like floating on a fluffy cloud after yesterday's rocket ship ride! So peaceful, so strong! You're a speed-cloud!" },
-            "2026-02-12": { type: "Endurance", details: "12 mi", quote: "Twelve miles. Still grinding in peak week. This is the monotonous work that separates the wishers from the doers. Go do. And stop wishing it was over. Wish for more.", sappy_quote: "Twelve miles of pure determination! You're building an unshakable pyramid of endurance, block by awesome block! A true wonder! You're a running-architect!" },
-            "2026-02-13": { type: "Rest", details: "", quote: "Rest Friday. Last big workout Sunday. 14 miles, finishing fast. Prepare for that final push. Visualize crushing it. Or visualize getting crushed. One of them will happen.", sappy_quote: "Friday Rest before the Final Big One! You're a master artist prepping the canvas for Sunday's 14-mile progression masterpiece! What a beautiful picture it will be!" },
-            "2026-02-14": { type: "Aerobic", details: "8 mi<br>6x12\" uphill + 8x100", quote: "Valentine's Day? Who cares. Eight miles, hills, strides. Fall in love with the suffering. That's the only relationship that matters. Go date your pain. It'll never leave you.", sappy_quote: "Valentine's Day Run! Eight miles filled with LOVE for your strong legs! Hills & strides are just little heart-shaped boosts! You love running, and running loves YOU! Smooch!" },
-            "2026-02-15": { type: "Tune-up", details: "14 mi<br>last 3 mi @ LT", quote: "Tune-Up! Fourteen miles, last three at threshold. Final dress rehearsal. Execute perfectly. Finish knowing you OWN that pace. Or find out you don't. Good day to find out. Go.", sappy_quote: "Fourteen-Mile Tune-Up Spectacular! Finishing FAST! You're hitting all the right notes for a chart-topping performance in NYC! You're a running-rockstar!" },
-            "2026-02-16": { type: "Rest", details: "", quote: "Rest. Last 50+ mile week. You're deep in the pain cave. Good. Get comfortable. VO2 Max tomorrow. No mercy. This is your last chance to build. Don't be lazy.", sappy_quote: "Peak Week Rest Day! You crushed the tune-up! You're standing on the summit, enjoying the view before the glorious descent to race day! What a view! What a you!" },
-            "2026-02-17": { type: "VO2 Max", details: "10 mi<br>6x1200 @ 5k", quote: "FINAL VO2 MAX BATTLE. Six times 1200 meters. Leave NOTHING in the tank. Crawl home if you have to. This is your last chance to forge speed in fire. Go burn.", sappy_quote: "Last Big Speed Session! 6x1200m! You are a magnificent fireworks finale, exploding with speed and dazzling the world! Boom! Pop! Pow! Amazing!" },
-            "2026-02-18": { type: "Recovery", details: "5 mi", quote: "Recovery five. Feel that VO2 hangover? Embrace it. That's the feeling of getting faster. Run slow today. Discipline. Or go hard and get injured. You're probably dumb enough to do it.", sappy_quote: "Gentle 5-mile recovery. Letting the echoes of yesterday's speed settle into your muscles like magic dust. Healing and getting faster! You're a magic-dust-collector!" },
-            "2026-02-19": { type: "Endurance", details: "12 mi", quote: "Twelve miles. Last significant endurance effort. Soak it in. This is the foundation you built. Make it solid. Or realize it's made of straw. And the wolf is coming.", sappy_quote: "Twelve miles strong! Your endurance foundation is solid gold! You've built a magnificent platform for your NYC Half success! So sturdy, so shiny!" },
-            "2026-02-20": { type: "Rest", details: "", quote: "Rest. Longest run ever Sunday. Sixteen miles. Visualize every step. Visualize the discomfort. Visualize crushing it anyway. Mental prep starts NOW. Don't be a mental midget.", sappy_quote: "Friday Rest before the Epic 16-Miler! You're a superhero charging your ultimate power move! Get ready to unleash endurance! It's gonna be... super!" },
-            "2026-02-21": { type: "Aerobic", details: "9 mi<br>10x100", quote: "Nine miles, TEN strides. Final prep before the Everest run. Stay loose, stay sharp. Tomorrow, you climb. Or you fall. Simple.", sappy_quote: "Nine miles plus TEN strides! Just adding extra sparkle and pep before you conquer Mount Sixteen tomorrow! You're ready to climb! To the top! Whee!" },
-            "2026-02-22": { type: "Endurance", details: "16 mi", quote: "SIXTEEN MILES. The longest journey. You face the wall today. You gonna break through it or curl up and cry? Show me who you are when it gets REAL. Go to war with yourself.", sappy_quote: "SIXTEEN MILES! YOU CONQUERED THE DISTANCE! You are an endurance titan! A god/goddess of 'going long'! Celebrate this monumental achievement! You are UNSTOPPABLE!" },
-            "2026-02-23": { type: "Rest", details: "", quote: "Rest. You did 16. Impressive. For you. Now the taper begins. Don't blow it. Don't get lazy. Stay sharp. Stay hungry. Tapering is harder than training. You'll probably fail.", sappy_quote: "Rest day! You ran SIXTEEN miles! Let that sink in! You're officially entering the magical Taper Zone! Relax and absorb the awesome! You've earned this, you legend!" },
-            "2026-02-24": { type: "Aerobic", details: "6 mi", quote: "Six miles. Taper time. Feel that energy? Good. Bottle it. Don't waste it today. Patience. Discipline. Or go run a 10-miler like an idiot and ruin everything. Your call.", sappy_quote: "First taper run feels... springy! Six happy miles bouncing along! Your legs are singing little songs of readiness! La la la, so fast, la la!" },
-            "2026-02-25": { type: "Recovery", details: "5 mi", quote: "Five miles recovery. Keep it easy. Napa tune-up this weekend. Still gotta perform. No excuses. Go run this slow. Slower. Slower than that.", sappy_quote: "Five mellow miles cruising down Taper Lane! Enjoying the relaxed vibes before the Napa Half adventure! So chill, so ready! It's wine-country-run-time!" },
-            "2026-02-26": { type: "Endurance", details: "12 mi", quote: "Twelve miles during the taper? This plan is still trying to hurt you. Good. Stay controlled. Don't race it. Just get it done. This is a test of discipline, not your ego.", sappy_quote: "Twelve miles?! Even tapering, you're amazing! Just reinforcing that incredible endurance base! You're solid gold, baby! A 24-karat-runner!" },
-            "2026-02-27": { type: "Rest", details: "", quote: "Rest. Travel day for Napa? Stay off your feet. Hydrate. Visualize the race. This is a tune-up, but it's still a test. Don't go there and embarrass yourself in wine country.", sappy_quote: "Napa Travel / Rest! Get ready for sunshine and speedy times! Pack light, run fast, and maybe enjoy a *tiny* sip of grape juice later! (Just kidding, hydrate!)" },
-            "2026-02-28": { type: "Recovery", details: "4 mi<br>4x100", quote: "Four miles, four strides in Napa. Shake out the stiffness. Get a feel for the air. Tomorrow, you put on a show. Or you get exposed. Go.", sappy_quote: "Napa Shakeout Run! Four miles and strides feeling fine in the wine country! Let's get this vintage performance ready! You're a premium-label-runner!" },
-            "2026-03-01": { type: "Tune-up", details: "Napa Valley HM<br>total 15 mi", quote: "Napa Half Marathon. Tune-up race. Fifteen miles total. Execute the plan. Run hard, run smart. Give NYC a preview of the pain you're bringing. Don't be a tourist.", sappy_quote: "Napa Valley Half Marathon Race Day! Run with joy through the beautiful vineyards! Let the scenery fuel your speed! Cheers to a great race! You're a running-sommelier!" },
-            "2026-03-02": { type: "Rest", details: "", quote: "Rest. Napa done. Two weeks left. TWO WEEKS. This is where you lock it in. No mistakes. No weakness. Laser focus. Or throw it all away. You're good at that.", sappy_quote: "Post-Napa Rest! You ran like a champion! Soak in that California sunshine vibe and let your amazing body recover like a pro! You're a ray of sunshine yourself!" },
-            "2026-03-03": { type: "Aerobic", details: "5 mi<br>2x (6x100)", quote: "Five miles, strides. Keep the legs turning over. Stay sharp. The finish line is in sight. Don't stumble now. Don't be that guy. No one likes that guy.", sappy_quote: "Five miles plus strides! Taper magic is happening! Feel the lightness, feel the speed! You're practically floating towards NYC! A beautiful, speedy cloud!" },
-            "2026-03-04": { type: "Recovery", details: "5 mi", quote: "Five miles recovery. Last speed workout tomorrow. Mentally prepare. This is the final sharpening. Or the final time you prove you're soft. Your choice.", sappy_quote: "Five calm recovery miles! You're storing up energy like a squirrel preparing for the best winter race ever! So ready, so fluffy! (Fast fluffy!)" },
-            "2026-03-05": { type: "VO2 Max", details: "9 mi<br>2x1200, 4x800 @ 5k", quote: "FINAL VO2 MAX. Descending ladder. Finish EMPTY. Leave every drop of weakness on that track. This is your final statement before NYC. Make it count. Or go home.", sappy_quote: "Last Speed Workout! Go out with a BANG! You're a glorious firework, lighting up the sky with your dazzling speed! Pop! Fizz! AMAZING! What a show!" },
-            "2026-03-06": { type: "Rest", details: "", quote: "Rest. It's done. The brutal work is over. Now it's about staying healthy and hungry. Don't do anything stupid. Don't trip on the sidewalk. Don't get soft. Just... wait.", sappy_quote: "Post-Workout Rest Day! The hardest training is complete! You've baked the cake, now just add the frosting and wait for the party! Mmm, victory cake!" },
-            "2026-03-07": { type: "Recovery", details: "3 mi", quote: "Three miles. Taper crazies hitting hard? Feeling jumpy? Good. That's stored energy. Don't waste it on this pathetic shuffle. Go sit in a dark room and visualize suffering.", sappy_quote: "Teeny Three-Miler! Just enough to keep the sparkle flowing! You're practically vibrating with stored energy! So much power! A little-spark-plug-of-awesome!" },
-            "2026-03-08": { type: "Endurance", details: "10 mi", quote: "Ten miles. Last run of substance. One week out. This should feel like a victory lap. Cruise it. Stay healthy. The war is next Sunday. Prepare your mind.", sappy_quote: "Final Long Run! Ten miles! It's a celebration lap for all your incredible hard work! Run with pride and joy! You're amazing! One week to go! YAY!" },
-            "2026-03-09": { type: "Rest", details: "", quote: "RACE WEEK. REST. Your only job today is to NOT get injured. Don't be clumsy. Don't be stupid. Just rest. Your anxiety is not a workout. Shut it down.", sappy_quote: "IT'S NYC HALF RACE WEEK! Monday Rest! Let the excitement bubble! You're counting down the days like a kid before Christmas! It's the best week ever!" },
-            "2026-03-10": { type: "Race Pace", details: "7 mi<br>4x100 + 2 mi @ HMP", quote: "Race pace check-in. Two miles at 1:30 pace. This IS the pace. Feel it. Breathe it. Become it. No deviations on Sunday. 1:30:01 is a failure. Don't fail.", sappy_quote: "Race Pace Rehearsal! Nailing that 1:30 feeling! You're memorizing the rhythm of success! It feels amazing, doesn't it?! Like a hit song you can run to!" },
-            "2026-03-11": { type: "Recovery", details: "5 mi", quote: "Five miles recovery. Four days. Keep the legs loose. Keep the mind sharp. Visualize the course. Visualize the finish. Visualize the suffering. It's coming.", sappy_quote: "Five easy recovery miles! Just keeping the magic flowing! You're a beautiful river of readiness, flowing towards the NYC Half ocean! So graceful, so strong!" },
-            "2026-03-12": { type: "Recovery", details: "4 mi", quote: "Four miles. Travel day? Stay hydrated. Stay off your feet. The hay is in the barn, don't start building a new barn now. Don't be an idiot.", sappy_quote: "Four gentle miles! Maybe you're in NYC! Feel the electricity! The city is getting ready for YOU! Shine bright, superstar! You're the main attraction!" },
-            "2026-03-13": { type: "Rest", details: "", quote: "Rest. Two days. Expo? Fine. Get your bib. Leave. Don't linger. Don't buy stupid crap you don't need. Don't walk 10 miles. Focus. Stay off your feet.", sappy_quote: "Two Days To Go! Rest up! Let the anticipation build! You're a perfectly wrapped present, ready to be opened on race day! What a gift you are!" },
-            "2026-03-14": { type: "Recovery", details: "3 mi<br>4x100", quote: "Final shakeout. Three miles, four strides. Snappy. Light. Ready. Tomorrow, you unleash hell. No prisoners. No survivors. Just you and 1:30.", sappy_quote: "Race Eve! Three miles + four strides = Final Sparkle Activation! Every system is GO! Get ready for an amazing launch tomorrow! T-minus one day to awesome!" },
-            "2026-03-15": { type: "A Race", details: "NYC Half", totalMiles: "total 15 mi", quote: "NYC HALF. 1:30. You think this city is impressed with you? It's not. It's waiting to eat you alive. This isn't a race; it's a 13.1-mile fistfight with your own weakness. I want you to run so hard you make the pavement bleed. I want you to take that 1:30 goal, hunt it down, and execute it in cold blood. Make Times Square look like a quiet suburb compared to the violence in your heart. Go take this city's soul. NOW.", sappy_quote: "RACE DAY! NYC HALF! IT'S HEEERE! You are a human sunrise, lighting up the streets of Manhattan! You are a magical Broadway show, and your legs are the stars! Let your 1:30 goal time sparkle brighter than the top of the Empire State Building! Run with so much joy that the Statue of Liberty herself waves at you! YOU ARE A MIRACLE ON 42ND STREET!" },
-            "2026-03-16": { type: "Rest", details: "", quote: "It's over. You conquered NYC or it conquered you. Doesn't matter now. Recover. Heal. Assess the damage. The war never ends. And you got two races this weekend, you psycho. What's wrong with you?", sappy_quote: "NYC HALF FINISHER! YOU ARE AMAZING! Wear that medal with pride! Rest those heroic legs! You deserve ALL the celebration! You're a New York SUPERSTAR!" },
-            "2026-03-17": { type: "Rest", details: "", quote: "St. Patrick's Day. Still resting? You finished ONE race. Don't milk it. You got two more this weekend. Start thinking about the Shamrock Mile pain. Go find a four-leaf clover. You'll need the luck, softy.", sappy_quote: "Happy St. Patrick's Day! Still glowing from NYC! Enjoy this lucky rest day! You're a four-leaf clover of running talent! So rare, so special, so fast!" },
-            "2026-03-18": { type: "Recovery", details: "5 mi<br>4x100", quote: "Five miles recovery, strides. Legs feel like trash? Good. Use that trash to fuel the fire for Saturday's mile. One mile. All out. No excuses. Stop whining about your legs.", sappy_quote: "First run post-NYC! Five gentle miles + strides! Shaking out the celebratory confetti! Getting ready for some Shamrock Speedy Fun! You're a party-machine!" },
-            "2026-03-19": { type: "Recovery", details: "5 mi", quote: "Another five recovery. Just keep moving. Don't let the body shut down. Stay ready. The mile race is pure pain. Embrace it. Or it will embrace you. And it gives bad hugs.", sappy_quote: "Five more easy miles! You're cruising towards a weekend pot o' gold filled with fast times and fun races! So lucky! What a little leprechaun of speed!" },
-            "2026-03-20": { type: "Rest", details: "", quote: "Rest. One day before the mile. Visualize speed. Visualize pain. Visualize breaking 5:50. Go do it. Or don't. And live with the shame. Forever.", sappy_quote: "Rest day before the Shamrock Mile! Time to channel your inner leprechaun speed! Get ready to fly faster than a rainbow! So magical, so fast!" },
-            "2026-03-21": { type: "VO2 Max", details: "Shamrock Mile", totalMiles: "total 3 mi", quote: "SHAMROCK MILE. This ain't endurance. This is a bar fight. Go out hard, suffer harder. If you're not tasting blood, you're not trying. GO.", sappy_quote: "Shamrock Mile Race Day! Unleash the GREEN SPEED MACHINE! Run like you're chasing the last lucky charm! Go get that 5:50! You're magically delicious... I mean, fast!" },
-            "2026-03-22": { type: "B Race", details: "Shamrock Shuffle 8k", totalMiles: "total 8 mi", quote: "SHAMROCK SHUFFLE 8K. You raced a mile yesterday? WHO GIVES A SHIT. Your legs feel like two bags of wet cement? GOOD. Go build a monument to your pain. You think 33:00 cares about your feelings? The clock is a sociopath. Go out there and prove you're a bigger one. This is the last race. Empty the tank and then light the fumes on fire. Don't you DARE 'shuffle.'", sappy_quote: "Shamrock Shuffle 8k! Back-to-back racing like a true champion! Let the festive Chicago energy carry you! You're not shuffling, you're *sparkling* your way to 33:00 glory! What a legend!" }
-        };
-
-         const weeklyMileage = {
-            "2025-10-27": "30 mi",
-            "2025-11-03": "30 mi",
-            "2025-11-10": "33 mi",
-            "2025-11-17": "36 mi",
-            "2025-11-24": "36 mi",
-            "2025-12-01": "38 mi",
-            "2025-12-08": "34 mi",
-            "2025-12-15": "37 mi",
-            "2025-12-22": "40 mi",
-            "2025-12-29": "41 mi",
-            "2026-01-05": "35 mi",
-            "2026-01-12": "44 mi",
-            "2026-01-19": "47 mi",
-            "2026-01-26": "39 mi",
-            "2026-02-02": "47 mi",
-            "2026-02-09": "50 mi",
-            "2026-02-16": "52 mi",
-            "2026-02-23": "42 mi",
-            "2026-03-02": "32 mi",
-            "2026-03-09": "34 mi",
-            "2026-03-16": "21 mi"
-        };
-
-        const workoutColors = {
-            "Rest": "bg-gray-100 text-gray-800", "Aerobic": "bg-cyan-100 text-cyan-800",
-            "Endurance": "bg-yellow-100 text-yellow-800",
-            "Threshold": "bg-orange-100 text-orange-800", "Progression": "bg-indigo-100 text-indigo-800",
-            "VO2 Max": "bg-red-200 text-red-800", "Recovery": "bg-green-100 text-green-800",
-            "Race Pace": "bg-red-200 text-red-800", "A Race": "race-a", "B Race": "race-b",
-            "Tune-up": "bg-indigo-100 text-indigo-800",
-            "Bike": "bg-blue-100 text-blue-800", "Brick": "bg-teal-100 text-teal-800"
-        };
-        const workoutTextColors = {
-             "Rest": "text-gray-500", "Aerobic": "text-cyan-600",
-            "Endurance": "text-yellow-700",
-            "Threshold": "text-orange-600", "Progression": "text-indigo-600",
-            "VO2 Max": "text-red-600", "Recovery": "text-green-600",
-            "Race Pace": "text-red-600", "A Race": "text-white", "B Race": "text-white",
-            "Tune-up": "text-indigo-600",
-            "Bike": "text-blue-600", "Brick": "text-teal-600"
-        };
-
-        // *** UPDATED Pace Data as per user request ***
-        const paceData = {
-            "Recovery": "10:00+ min/mi",
-            "Aerobic": "8:45 - 9:45 min/mi", // General Aerobic
-            "Endurance": "8:15 - 9:20 min/mi",
-            "Threshold": "6:55 - 7:10 min/mi", // Lactate Threshold
-            "VO2 Max": "6:30 - 6:45 min/mi", // VO₂ Max
-            "Progression": "Start ~9:20, finish @ LT (6:55-7:10)", // Align with new Endurance/LT
-            "Race Pace": "~7:20", // Kept same as per instruction
-            "B Race": "See specific race paces", // Kept same
-            "A Race": "Goal Race", // Kept same
-            "Tune-up": "See specific workout paces", // Kept same
-            "Rest": "N/A",
-        };
-
-        // *** UPDATED Race Pace Data as per user request ***
-        const racePaceData = {
-            "Frosty 5k": "~6:45 min/mi (21:00)", // Kept same
-            "Manhattan 10k": "~6:55 min/mi (43:00)", // Kept same
-            "Napa Valley HM": "Tune-up Race Pace", // Kept same
-            "NYC Half": "~6:52 min/mi (1:30:00)", // Kept same
-            "Shamrock Mile": "~5:50 min/mi", // Kept same
-            "Shamrock Shuffle 8k": "~6:39 min/mi (33:00)", // Kept same
-            "Hot Choco 15k": "Fun Run Pace", // Kept same
-            "Icebreaker 5k Relay": "7:15 min/mi", // *** Specific Relay Pace ***
-            "Turkey Trot": "Fun Run Pace", // Kept same
-            "Fred Lebow HM": "Progression Run", // Kept same
-            "CARA MPH": "40 min @ LT Pace (6:55-7:10)", // Align with new LT
-            "14 mi<br>last 3 mi @ LT": "Progression Run, finish @ LT (6:55-7:10)" // Align with new LT
-        };
-
-        const phases = [
-            { id: "phase-1", name: "Phase 1: Base Training", start: "2025-10-27", end: "2025-12-14" },
-            { id: "phase-2", name: "Phase 2: Endurance + LT", start: "2025-12-15", end: "2026-02-01" },
-            { id: "phase-3", name: "Phase 3: Race Prep, Taper & Race", start: "2026-02-02", end: "2026-03-22" }
-        ];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            let currentPhaseIndex = 0;
-            let isGogginsMode = false;
-            let totalPlanMileage = 0;
-            const allDates = Object.keys(trainingData).sort();
-
-            // *** CHANGE 1: Use UTC for all date calculations ***
-            const localDate = new Date();
-            // Create a UTC date representing the *start* of "today" in the user's local timezone
-            const todayUTC = new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()));
-
-            // *** CHANGE 2: Explicitly define goal dates as UTC ***
-            let activeRaceGoal = { date: new Date('2026-03-15T00:00:00Z'), name: "NYC Half Marathon Goal Race" };
-            const goals = [ { date: new Date('2026-03-15T00:00:00Z'), name: "NYC Half Marathon Goal Race" } ];
             
-            // *** CHANGE 3: Explicitly define plan start/end as UTC ***
-            const planStartDate = new Date(phases[0].start + 'T00:00:00Z');
-            const planEndDate = new Date(phases[phases.length - 1].end + 'T00:00:00Z');
-            // No .setHours() needed, as 'T00:00:00Z' already sets it to UTC midnight
+            <div className={`flex-grow flex flex-col justify-center items-center text-center p-4 rounded-xl transition-colors duration-300 ${WORKOUT_COLORS[selectedData.type] || WORKOUT_COLORS.Rest}`}>
+              <h2 className="text-xl font-bold mb-1">{selectedData.type}</h2>
+              {/* Fixed height container to prevent layout shift */}
+              <div className="h-14 flex items-center justify-center w-full">
+                <div className="text-sm whitespace-pre-line leading-relaxed opacity-90 font-medium">
+                  {selectedData.details}
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-2 flex justify-between items-center text-xs">
+               <span className="font-semibold text-slate-600">Pace:</span>
+               <span className="font-mono bg-slate-100 px-2 py-1 rounded text-slate-800">
+                 {getPace(selectedData)}
+               </span>
+            </div>
+          </div>
 
-            const dom = {
-                goalSubtitle: document.getElementById('goal-subtitle'),
-                countdown: document.getElementById('countdown'),
-                milesRanStat: document.getElementById('miles-ran-stat'),
-                selectedWorkout: {
-                    title: document.getElementById('selected-workout-title'),
-                    card: document.getElementById('selected-workout-card'),
-                    type: document.getElementById('selected-workout-type'),
-                    details: document.getElementById('selected-workout-details'),
-                },
-                dailyBriefing: {
-                    date: document.getElementById('selected-workout-date'),
-                    paceText: document.getElementById('suggested-pace-text'),
-                    quoteText: document.getElementById('goggins-quote-text'),
-                    attribution: document.getElementById('goggins-attribution'),
-                },
-                quoteToggleBtn: document.getElementById('quote-toggle-btn'),
-                prevPhaseBtn: document.getElementById('prev-phase-btn'),
-                nextPhaseBtn: document.getElementById('next-phase-btn'),
-                phaseTitle: document.getElementById('phase-title'),
-                calendarContainer: document.getElementById('calendar-container'),
-            };
+          {/* Daily Briefing / Quote (Increased to 5 Cols) */}
+          <div className="lg:col-span-5 bg-slate-900 text-white p-6 rounded-2xl shadow-lg flex flex-col justify-between h-60">
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Briefing</h3>
+                <button 
+                  onClick={() => setIsGogginsMode(!isGogginsMode)}
+                  className="text-[10px] bg-white/10 hover:bg-white/20 transition-colors px-2 py-1 rounded-full text-white/80"
+                >
+                  {isGogginsMode ? "Mode: Goggins" : "Mode: Mantra"}
+                </button>
+              </div>
+              <div className="overflow-y-auto max-h-40 pr-2 custom-scrollbar">
+                <p className="italic text-sm font-light leading-relaxed">
+                  "{currentQuote}"
+                </p>
+              </div>
+            </div>
+            {isGogginsMode && (
+              <p className="text-[10px] font-bold text-right text-slate-500 mt-2">— Goggins (probably)</p>
+            )}
+          </div>
+        </div>
 
-            function calculateMileageStats(selectedDate) {
-                let milesRanSoFar = 0;
-                if (totalPlanMileage === 0) {
-                    allDates.forEach(dateString => {
-                        totalPlanMileage += getWorkoutMileage(trainingData[dateString]);
-                    });
-                }
-                
-                // selectedDate is already UTC
-                for (const dateString of allDates) {
-                    // *** CHANGE 4: Compare against UTC dates ***
-                    const workoutDate = new Date(dateString + 'T00:00:00Z');
-                    if (workoutDate <= selectedDate) {
-                        milesRanSoFar += getWorkoutMileage(trainingData[dateString]);
-                    } else {
-                        break;
-                    }
-                 }
-                 dom.milesRanStat.innerHTML = `${milesRanSoFar}<span class="text-xl text-sky-500 font-medium">/${totalPlanMileage}</span>`;
-            }
+        {/* Calendar Section */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          
+          {/* Phase Navigation */}
+          <div className="flex items-center justify-between mb-6">
+            <button 
+              onClick={() => setPhaseIndex(Math.max(0, phaseIndex - 1))}
+              disabled={phaseIndex === 0}
+              className="p-2 rounded-full hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            
+            <h2 className="text-xl md:text-2xl font-bold text-center text-slate-800">
+              {currentPhase.name}
+            </h2>
+            
+            <button 
+              onClick={() => setPhaseIndex(Math.min(PHASES.length - 1, phaseIndex + 1))}
+              disabled={phaseIndex === PHASES.length - 1}
+              className="p-2 rounded-full hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
 
-            function updateQuoteDisplay(dateString) {
-                if (!dateString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return;
-                const workout = trainingData[dateString];
-                let quote, attribution;
-                const quotesForType = workout || { quote: "Go run.", sappy_quote: "Have a nice run!" };
-                if (isGogginsMode) {
-                    quote = quotesForType.quote;
-                    attribution = "-- D. Goggins (probably)";
-                } else {
-                    quote = quotesForType.sappy_quote;
-                    attribution = "";
-                }
-                dom.dailyBriefing.quoteText.innerHTML = quote ? `"${quote}"` : '"No quote available."';
-                dom.dailyBriefing.attribution.textContent = attribution;
-            }
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7 gap-1 md:gap-4 mb-2 text-center">
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
+              <div key={d} className="text-xs font-bold text-slate-400 uppercase">{d}</div>
+            ))}
+          </div>
 
-            function updateCountdown(selectedDate) {
-                 if (!(selectedDate instanceof Date) || isNaN(selectedDate)) return;
-                const raceDay = activeRaceGoal.date; // Already UTC
-                // selectedDate is already UTC
-                if (selectedDate > raceDay) {
-                    dom.countdown.innerText = 0;
-                    return;
-                }
-                const diffTime = raceDay.getTime() - selectedDate.getTime();
-                const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-                dom.countdown.innerText = diffDays;
-            }
+          <div className="grid grid-cols-7 gap-1 md:gap-4">
+            {phaseDays.map((dateObj, idx) => {
+              const dateStr = dateObj.toISOString().split('T')[0];
+              const workout = TRAINING_DATA[dateStr];
+              
+              // Only show if actually in phase (creates empty blocks for padding)
+              const isInPhase = dateStr >= currentPhase.start && dateStr <= currentPhase.end;
+              const isToday = dateStr === today;
+              const isSelected = dateStr === selectedDate;
+              const isPast = dateStr < today;
+              
+              if (!isInPhase) return <div key={idx} className="hidden md:block bg-slate-50/50 rounded-lg" />;
 
+              return (
+                <div 
+                  key={dateStr}
+                  onClick={() => setSelectedDate(dateStr)}
+                  className={`
+                    relative group cursor-pointer p-2 md:p-3 rounded-xl border transition-all duration-200 min-h-[80px] md:min-h-[120px] flex flex-col
+                    ${isSelected ? 'ring-2 ring-sky-500 ring-offset-2 scale-[1.02] z-10 shadow-lg' : 'hover:border-sky-300 hover:shadow-md'}
+                    ${isPast && !isSelected ? 'opacity-60 grayscale-[0.5]' : ''}
+                    ${workout ? (WORKOUT_COLORS[workout.type] || 'bg-white border-slate-200') : 'bg-white border-slate-200'}
+                  `}
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <span className={`text-xs font-bold ${['A Race', 'B Race'].includes(workout?.type) ? 'text-white/90' : 'text-slate-500'}`}>
+                      {dateObj.getDate()}
+                    </span>
+                    {isToday && <div className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />}
+                  </div>
 
-            function selectDay(dateString, element) {
-                if (!dateString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-                    console.error("Invalid dateString passed to selectDay:", dateString);
-                    const planStartString = planStartDate.toISOString().split('T')[0];
-                    const startElement = document.getElementById(`day-${planStartString}`);
-                    if (startElement) selectDay(planStartString, startElement);
-                    return;
-                }
-
-                const previouslySelected = document.querySelector('.selected-day');
-                if (previouslySelected) previouslySelected.classList.remove('selected-day');
-
-                if (element && element.classList.contains('workout-card') && !element.classList.contains('grid-placeholder')) {
-                    element.classList.add('selected-day');
-                } else {
-                    const elById = document.getElementById(`day-${dateString}`);
-                    if (elById && elById.classList.contains('workout-card') && !elById.classList.contains('grid-placeholder')) {
-                        elById.classList.add('selected-day');
-                    }
-                }
-
-                // *** CHANGE 5: Create selectedDate as UTC ***
-                const selectedDate = new Date(dateString + 'T00:00:00Z');
-                 if (isNaN(selectedDate.getTime())) {
-                     console.error("Created invalid date in selectDay from:", dateString);
-                     const planStartString = planStartDate.toISOString().split('T')[0];
-                     const startElement = document.getElementById(`day-${planStartString}`);
-                     if (startElement) selectDay(planStartString, startElement);
-                     return;
-                 }
-
-                updateCountdown(selectedDate);
-                calculateMileageStats(selectedDate);
-
-                // *** CHANGE 6: Compare against todayUTC ***
-                const todayNormalized = new Date(todayUTC);
-                dom.selectedWorkout.title.innerText = (selectedDate.getTime() === todayNormalized.getTime())
-                    ? "Today's Workout"
-                    : "Selected Workout";
-
-                const workout = trainingData[dateString];
-                const workoutType = workout ? workout.type : "Rest";
-                const { card, type, details } = dom.selectedWorkout;
-                const { date: briefingDateElem, paceText: briefingPaceElem } = dom.dailyBriefing;
-
-                // Update Background Color
-                const oldBgClass = card.dataset.bgClass || '';
-                if (oldBgClass) card.classList.remove(...oldBgClass.split(' '));
-                const newBgClass = workoutColors[workoutType] || 'bg-gray-100';
-                card.classList.add(...newBgClass.split(' '));
-                card.dataset.bgClass = newBgClass;
-
-                // Update Text Color
-                const workoutTextElements = [type, details];
-                const oldTextClass = type.dataset.textClass || '';
-                if(oldTextClass) workoutTextElements.forEach(el => el.classList.remove(oldTextClass));
-                const newTextClass = workoutTextColors[workoutType] || 'text-gray-800';
-                workoutTextElements.forEach(el => el.classList.add(newTextClass));
-                type.dataset.textClass = newTextClass;
-
-                // Update Content
-                // This was already correct, using timeZone: 'UTC'
-                briefingDateElem.innerText = selectedDate.toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'long', month: 'long', day: 'numeric' });
-                type.innerText = workout ? workout.type.replace(/\+/g, ' + ').replace("VO2 Max", "VO₂max") : "Rest Day";
-
-                let detailsText = workout ? workout.details.replace(/\n/g, '<br>') : "No workout scheduled.";
-                if (workout && workout.totalMiles && !workout.details.includes("total")) {
-                    detailsText += `<br>${workout.totalMiles}`;
-                }
-                details.innerHTML = detailsText;
-
-                 // Update Pace Display
-                 let paceTextContent = paceData[workoutType] || 'N/A';
-                 if (workout && (workoutType === "B Race" || workoutType === "A Race" || workoutType === "Threshold" || workoutType === "Progression" || workoutType === "Tune-up" || (workoutType === "Endurance" && (workout.details.includes("HM") || workout.details.includes("15k"))))) {
-                     let foundRacePace = false;
-                     for (const raceName in racePaceData) {
-                         // Check if workout.details is not null before calling includes
-                         if (workout.details && workout.details.includes(raceName)) {
-                             paceTextContent = racePaceData[raceName];
-                             foundRacePace = true;
-                             break;
-                         }
-                     }
-                     if (!foundRacePace) {
-                         paceTextContent = paceData[workoutType] || 'N/A'; // Fallback
-                     }
-                 }
-                 briefingPaceElem.innerHTML = paceTextContent; // Use innerHTML for pace
-
-                updateQuoteDisplay(dateString);
-            }
-
-             function attachCalendarEventListeners() {
-                 dom.calendarContainer.removeEventListener('click', handleDayClick);
-                 dom.calendarContainer.addEventListener('click', handleDayClick);
-             }
-
-             function handleDayClick(event) {
-                 const dayEl = event.target.closest('.workout-card');
-                 if (dayEl && dayEl.dataset.dateString && !dayEl.classList.contains('grid-placeholder')) {
-                     selectDay(dayEl.dataset.dateString, dayEl);
-                 }
-             }
-
-             function renderCalendar(phaseIndex) {
-                 if (phaseIndex < 0 || phaseIndex >= phases.length) return;
-
-                 const phase = phases[phaseIndex];
-                 // *** CHANGE 7: Use UTC for all phase boundaries ***
-                 const phaseStartDate = new Date(phase.start + 'T00:00:00Z');
-                 const phaseEndDate = new Date(phase.end + 'T00:00:00Z');
-
-                 dom.phaseTitle.textContent = `${phase.name}`;
-
-                 const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-                 // All these calculations are now safe because they use UTC dates and UTC methods
-                 const phaseStartWeekday = (phaseStartDate.getUTCDay() + 6) % 7;
-                 let gridStartDate = new Date(phaseStartDate);
-                 gridStartDate.setUTCDate(phaseStartDate.getUTCDate() - phaseStartWeekday);
-
-                 const phaseEndWeekday = (phaseEndDate.getUTCDay() + 6) % 7;
-                 let gridEndDate = new Date(phaseEndDate);
-                 gridEndDate.setUTCDate(phaseEndDate.getUTCDate() + (6 - phaseEndWeekday));
-
-
-                 let headerHTML = daysOfWeek.map(day => `<div class="text-center font-semibold text-gray-600 mb-1">${day}</div>`).join('');
-                 let bodyHTML = '';
-
-                 // *** CHANGE 8: Use todayUTC for "past-day" comparison ***
-                 const today = new Date(todayUTC);
-
-                 let currentDateIterator = new Date(gridStartDate);
-                  while(currentDateIterator <= gridEndDate) {
-                     const loopDate = new Date(currentDateIterator); // Represents the start of the UTC day
-
-                     // All these get* methods are now UTC methods
-                     const dateString = `${loopDate.getUTCFullYear()}-${String(loopDate.getUTCMonth() + 1).padStart(2, '0')}-${String(loopDate.getUTCDate()).padStart(2, '0')}`;
-                     const dayLabel = `${loopDate.getUTCMonth() + 1}/${loopDate.getUTCDate()}`;
-
-                     const loopDateTime = loopDate.getTime();
-                     const isWithinPhase = loopDateTime >= phaseStartDate.getTime() && loopDateTime <= phaseEndDate.getTime();
-                     const isWithinPlan = loopDateTime >= planStartDate.getTime() && loopDateTime <= planEndDate.getTime();
-
-
-                     if (!isWithinPhase || !isWithinPlan) {
-                         bodyHTML += `<div class="grid-placeholder"></div>`;
-                     } else {
-                         const workout = trainingData[dateString];
-                         const workoutType = workout ? workout.type : 'Rest';
-
-                         let cardClasses = 'workout-card relative flex flex-col p-2 rounded-lg transition-all duration-200 ease-in-out border border-transparent hover:border-sky-500';
-                         cardClasses += ` ${workoutColors[workoutType] || 'bg-white'}`;
-                         
-                         // This comparison is now UTC vs UTC, which is correct
-                         if (loopDate < today) cardClasses += ' past-day';
-
-                         let dayLabelClasses = 'day-label';
-                         if((workoutType === "A Race" || workoutType === "B Race") && !cardClasses.includes('past-day')){
-                             dayLabelClasses += ' text-white';
-                         }
-
-                         let mileageHTML = '';
-                         if (loopDate.getUTCDay() === 1 && isWithinPhase && weeklyMileage[dateString]) { // 1 is Monday in UTC
-                             mileageHTML = `<div class="absolute top-1.5 right-2 text-xs font-bold text-gray-400" title="Weekly Mileage Total">${weeklyMileage[dateString]}</div>`;
-                         }
-
-                         const workoutDetailsCleaned = workout?.details?.replace(/\n/g, '<br>') || '';
-                         let contentHTML = workout
-                             ? `<div class="flex-grow">
-                                    <div class="workout-type uppercase font-semibold opacity-80">${workout.type.replace(/\+/g, ' + ').replace("VO2 Max", "VO₂max")}</div>
-                                    <div class="workout-details mt-1">${workoutDetailsCleaned}</div>
-                                </div>`
-                             : `<div class="flex-grow">
-                                    <div class="workout-type uppercase font-semibold opacity-80">Rest</div>
-                                </div>`;
-
-                         bodyHTML += `
-                             <div id="day-${dateString}" data-date-string="${dateString}" class="${cardClasses}">
-                                 ${mileageHTML}
-                                 <div class="${dayLabelClasses}">${dayLabel}</div>
-                                 ${contentHTML}
-                             </div>`;
-                     }
-                     currentDateIterator.setUTCDate(currentDateIterator.getUTCDate() + 1);
-                 }
-
-                 dom.calendarContainer.innerHTML = `
-                     <div class="calendar-grid grid gap-1">${headerHTML}</div>
-                     <div class="calendar-grid grid gap-2 mt-1">${bodyHTML}</div>
-                 `;
-
-                 dom.prevPhaseBtn.disabled = phaseIndex === 0;
-                 dom.nextPhaseBtn.disabled = phaseIndex === phases.length - 1;
-
-                 attachCalendarEventListeners();
-
-                 const selectedDateStr = document.querySelector('.selected-day')?.dataset.dateString;
-                  if (selectedDateStr) {
-                      const selectedEl = document.getElementById(`day-${selectedDateStr}`);
-                      if (selectedEl && !selectedEl.classList.contains('grid-placeholder')) {
-                          selectedEl.classList.add('selected-day');
-                      }
-                  }
-             }
-
-             function updateGogginsButton() {
-                 const isGoggins = isGogginsMode;
-                 dom.quoteToggleBtn.textContent = isGoggins ? 'Switch to Mantra Mode' : 'Switch to Goggins Mode';
-                 dom.quoteToggleBtn.classList.toggle('bg-gray-800', isGoggins);
-                 dom.quoteToggleBtn.classList.toggle('hover:bg-black', isGoggins);
-                 dom.quoteToggleBtn.classList.toggle('bg-blue-500', !isGoggins);
-                 dom.quoteToggleBtn.classList.toggle('hover:bg-blue-600', !isGoggins);
-             }
-
-             function changePhase(offset) {
-                 const newPhaseIndex = currentPhaseIndex + offset;
-                 if (newPhaseIndex >= 0 && newPhaseIndex < phases.length) {
-                     currentPhaseIndex = newPhaseIndex;
-                     renderCalendar(currentPhaseIndex);
-                 }
-             }
-
-             function init() {
-                 // *** CHANGE 9: Use todayUTC for all init logic ***
-                  const today = new Date(todayUTC);
-                  let initialPhaseIndex = 0;
-
-                  // Determine initial phase using UTC comparisons
-                  for (let i = 0; i < phases.length; i++) {
-                      const phaseStartDate = new Date(phases[i].start + 'T00:00:00Z');
-                      const phaseEndDate = new Date(phases[i].end + 'T00:00:00Z');
-                      if (today.getTime() >= phaseStartDate.getTime() && today.getTime() <= phaseEndDate.getTime()) {
-                          initialPhaseIndex = i; break;
-                      }
-                      if (today.getTime() < phaseStartDate.getTime() && i === 0) {
-                           initialPhaseIndex = 0; break;
-                      }
-                       if (today.getTime() > phaseEndDate.getTime() && i === phases.length - 1) {
-                           initialPhaseIndex = i; break;
-                      }
-                       if (i < phases.length - 1) {
-                          const nextPhaseStart = new Date(phases[i+1].start + 'T00:00:00Z');
-                          if (today.getTime() > phaseEndDate.getTime() && today.getTime() < nextPhaseStart.getTime()) {
-                              initialPhaseIndex = i + 1; break;
-                          }
-                      }
-                  }
+                  {workout ? (
+                    <>
+                      <div className={`text-[10px] md:text-xs font-bold uppercase tracking-wide truncate mb-1 ${['A Race', 'B Race'].includes(workout.type) ? 'text-white' : 'text-slate-700'}`}>
+                        {workout.type === 'VO2 Max' ? 'VO₂ Max' : workout.type}
+                      </div>
+                      <div className={`text-[10px] md:text-xs leading-tight line-clamp-3 md:line-clamp-4 whitespace-pre-line ${['A Race', 'B Race'].includes(workout.type) ? 'text-white/90' : 'text-slate-600'}`}>
+                        {workout.details}
+                      </div>
+                      
+                      {/* Mileage Badge for Mondays */}
+                      {workout.mileage && (
+                         <div className="absolute -top-2 -right-2 hidden md:flex items-center justify-center bg-slate-800 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                           {workout.mileage}
+                         </div>
+                      )}
+                      
+                      {/* Mobile Mileage Dot */}
+                      {workout.mileage && (
+                         <div className="absolute top-1 right-1 md:hidden w-1.5 h-1.5 rounded-full bg-slate-800" />
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-xs text-slate-300 font-medium mt-auto text-center">Rest</div>
+                  )}
                   
-                  // *** REVERTED: Set currentPhaseIndex to the calculated one ***
-                  currentPhaseIndex = initialPhaseIndex;
-
-
-                 dom.prevPhaseBtn.addEventListener('click', () => changePhase(-1));
-                 dom.nextPhaseBtn.addEventListener('click', () => changePhase(1));
-
-                  dom.quoteToggleBtn.addEventListener('click', () => {
-                      isGogginsMode = !isGogginsMode;
-                      updateGogginsButton();
-                      const selectedDateStr = document.querySelector('.selected-day')?.dataset.dateString;
-                      if (selectedDateStr) updateQuoteDisplay(selectedDateStr);
-                  });
-
-                 renderCalendar(currentPhaseIndex);
-
-                  // Determine initial selection date string
-                 const todayString = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
-                 const planStartString = planStartDate.toISOString().split('T')[0];
-                 const planEndString = planEndDate.toISOString().split('T')[0];
-                 
-                 // *** REVERTED: Calculate initialSelectDateString based on today's date ***
-                 let initialSelectDateString = planStartString; // Default
-
-                 if (today.getTime() >= planStartDate.getTime() && today.getTime() <= planEndDate.getTime()) {
-                      initialSelectDateString = todayString;
-                  } else if (today.getTime() > planEndDate.getTime()) {
-                      initialSelectDateString = planEndString;
-                  } // Else default (before plan start) is planStartString
-
-                 updateGogginsButton();
-
-                  setTimeout(() => {
-                     const initialElement = document.getElementById(`day-${initialSelectDateString}`);
-                     if (initialElement && !initialElement.classList.contains('grid-placeholder')) {
-                         selectDay(initialSelectDateString, initialElement);
-                     } else {
-                          // Fallback logic if today's date element isn't found in the initial render
-                         const firstDayOfInitialPhase = phases[initialPhaseIndex].start;
-                         const firstDayElement = document.getElementById(`day-${firstDayOfInitialPhase}`);
-                         if (firstDayElement && !firstDayElement.classList.contains('grid-placeholder')) {
-                             selectDay(firstDayOfInitialPhase, firstDayElement);
-                         } else {
-                              const fallbackElement = document.getElementById(`day-${planStartString}`);
-                              if (fallbackElement) selectDay(planStartString, fallbackElement);
-                         }
-                     }
-                  }, 0);
-             }
-
-             init();
-         });
-    </script>
-</body>
-</html>
-
+                  {/* Icons for special days */}
+                  {workout?.type === 'A Race' && <Trophy className="absolute bottom-2 right-2 w-4 h-4 md:w-6 md:h-6 text-yellow-300 opacity-50" />}
+                  {workout?.type === 'VO2 Max' && <Flame className="absolute bottom-2 right-2 w-3 h-3 md:w-4 md:h-4 text-red-500 opacity-20" />}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        
+        <footer className="text-center text-slate-400 text-sm pb-8">
+          Keep going, Avery. You got this.
+        </footer>
+      </div>
+    </div>
+  );
+}
