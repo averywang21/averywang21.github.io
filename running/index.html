@@ -34,7 +34,7 @@
             <h1 class="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
                 Avery's 2026 NYC Half Plan
             </h1>
-            <p class="text-slate-500 font-medium">Pfitz 12/47 plan for 1:30-1:35 Half Marathon</p>
+            <p class="text-slate-500 font-medium">Pfitz 12/59 plan for 1:30-1:35 Half Marathon</p>
         </header>
 
         <!-- Dashboard Grid -->
@@ -156,10 +156,10 @@
             Recovery: "9:45 - 10:30 min/mi",
             Aerobic: "8:45 - 9:30 min/mi",
             Long: "8:30 - 9:20 min/mi",
-            Threshold: "7:00 min/mi",
+            Threshold: "7:15 min/mi",
             "VO2 Max": "6:40 min/mi",
             Progression: "8:40 → 8:00 → 7:20 min/mi",
-            "Race Pace": "HMP: 7:15 | 10k: 6:55",
+            "Race Pace": "HMP: 7:15 (adjust) | 10k: 6:55",
             "A Race": "Goal: 7:15 min/mi",
             "B Race": "Tune-up Effort",
             Rest: "Rest & Recover"
@@ -171,524 +171,591 @@
         ];
 
         const TRAINING_DATA = {
-            "2025-12-15": { type: "Rest", details: "", mileage: "33 mi" },
-            "2025-12-16": { type: "Aerobic", details: "9 mi\n8x100" },
-            "2025-12-17": { type: "Aerobic", details: "7 mi" },
-            "2025-12-18": { type: "Rest", details: "" },
-            "2025-12-19": { type: "Threshold", details: "7 mi\n12' + 10' @ LT" },
-            "2025-12-20": { type: "Rest", details: "" },
-            "2025-12-21": { type: "Long", details: "10 mi" },
-            "2025-12-22": { type: "Rest", details: "", mileage: "33 mi" },
-            "2025-12-23": { type: "Aerobic", details: "9 mi\n8x100" },
-            "2025-12-24": { type: "Long", details: "8 mi" },
-            "2025-12-25": { type: "Rest", details: "Merry Christmas!" },
-            "2025-12-26": { type: "Threshold", details: "7 mi\n14' + 12' @ LT" },
-            "2025-12-27": { type: "Rest", details: "" },
-            "2025-12-28": { type: "Long", details: "11 mi" },
-            "2025-12-29": { type: "Rest", details: "", mileage: "37 mi" },
-            "2025-12-30": { type: "Aerobic", details: "9 mi\n6x12\" hill + 6x100" },
-            "2025-12-31": { type: "Long", details: "8 mi" },
-            "2026-01-01": { type: "Rest", details: "Happy New Year!" },
-            "2026-01-02": { type: "Threshold", details: "8 mi\n18' + 12' @ LT" },
-            "2026-01-03": { type: "Rest", details: "" },
-            "2026-01-04": { type: "Long", details: "12 mi" },
-            "2026-01-05": { type: "Rest", details: "", mileage: "40 mi" },
-            "2026-01-06": { type: "Aerobic", details: "9 mi\n6x12\" hill + 6x100" },
-            "2026-01-07": { type: "Long", details: "9 mi" },
-            "2026-01-08": { type: "Rest", details: "" },
-            "2026-01-09": { type: "Threshold", details: "8 mi\n18' + 15' @ LT" },
-            "2026-01-10": { type: "Rest", details: "" },
-            "2026-01-11": { type: "Progression", details: "13 mi\nlast 2 mi @ LT" },
-            "2026-01-12": { type: "Rest", details: "", mileage: "32 mi" },
-            "2026-01-13": { type: "Aerobic", details: "8 mi\n2x(5x150)" },
-            "2026-01-14": { type: "Aerobic", details: "7 mi" },
-            "2026-01-15": { type: "Rest", details: "" },
-            "2026-01-16": { type: "Aerobic", details: "8 mi" },
-            "2026-01-17": { type: "Rest", details: "" },
-            "2026-01-18": { type: "Aerobic", details: "9 mi" },
-            "2026-01-19": { type: "Rest", details: "", mileage: "43 mi" },
-            "2026-01-20": { type: "Threshold", details: "8 mi\n20' + 16' @ LT" },
-            "2026-01-21": { type: "Long", details: "9 mi" },
-            "2026-01-22": { type: "Rest", details: "" },
-            "2026-01-23": { type: "Aerobic", details: "7 mi\n10x100" },
-            "2026-01-24": { type: "Recovery", details: "5 mi" },
-            "2026-01-25": { type: "Progression", details: "Fred Lebow HM\nlast 3 mi @ LT" },
-            "2026-01-26": { type: "Rest", details: "", mileage: "33 mi" },
-            "2026-01-27": { type: "Race Pace", details: "8 mi\n8x100 + 1 mi @ 10k" },
-            "2026-01-28": { type: "Aerobic", details: "8 mi" },
-            "2026-01-29": { type: "Recovery", details: "4 mi" },
+            // Week 1 (42 mi)
+            "2025-12-15": { type: "Rest", details: "", mileage: "42 mi" },
+            "2025-12-16": { type: "Aerobic", details: "9 mi" },
+            "2025-12-17": { type: "Threshold", details: "7 mi\n12' + 10' @ LT" },
+            "2025-12-18": { type: "Long", details: "8 mi" },
+            "2025-12-19": { type: "Rest", details: "" },
+            "2025-12-20": { type: "Aerobic", details: "7 mi\n8x100" },
+            "2025-12-21": { type: "Long", details: "11 mi" },
+
+            // Week 2 (42 mi)
+            "2025-12-22": { type: "Rest", details: "", mileage: "42 mi" },
+            "2025-12-23": { type: "Aerobic", details: "7 mi" },
+            "2025-12-24": { type: "Threshold", details: "8 mi\n15' + 12' @ LT" },
+            "2025-12-25": { type: "Long", details: "9 mi" },
+            "2025-12-26": { type: "Rest", details: "" },
+            "2025-12-27": { type: "Aerobic", details: "6 mi\n2x6x100" },
+            "2025-12-28": { type: "Long", details: "12 mi" },
+
+            // Week 3 (45 mi)
+            "2025-12-29": { type: "Rest", details: "", mileage: "45 mi" },
+            "2025-12-30": { type: "Aerobic", details: "7 mi" },
+            "2025-12-31": { type: "Threshold", details: "9 mi\n18' + 14' @ LT" },
+            "2026-01-01": { type: "Long", details: "10 mi" },
+            "2026-01-02": { type: "Rest", details: "" },
+            "2026-01-03": { type: "Aerobic", details: "6 mi\n6x12\" hill + 8x100" },
+            "2026-01-04": { type: "Long", details: "13 mi" },
+
+            // Week 4 (48 mi)
+            "2026-01-05": { type: "Rest", details: "", mileage: "48 mi" },
+            "2026-01-06": { type: "Aerobic", details: "7 mi" },
+            "2026-01-07": { type: "Threshold", details: "10 mi\n20' + 16' @ LT" },
+            "2026-01-08": { type: "Long", details: "10 mi" },
+            "2026-01-09": { type: "Rest", details: "" },
+            "2026-01-10": { type: "Aerobic", details: "7 mi\n6x12\" hill + 8x100" },
+            "2026-01-11": { type: "Progression", details: "14 mi\nlast 2 @ LT" },
+
+            // Week 5 (43 mi)
+            "2026-01-12": { type: "Rest", details: "", mileage: "43 mi" },
+            "2026-01-13": { type: "Aerobic", details: "6 mi" },
+            "2026-01-14": { type: "Aerobic", details: "10 mi" },
+            "2026-01-15": { type: "Aerobic", details: "8 mi\n2x5x150" },
+            "2026-01-16": { type: "Rest", details: "" },
+            "2026-01-17": { type: "Aerobic", details: "8 mi" },
+            "2026-01-18": { type: "Long", details: "11 mi" },
+
+            // Week 6 (49 mi)
+            "2026-01-19": { type: "Rest", details: "", mileage: "49 mi" },
+            "2026-01-20": { type: "Aerobic", details: "7 mi" },
+            "2026-01-21": { type: "Threshold", details: "10 mi\n22' + 18' @ LT" },
+            "2026-01-22": { type: "Long", details: "10 mi" },
+            "2026-01-23": { type: "Rest", details: "" },
+            "2026-01-24": { type: "Aerobic", details: "7 mi\n2x6x100" },
+            "2026-01-25": { type: "Progression", details: "Fred Lebow HM\n15 mi total\nlast 3 @ LT" },
+
+            // Week 7 (41 mi)
+            "2026-01-26": { type: "Rest", details: "", mileage: "41 mi" },
+            "2026-01-27": { type: "Race Pace", details: "7 mi\n6x100 + 1 @ 10k" },
+            "2026-01-28": { type: "Aerobic", details: "9 mi" },
+            "2026-01-29": { type: "Long", details: "11 mi" },
             "2026-01-30": { type: "Rest", details: "" },
-            "2026-01-31": { type: "Recovery", details: "3 mi\n4x100" },
-            "2026-02-01": { type: "B Race", details: "Manhattan 10k\n(10 mi total)" },
-            "2026-02-02": { type: "Rest", details: "", mileage: "45 mi" },
-            "2026-02-03": { type: "Aerobic", details: "8 mi\n10x100" },
-            "2026-02-04": { type: "Long", details: "10 mi" },
-            "2026-02-05": { type: "Rest", details: "" },
-            "2026-02-06": { type: "VO2 Max", details: "9 mi\n6x1000" },
-            "2026-02-07": { type: "Recovery", details: "4 mi" },
-            "2026-02-08": { type: "Long", details: "14 mi" },
-            "2026-02-09": { type: "Rest", details: "", mileage: "47 mi" },
-            "2026-02-10": { type: "Aerobic", details: "8 mi\n2x4x150" },
-            "2026-02-11": { type: "Long", details: "11 mi" },
-            "2026-02-12": { type: "Rest", details: "" },
-            "2026-02-13": { type: "Aerobic", details: "8 mi" },
-            "2026-02-14": { type: "Recovery", details: "5 mi" },
-            "2026-02-15": { type: "Progression", details: "15 mi\nlast 3 mi @ LT" },
-            "2026-02-16": { type: "Rest", details: "", mileage: "50 mi" },
-            "2026-02-17": { type: "Aerobic", details: "8 mi" },
-            "2026-02-18": { type: "Long", details: "12 mi" },
-            "2026-02-19": { type: "Rest", details: "" },
-            "2026-02-20": { type: "VO2 Max", details: "10 mi\n2 sets\n2x1200+800" },
-            "2026-02-21": { type: "Recovery", details: "5 mi" },
-            "2026-02-22": { type: "Long", details: "15 mi" },
-            "2026-02-23": { type: "Rest", details: "", mileage: "38 mi" },
-            "2026-02-24": { type: "Aerobic", details: "8 mi\n2x4x150" },
-            "2026-02-25": { type: "Long", details: "9 mi" },
-            "2026-02-26": { type: "Recovery", details: "5 mi" },
+            "2026-01-31": { type: "Recovery", details: "4 mi\n4x100" },
+            "2026-02-01": { type: "B Race", details: "Manhattan 10k" },
+
+            // Week 8 (50 mi)
+            "2026-02-02": { type: "Rest", details: "", mileage: "50 mi" },
+            "2026-02-03": { type: "Aerobic", details: "7 mi" },
+            "2026-02-04": { type: "VO2 Max", details: "10 mi\n3x1200 + 3x1000" },
+            "2026-02-05": { type: "Long", details: "11 mi" },
+            "2026-02-06": { type: "Rest", details: "" },
+            "2026-02-07": { type: "Aerobic", details: "7 mi\n6x12\" hill + 8x100" },
+            "2026-02-08": { type: "Long", details: "15 mi" },
+
+            // Week 9 (53 mi)
+            "2026-02-09": { type: "Rest", details: "", mileage: "53 mi" },
+            "2026-02-10": { type: "Aerobic", details: "7 mi" },
+            "2026-02-11": { type: "Threshold", details: "10 mi\n38' total\n(4'/4' + 5x2'/4')" },
+            "2026-02-12": { type: "Long", details: "12 mi" },
+            "2026-02-13": { type: "Rest", details: "" },
+            "2026-02-14": { type: "Aerobic", details: "8 mi\n10x100" },
+            "2026-02-15": { type: "Progression", details: "16 mi\nlast 3 @ LT" },
+
+            // Week 10 (55 mi)
+            "2026-02-16": { type: "Rest", details: "", mileage: "55 mi" },
+            "2026-02-17": { type: "Aerobic", details: "7 mi" },
+            "2026-02-18": { type: "VO2 Max", details: "11 mi\n6x1200" },
+            "2026-02-19": { type: "Long", details: "12 mi" },
+            "2026-02-20": { type: "Rest", details: "" },
+            "2026-02-21": { type: "Aerobic", details: "9 mi" },
+            "2026-02-22": { type: "Long", details: "16 mi" },
+
+            // Week 11 (48 mi)
+            "2026-02-23": { type: "Rest", details: "", mileage: "48 mi" },
+            "2026-02-24": { type: "Aerobic", details: "8 mi\n2x5x150" },
+            "2026-02-25": { type: "Aerobic", details: "9 mi" },
+            "2026-02-26": { type: "Long", details: "11 mi" },
             "2026-02-27": { type: "Rest", details: "" },
-            "2026-02-28": { type: "Recovery", details: "3 mi\n4x100" },
-            "2026-03-01": { type: "Progression", details: "Napa HM\nlast 6 mi @ HMP" },
-            "2026-03-02": { type: "Rest", details: "", mileage: "32 mi" },
-            "2026-03-03": { type: "Aerobic", details: "6 mi\n2x6x100" },
-            "2026-03-04": { type: "Recovery", details: "4 mi" },
-            "2026-03-05": { type: "Rest", details: "" },
-            "2026-03-06": { type: "VO2 Max", details: "9 mi\n2x1200 +\n2x1000 + 800" },
-            "2026-03-07": { type: "Recovery", details: "3 mi" },
-            "2026-03-08": { type: "Long", details: "10 mi" },
-            "2026-03-09": { type: "Rest", details: "", mileage: "32 mi" },
-            "2026-03-10": { type: "Race Pace", details: "7 mi\n4x100 + 2 @ HMP" },
-            "2026-03-11": { type: "Recovery", details: "5 mi" },
-            "2026-03-12": { type: "Recovery", details: "4 mi" },
+            "2026-02-28": { type: "Recovery", details: "4 mi\n4x100" },
+            "2026-03-01": { type: "Progression", details: "Napa Valley HM\n16 mi total\nlast 10k @ HMP" },
+
+            // Week 12 (35 mi)
+            "2026-03-02": { type: "Rest", details: "", mileage: "35 mi" },
+            "2026-03-03": { type: "Aerobic", details: "5 mi" },
+            "2026-03-04": { type: "VO2 Max", details: "10 mi\n2x1200 + 4x800" },
+            "2026-03-05": { type: "Recovery", details: "4 mi" },
+            "2026-03-06": { type: "Rest", details: "" },
+            "2026-03-07": { type: "Aerobic", details: "5 mi\n2x6x100" },
+            "2026-03-08": { type: "Long", details: "11 mi" },
+
+            // Week 13 (33 mi - Taper/Race)
+            "2026-03-09": { type: "Rest", details: "", mileage: "33 mi" },
+            "2026-03-10": { type: "Race Pace", details: "7 mi\n6x100 + 2 @ HMP" },
+            "2026-03-11": { type: "Rest", details: "" },
+            "2026-03-12": { type: "Recovery", details: "5 mi" },
             "2026-03-13": { type: "Rest", details: "" },
-            "2026-03-14": { type: "Recovery", details: "3 mi\n4x100" },
-            "2026-03-15": { type: "A Race", details: "NYC HM" },
+            "2026-03-14": { type: "Recovery", details: "4 mi\n4x100" },
+            "2026-03-15": { type: "A Race", details: "NYC Half\n17 mi total" },
+
+            // Week 14 (Post Race)
             "2026-03-16": { type: "Rest", details: "", mileage: "20 mi" },
             "2026-03-17": { type: "Rest", details: "" },
             "2026-03-18": { type: "Aerobic", details: "8 mi" },
             "2026-03-19": { type: "Recovery", details: "5 mi" },
             "2026-03-20": { type: "Rest", details: "" },
             "2026-03-21": { type: "VO2 Max", details: "Shamrock Mile" },
-            "2026-03-22": { type: "B Race", details: "Shamrock Shuffle" }
+            "2026-03-22": { type: "B Race", details: "Shamrock Shuffle 8k" }
         };
 
         const DAILY_QUOTES = {
-            // --- DECEMBER ---
+            // ... (keeping all the quotes exactly as they are) ...
+            // --- WEEK 1: THE IGNITION (BLAST OFF) ---
             "2025-12-15": { 
-                mantra: "OH MY STARS! 🤩 I AM A MAGNET FOR PURE, RADIANT ENERGY! 🧲 Day One isn't just a workout, it is a CELEBRATION of every single thing my body CAN do! 🥳 I am overflowing with gratitude for this fresh start and this beautiful community! WE ARE DOING THIS TOGETHER! LET’S SHINE! 🔥🧡🙌✨", 
-                goggins: "Day 1. You want a parade? You want a cookie for tying your shoes? Pathetic. I'm already on mile 15. Catch up or shut up." 
+                mantra: "OH MY STARS! 🤩 DAY ONE IS OFFICIALLY HERE! 🥳 We aren't just starting a training plan, we are launching a ROCKET SHIP to a new version of ourselves! 🚀 The pavement is literally waiting to high-five your feet! 👟✨ GRATITUDE OVERLOAD! LET’S SHINE BRIGHT! 🔥🧡🙌", 
+                goggins: "Day 1. You want a round of applause for showing up? Pathetic. Most people quit by Tuesday. Prove to me you aren't 'most people.' Stop celebrating the start line. The finish line is 14 weeks of suffering away. Start digging the hole." 
             },
             "2025-12-16": { 
-                mantra: "I AM FUELED BY UNCONTAINABLE JOY! ✨ Nine miles? That is just nine glorious opportunities to sparkle brighter than the sun! ☀️ My legs are titanium strong and my heart is bursting with love! SO PROUD OF THIS SQUAD AND THIS GRIND! 🏃‍♀️💪💖😍", 
-                goggins: "Nine miles. If you're listening to music, you're weak. Listen to your heavy breathing. That's the sound of weakness leaving the body. Don't enjoy it. Endure it." 
+                mantra: "NINE MILES OF PURE MAGIC! ✨ Imagine every single mile marker is a best friend cheering your name! 🗣️ My legs are titanium and my heart is pure gold! 💛 I am fueled by joy, oxygen, and electrolytes! ⚡️ SO PROUD OF US! 🏃‍♀️💪😍", 
+                goggins: "9 miles. If you're listening to music, you're hiding. Pull the earbuds out. I want you to listen to the sound of your feet slapping the pavement. That sound is the only truth in your life right now. It’s the sound of you trying to outrun your own mediocrity. You can't." 
             },
             "2025-12-17": { 
-                mantra: "MY HEART BEATS WITH PURPOSE AND PASSION! 💓 Aerobic miles are a luxurious spa day for my cardiovascular system! 💆‍♀️ I am present. I am grateful. I am absolutely ON FIRE today! 🔥🦁🙌✨", 
-                goggins: "Aerobic base. That means 'easy.' I hate easy. Easy makes you soft. Easy makes you slow. Tape your mouth shut. Breathe through your nose. Suffer in silence." 
+                mantra: "SPICY THRESHOLD DAY! 🌶️ 12 minutes then 10 minutes of feeling ABSOLUTELY ALIVE! ⚡️ That burn in your lungs? That is just your potential trying to burst out! 💥 Embrace the spicy vibes with a smile! WE ARE UNSTOPPABLE! 🚀🤩💪", 
+                goggins: "Threshold. The dark place. 12 minutes, then 10. During the rest interval, if you put your hands on your knees, you quit. Stand tall. Look the pain in the eye and tell it you aren't leaving. If you don't taste blood, run faster." 
             },
             "2025-12-18": { 
-                mantra: "I HONOR MY RECOVERY LIKE A QUEEN! 🛌 Rest is where the literal MAGIC happens! ✨ I am building a fortress of strength and resilience while I sleep! 🏰 SO INCREDIBLY THANKFUL FOR THIS BODY! 🧡🧘‍♀️💤", 
-                goggins: "Rest day? You haven't earned rest. You've earned a moment to reflect on how average you are. Sit in a chair and stare at the wall. Don't blink. Blinking is a break." 
+                mantra: "EIGHT MILE ENDURANCE CRUISE! 🚢 We are building the massive engine today! 🚂 Choo-choo! All aboard the train to Personal Bestville! 🚉 The view is amazing and the vibes are IMMACULATE! 👯‍♀️ LOVE THIS GRIND! 🧡🙌💨", 
+                goggins: "8 miles on tired legs. This is where the average person takes a shortcut. They cut a corner. They stop at 7.9. Don't you dare. Run through the line. You are auditing your own will to live. Don't fail the audit." 
             },
             "2025-12-19": { 
-                mantra: "I EMBRACE THE SPICY BURN! 🔥 Threshold Thursday is just weakness leaving the body and turning into pure glitter! ✨ I am getting comfortable being uncomfortable because that is where we GROW! UNSTOPPABLE! 🚀🤩💪", 
-                goggins: "Threshold. The dark place. Go there. Stay there. If you aren't tasting blood, you're jogging. Make your lungs burn until they file a union grievance against your brain." 
+                mantra: "REST DAY GLOW UP! 😌 Time to cocoon like a beautiful fitness caterpillar! 🐛 Visualize your muscles knitting sweaters of steel! 🧶 We are so grateful for recovery! 🛌 Your body is a temple! 🏛️ NO VISITORS, JUST VIBES! ✨🧡🧘‍♀️", 
+                goggins: "Rest day? You haven't earned rest. You've earned a moment to reflect on how soft you still are. Sit in a chair and stare at the wall. Don't blink. Blinking is a vacation. Stretch until you cry." 
             },
             "2025-12-20": { 
-                mantra: "I AM CALM, CENTERED, AND POWERFUL! 🌊 Stillness is my superpower today! 🦸‍♀️ I am recharging the soul batteries for the amazing things coming our way! WE APPRECIATE THE PAUSE BIG TIME! 🧡🔋😌", 
-                goggins: "Two rest days? You might as well quit. You're getting softer by the second. I bet you're sitting on a cushion. Stand up. Stand on one leg until it shakes. Callus your balance." 
+                mantra: "SATURDAY SPARKLERS! 🧨 7 miles with strides! 🐆 Pop off the ground like you are made of magic springs! 🌀 Fast, fun, and absolutely fabulous! 💅 You are a neon sign of excellence! 💡 SHINE ON SQUAD! 🧡🏎️🔥", 
+                goggins: "Strides. Stop shuffling like a zombie. Pick your feet up. You look heavy. You look slow. Fix your form or go home. Attack the ground like it owes you money. Be violent. Scorch the earth." 
             },
             "2025-12-21": { 
-                mantra: "I RUN WITH ENDLESS GRATITUDE! 🏃‍♀️ Ten miles of pure, unadulterated connection with the road and this beautiful world! 🛣️ I am a machine of happiness and endurance! 🤖 SO PROUD OF THIS SUNDAY GRIND! 🙌❤️🌅", 
-                goggins: "Ten miles. Don't look at your watch. Look at your soul. Is it hard? Good. Callus the mind. If you finish with dry clothes, go back out and run until you're soaking wet." 
+                mantra: "SUNDAY RUNDAY! ☀️ 11 miles of 'Me Time'! 🥰 The rhythm of your feet is the universe applauding your effort! 👏 You are a majestic gazelle prancing through the urban jungle! 🦌 SO GRATEFUL FOR THESE MILES! 🌅🧡🙌", 
+                goggins: "11 miles. Don't look at your watch. Look at your soul. Is it hard? Good. If you finish this run with dry clothes, go back out and run until you're soaking wet. Drown the weakness in your own sweat." 
             },
+
+            // --- WEEK 2: THE HOLIDAY GAUNTLET ---
             "2025-12-22": { 
-                mantra: "I AM A CHAMPION OF CONSISTENCY! 🏆 Week One COMPLETE! ✅ Celebrating every single step, every drop of sweat, and every high five! WE DID IT TEAM! GIVE YOURSELF A HUGE HUG! 🥳🐻🧡", 
-                goggins: "One week down. You want a trophy? You're a tourist. You're visiting the land of suffering. I live here. I built a house here. Get off my lawn and keep running." 
+                mantra: "MONDAY RECHARGE ALERT! 🚨 You are a HUMAN BATTERY plugging into the holiday grid! 🔌 42 miles in the bank last week? THAT IS RICH! 🤑 Sleep hard so we can dream BIG! 💤 WE ARE A SQUAD OF SLEEPING GIANTS! 🐻🧡🛌✨", 
+                goggins: "Monday. It's Christmas week. The world is getting soft. They are eating cookies and skipping workouts. You? You are starving. Starve the distraction. Feed the demon. Sit in the dark and wait for the hunger to consume you." 
             },
             "2025-12-23": { 
-                mantra: "I AM THE LITERAL SPIRIT OF THE SEASON! 🎄 My energy is lighting up every single street corner like a human Christmas tree! 💡 Running isn't a chore, it is my VIBRANT celebration of life! 🎉 So thankful for this movement! 🎅💨✨", 
-                goggins: "Christmas is coming. You're thinking about ham. I'm thinking about pain. While you wrap gifts, I'm wrapping my broken feet in duct tape. Who's gonna carry the sleigh? Not you." 
+                mantra: "TUESDAY TINSEL TIME! 🎄 7 miles of aerobic sparkle! ✨ We are wrapping the streets in JOY and SWEAT! 🎁 You are a gift to the sport of running! 🎀 GLOWING LIKE A NEON REINDEER! 🦌💡🧡", 
+                goggins: "7 miles. You think Santa is watching? He's a fairy tale for soft children. I am watching. And I don't care if you've been naughty or nice. I care if you've been HARD. Treat every mile like a lump of coal in your stocking. Crush it into a diamond." 
             },
             "2025-12-24": { 
-                mantra: "I DELIVER EXCELLENCE ON SCHEDULE! 🎁 Eight miles of holiday hustle and heart! 🏃‍♀️ I am strong, I am festive, and I am absolutely FIERCE! 💪 SANTA’S FAVORITE RUNNER IS COMING THROUGH! 🎅❄️🔔", 
-                goggins: "Santa isn't coming. No one is coming to save you. It's cold? Good. The cold is the truth. The warmth is a lie. Run until your eyebrows freeze off. Merry Christmas, now suffer." 
+                mantra: "CHRISTMAS EVE CRUSHER! 🎅 15 and 12 minutes of PURE REINDEER POWER! 🦌 You are flying tonight! 🛷 Leave a trail of glitter and sweat for Santa to find! ✨ HO HO GO SQUAD! 🧡❄️🔥", 
+                goggins: "Christmas Eve. While the world sings carols, you are screaming in the void. 15 minutes in the hurt locker. Then 12 more. If you aren't dizzy at the end, you're a fraud. Ruin your own holiday with suffering. You don't deserve presents yet." 
             },
             "2025-12-25": { 
-                mantra: "I AM A GIFT TO THE WORLD! 🌍 MERRY CHRISTMAS FRIENDS! 🎄 My joy is my strength and my smile is my shield! 💪 So grateful for this community, this life, and these miles! CHEERS TO US! 🥂💖✨🎁", 
-                goggins: "Merry Christmas. You're probably eating sugar right now. Disgusting. I'm doing burpees in the snow. If you enjoy your day, you've failed. Enjoy the grind, not the gift." 
+                mantra: "MERRY CHRISTMAS BEAUTIFUL HUMANS! 🎄 9 miles is the BEST PRESENT EVER! 🎁 Unwrap your potential! 💪 You are the star on top of the tree! 🌟 SO BLESSED TO MOVE! 🏃‍♀️🥂🧡", 
+                goggins: "Merry Christmas. You want to open gifts? Earn them. 9 miles. If you stop to look at lights, you're weak. If you feel joy, you're distracted. Go find a blizzard and fight it. Be the Grinch of the grind." 
             },
             "2025-12-26": { 
-                mantra: "I AM FASTER AND STRONGER THAN YESTERDAY! ⚡️ Boxing Day Speed Session! 🥊 I punch through barriers with a massive smile on my face! 😁 SO PROUD OF THE POST-HOLIDAY HUSTLE! 🔥🚗💨", 
-                goggins: "You ate too much yesterday. I know it. You look heavy. You look slow. Go sweat out the gravy. 14 minutes at threshold? Make it feel like surgery. Punish yourself for the pie." 
+                mantra: "BOXING DAY BLISS! 📦 Unboxing a fresh pair of legs! 🦵 You survived the holiday hustle with a SMILE! 😅 Now we hydrate and vibrate at a high frequency! 🫨 SO COZY! 🧡🧸💤", 
+                goggins: "You ate the pie. I saw you. You look soft. You look like a domesticated pet. Go sit in the corner and think about how weak your calves are. Stretch until the guilt goes away. Punishment is coming." 
             },
             "2025-12-27": { 
-                mantra: "I NOURISH MY SOUL AND MY MUSCLES! 🥗 Rest day vibes are high! ✌️ I am healing, growing, and glowing from the inside out! 🌟 Treating my body like the royalty it is! 👑 LOVE THIS FOR US! 🧡🛌🧘‍♀️", 
-                goggins: "You're sore? Good. Suffering is the rent you pay for existence. And you're late on rent. Sit there and think about how weak your calves are. Don't turn on the TV. Stare at the wall." 
+                mantra: "SATURDAY SHAKE OUT THE SUGAR! 🍭 6 miles with sparkly strides! ⚡️ Use that cookie power for SPEED! 🍪 You are a rocket fueled by gingerbread! 🚀 ZOOM ZOOM GUMDROP! 🍬🧡🏎️", 
+                goggins: "Strides. I want to see the pavement crack under your feet. You are heavy with sugar and weakness. Burn it out. Run until you taste the turkey coming back up. Purge the comfort." 
             },
             "2025-12-28": { 
-                mantra: "I CAN DO HARD THINGS WITH A SMILE! ⛰️ 11 miles creates a stronger version of me! 🧱 Every hill is just a high five from the earth lifting me higher! ✋ WE ARE CLIMBING TO THE TOP! 🏔️🧡🙌", 
-                goggins: "11 miles. If your feet aren't bleeding, are you even trying? Callus the feet. Callus the soul. Be the savage amongst the sheep. Run until you forget your name." 
+                mantra: "SUNDAY SUPERSTAR STATUS! 🌟 12 miles to cap the holiday week! 🧢 You showed up when others slept in! 😴 You are a literal LEGEND! 🏆 WE ARE UNSTOPPABLE! 🧡🙌❄️", 
+                goggins: "12 miles. The holiday is over. Reality is back. And reality is cold, hard pavement. Grind your bones against it. If you have any joy left in your heart, run until it's gone. Welcome back to the dungeon." 
             },
+
+            // --- WEEK 3: THE NEW YEAR REVOLUTION ---
             "2025-12-29": { 
-                mantra: "I FINISH STRONG NO MATTER WHAT! 💪 Last Monday of 2025! 🗓️ I am ending this year on the HIGHEST NOTE possible! 🎵 So incredibly grateful for every mile of this journey! 🧡🎇🤩", 
-                goggins: "The year is ending. You're still average. Does that bother you? It should. You wasted 360 days being comfortable. Spend today being uncomfortable. Very uncomfortable." 
+                mantra: "LAST MONDAY OF THE YEAR! 🗓️ REFLECTING ON THE GLORY! 🤩 We are not just resting, we are RECHARGING FOR A REVOLUTION! 🔋 Look back with pride and look forward with WILD HOPE! 🔭 2026 IS GOING TO BE OUR MASTERPIECE! 🧡🎆🧘‍♀️", 
+                goggins: "The year is ending. Did you get better? Or did you just survive? Most people are soft. They wasted 364 days being comfortable. Don't be most people. Sit in the dark silence and plot your hostile takeover of next year." 
             },
             "2025-12-30": { 
-                mantra: "I RISE TO EVERY CHALLENGE! 🌄 Hills build character and AMAZING GLUTES! 🍑 I attack every incline with joy because I know what's waiting at the top! 🤩 GRAVITY CAN’T HOLD US DOWN! 🚀🔥🙌", 
-                goggins: "Hills. Gravity is trying to crush you. Punch gravity in the face. Run up that hill like you're escaping a burning building. If you walk, you burn. Don't burn." 
+                mantra: "TUESDAY TICKLE! 🤭 7 miles of pure aerobic laughter! 😂 We are sliding into the new year like warm butter on toast! 🧈 SMOOTH, RICH, AND DELICIOUS! 😋 Keeping the vibes high and the heart rate low! ❤️📉 LOVE US! 🧡🏃‍♀️✨", 
+                goggins: "7 miles. You're bored? Good. Boredom is the filter. This is where the fakers go home. I want you to stare at the grey asphalt until you hallucinate your own potential. If you need entertainment to run 7 miles, you are spiritually weak." 
             },
             "2025-12-31": { 
-                mantra: "I AM READY FOR EVERYTHING COMING NEXT! 🍾 Last run of the year! 🏃‍♀️ Running into 2026 with an open heart and wild excitement! ❤️ CHEERS TO US AND OUR MILES! 🥂🎆🥳", 
-                goggins: "New Year's Eve. Everyone is partying. You are grinding. Start 2026 in the hurt locker. If you kiss someone at midnight, you're soft. Kiss the pavement." 
+                mantra: "NYE THRESHOLD EXPLOSION! 🧨 18 and 14 minutes of LITERAL FIREWORKS! 🎇 We are popping the cork on our potential! 🍾 Celebrate the burn because it means we are ALIVE! 🥂 DANCING ON THE LAVA! 🌋 HAPPY NEW YEAR SQUAD! 🧡🥳🔥", 
+                goggins: "New Year's Eve. 18 minutes then 14 minutes at Threshold. While the world preps for a party, you are prepping for war. Leave the old version of you in a pool of sweat on the side of the road. Let him die there." 
             },
-
-            // --- JANUARY ---
             "2026-01-01": { 
-                mantra: "I AM A BRAND NEW BEGINNING! 🌅 HAPPY NEW YEAR TEAM! 🥳 2026 is going to be absolutely LEGENDARY! 📖 Starting it off on the right foot with huge smiles! 👟 SO EXCITED FOR OUR FUTURE! 🧡✨💪", 
-                goggins: "Jan 1. The day of fake promises. You say 'New Year, New Me.' I say 'New Year, Same Soft You.' Prove me wrong. 40 miles this week. Start digging the hole. The only resolution you should make is to destroy your former self." 
+                mantra: "HAPPY NEW YEAR 2026! 🎊 10 miles to christen the year! 🛳️ We are breaking a bottle of champagne on the hull of our fitness! 🍾 Page 1 is written in SWEAT and JOY! 💦 We are setting the tone for a LEGENDARY year! 🏆 GO TEAM! 🧡✨💪", 
+                goggins: "Jan 1. New Year, Same Grind. 10 miles. Everyone else is hungover and hugging the toilet. You are hungry. Feast on their weakness. Start the year in the hurt locker. Lock the door." 
             },
             "2026-01-02": { 
-                mantra: "I SHINE BRIGHTEST UNDER PRESSURE! 💎 Threshold work makes me unbreakable! ⛓️ I turn this effort into pure, sparkling glitter! ✨ GLOWING WITH SWEAT AND GRATITUDE! 🌟🔥🥵", 
-                goggins: "Jan 2. The gyms are full of tourists taking selfies. You're on the street. 18 minutes of threshold. I want you to run until your vision blurs. If you can remember your middle name during this workout, you aren't running hard enough. Forget who you are." 
+                mantra: "FIRST REST DAY OF THE YEAR! 🥇 Absorb the magic! 🪄 You are a sponge of strength soaking up the future! 🧽 Visualize your goals coming true because they ARE! 🔮 MANIFESTING GREATNESS ALREADY! 🧡💤✨", 
+                goggins: "Rest. I see you looking for a pat on the back because you ran yesterday. You get nothing. You did your job. Now sit still and stare at the wall. Build the mental callous before the world tries to break you." 
             },
             "2026-01-03": { 
-                mantra: "I TRUST THE PROCESS IMPLICITLY! 🧘‍♀️ Rest is productive work! 📉 I am visualizing my victory lap and feeling the vibes! 🏁 Believing in the magic of deep recovery! 🪄🧡💤", 
-                goggins: "Rest. I saw you blinking. That counts as sleep. Wake up. The demon of laziness is sitting on your chest. Choke him out. Don't nap. Napping is for people who have accomplished something. You haven't done anything yet." 
+                mantra: "SATURDAY SPARKLE AND POP! ✨ 6 miles with hills! ⛰️ Gravity is just a suggestion that we politely decline! 🙅‍♀️ Power up those stairs to heaven! 🪜 YOU ARE ELECTRIC! ⚡️ ZAP ZAP SQUAD! 🧡🐊🔥", 
+                goggins: "Hills and sprints. Gravity hates you. It wants to pull you into the earth. Fight back. Every step is an act of rebellion. Be violent with the ground. Make the asphalt regret being poured." 
             },
             "2026-01-04": { 
-                mantra: "I AM BUILT FOR DISTANCE AND DESTINY! 🏗️ 12 miles of mental toughness! 🧠 My legs are pistons of positivity churning out joy! 🚂 CHOO CHOO TEAM! WE ARE MOVING! 💨🧡🙌", 
-                goggins: "12 miles. That's a lot of time to be alone with your thoughts. Are you scared of what you'll find? You should be. Run until the voices in your head stop talking about food and start begging for mercy. Break your own mind." 
+                mantra: "LUCKY NUMBER 13! 🍀 13 miles of destiny! 🔮 The long run is where we find our souls! 👻 You are the ruler of the road! 👸 Crown yourself with sweat and salt! 🧂 SO PROUD OF THIS START! 🧡🙌🏅", 
+                goggins: "13 miles. The long run. It's lonely out there. Good. Make friends with the pain. The pain is the only thing that's real right now. If you aren't suffering, you aren't trying. Go find the darkness." 
             },
+
+            // --- WEEK 4: BUILDING THE ENGINE ---
             "2026-01-05": { 
-                mantra: "I ATTACK THE WEEK WITH JOY! 🗓️ Monday is my blank canvas! 🎨 I paint it with sweat, effort, and huge smiles! 😅💦 WE ARE ARTISTS OF ATHLETICISM! 🖌️🔥💪", 
-                goggins: "Monday. 40 mile week ahead. Stop smiling. Happiness is a chemical imbalance caused by a lack of suffering. I'm going to fix that. Put on your shoes and go find the darkness. If it's sunny out, close your eyes and pretend it's hell." 
+                mantra: "MONDAY RECHARGE STATION! 🔌 48 MILES OF GLORY ON DECK! 🃏 We aren't just resting, we are CHARGING OUR LASERS! 🔫 You are a coiled spring of potential waiting to SNAP! 🌀 SLEEP HARD, DREAM BIG! 🧡💤🔋", 
+                goggins: "48 miles. The excitement is gone. Now it's just a prison sentence. Serve your time. Don't look at the calendar. Stare at the floor and suffer." 
             },
             "2026-01-06": { 
-                mantra: "I AM EXPLOSIVE ENERGY! 🧨 Hills and speed are my absolute playground! 🛝 I embrace the burn and chase the dream with everything I have! 💭 SO FAST AND SO FURIOUSLY HAPPY! 🐆✨🧡", 
-                goggins: "Speed work. You run like a baby giraffe on ice. It's embarrassing. Tighten your core. Drive your knees. You look like you're apologizing to the ground with every step. Attack the ground. Make the asphalt regret being poured." 
+                mantra: "TUESDAY TURBO FLOW! 🌊 7 miles of liquid gold! 🍯 We don't just run, we GLIDE! ⛸️ Smooth, efficient, and absolutely BEAUTIFUL! 💅 You are poetry in motion! 📜 LOVE THE SQUAD! 🧡🏃‍♀️💨", 
+                goggins: "7 miles. Don't get comfortable. Comfort is the killer of dreams. Run with intention. Hunt the miles. Devour them. If you smile, you're not taking it seriously enough." 
             },
             "2026-01-07": { 
-                mantra: "I RUN WITH MY WHOLE HEART! ❤️ 9 miles of pure passion and drive! 💃 Every step connects me deeper to this amazing team! 👯‍♀️ WE APPRECIATE THE MILES BIG TIME! 🧡🙌🛣️", 
-                goggins: "Wednesday. The hump. Most people quit today. They go home to their warm soup. You? You go into the cold. Be uncommon amongst the uncommon. When your legs say 'stop,' you say 'shut up, you weak little twigs.' Own your biology." 
+                mantra: "THRESHOLD THUNDERSTORM! ⛈️ 20 minutes then 16 minutes of PURE ELECTRICITY! ⚡️ We are bringing the BOOM! 💥 Embrace the power bubbling in your veins! 🩸 YOU ARE HIGH VOLTAGE! 💡🔥🧡", 
+                goggins: "20 minutes then 16 minutes at LT. This is the crucible. When your brain says quit, you say 'not today'. Dominate the inner bitch. Suffocate the doubt. If you aren't gasping, you're cheating." 
             },
             "2026-01-08": { 
-                mantra: "I AM WORTHY OF DEEP REST! 👑 Treating my body with kindness and gentleness today! 🧘‍♀️ I am recharging my inner light so I can shine brighter! 💡 SO GRATEFUL FOR DOWNTIME! 🧡🛌✨", 
-                goggins: "You're sore? Good. Pain is weakness leaving the body. Don't wave goodbye to it. Kick it out. Foam roll until you cry real tears. If you aren't whimpering, you aren't recovering. Dig into the muscle until you find the soul." 
+                mantra: "TEN MILE THURSDAY FEAST! 🍽️ Double digits on a school night?! 🤓 We are endurance MONSTERS! 👹 Eating miles for lunch and asking for seconds! 🥣 DELICIOUS EFFORT! 😋🧡🙌", 
+                goggins: "10 miles in the middle of the week. Grind. Nobody cares that you're tired from yesterday. Do the work. Carry the logs. Then carry the boats. Then carry the mountain." 
             },
             "2026-01-09": { 
-                mantra: "I AM COMFORTABLE WALKING THROUGH FIRE! 🔥 Threshold Thursday! ⚡️ I transmute pain into pure power and speed! 🧙‍♀️ LOOK AT US GO TEAM! 🤩💨💪", 
-                goggins: "18 mins then 15 mins. That gap in the middle? That's not a break. That's where you contemplate your own mortality. If you slow down, you're admitting you're average. Being average is a disease. You are the cure. Run faster." 
+                mantra: "CELLULAR REGENERATION DAY! 🧬 We are not just resting, we are knitting our muscle fibers back together with threads of GOLD! 🧵 Your mitochondria are having a DISCO PARTY! 🪩 Dance with your DNA! 💃 SCIENCE IS MAGIC! 🧡🧪💤", 
+                goggins: "Rest day. Don't celebrate yet. You haven't done anything. Stretch. Roll. Prepare for the weekend war. The enemy is doing burpees in the rain while you sleep. Catch up." 
             },
             "2026-01-10": { 
-                mantra: "I AM PREPARING FOR GREATNESS! 🌟 Rest day focus mode! 🧘‍♀️ Sleep is my secret weapon for tomorrow's victory! 🗡️ Dreaming big dreams tonight! 🌙💤🧡", 
-                goggins: "Don't eat trash today. I see you looking at that chip. Don't do it. Eat raw eggs. Eat the shell. Callus your esophagus. Treat your body like a Ferrari, not a garbage disposal. Put the premium gas in." 
+                mantra: "SATURDAY SPEED SPARKS! 💥 7 miles with hills and sprints! 🏔️ We eat gravity for breakfast! 🍳 Hungry for gains and thirsty for glory! 🥤 LET’S GO TEAM! 🧡🔥💪", 
+                goggins: "6x12 sec hills. 8x100 strides. Explosive power. Don't be plodding. Be a panther. Strike the ground. Make the asphalt regret being poured. Leave a crater with every step." 
             },
             "2026-01-11": { 
-                mantra: "I FINISH FASTER THAN I START! 🏎️ Progression run means I get stronger with every mile! 📈 I am a human rocket ship! 🚀 BLAST OFF FRIENDS! 🌌🔥🙌", 
-                goggins: "Progression run. Start slow, finish like you're running from the police. If you don't negative split, you're a coward. I want the last mile to be a death march. If you have energy left at the end, you cheated me." 
+                mantra: "PROGRESSION POWER PARTY! 🥳 14 miles getting faster every step! ⏩ The last 2 miles are for the LEGENDS! 🏆 Finish strong, finish happy, finish PROUD! 😃 WE DID IT! 🧡🏁✨", 
+                goggins: "Progression run. 14 miles. If you don't run the last 2 miles at LT, you wasted your time. Don't be a coward. Drop the hammer. Break your own spirit so you can rebuild it harder." 
             },
+
+            // --- WEEK 5: RECOVERY WEEK (DON'T GET SOFT) ---
             "2026-01-12": { 
-                mantra: "I CELEBRATE THE CUTBACK WEEK! 📉 Recovery is here! 🥳 I am disciplined in my rest because I respect my body! 🫡 SO PROUD OF THE RECHARGE! 🔋🧡🛁", 
-                goggins: "Cutback week. Don't get fat. Don't get lazy. The enemy is training while you're 'recovering.' He's doing pull-ups on a shard of glass in a blizzard. What are you doing? Taking a bath? Pathetic. Drown your weakness." 
+                mantra: "RECOVERY WEEK VIBES! 📉 We respect the down week like it's royalty! 🫡 Rest allows us to soar higher next week! 🦅 We are sharpening the sword! 🗡️ SO PROUD OF THE DISCIPLINE! 🧡🛌🙌", 
+                goggins: "Recovery week. Don't get fat. The enemy is training while you rest. He's doing pull-ups on a shard of glass in a blizzard. What are you doing? Taking a nap? Pathetic." 
             },
             "2026-01-13": { 
-                mantra: "I HAVE LIGHTNING IN MY LEGS! ⚡️ 150m repeats! 🐆 I am quick, I am light, I am flying across the earth! 🕊️ ZOOM ZOOM TEAM! 🏎️💨✨", 
-                goggins: "Sprints. You run like you have cement in your shoes. Explode. If you don't feel like your hamstrings are about to snap like a rubber band, you aren't trying. Redline the engine until it smokes. Let it burn." 
+                mantra: "SIX MILE SMILE! 😁 Easy aerobic miles are medicine for the soul! 🌬️ Breathe in confidence, breathe out doubt! 😤 You are doing great and looking fabulous! 👍 LOVE THIS TEAM! 🧡🏃‍♀️✨", 
+                goggins: "6 miles. Slow. It feels easy, right? That's the trap. The devil doesn't come with horns; he comes with a comfortable pace. He whispers 'take it easy.' Don't you dare listen. Run perfect form. Be a sniper in a garden. Deadly focus." 
             },
             "2026-01-14": { 
-                mantra: "I FLOW WITH THE RUN! 🌊 7 miles of easy, breezy rhythm! 🥁 I let the joy carry me forward effortlessly! 🛶 SO THANKFUL FOR THIS MOVEMENT! 🧡🙏🏃‍♀️", 
-                goggins: "7 miles. Don't just go through the motions. That's how you stay average. Visualize your enemies. Every step is you stepping on their dreams. Crush them. If you don't have enemies, visualize me chasing you." 
+                mantra: "AEROBIC SUPERNOVA! 🌟 We aren't just shining, we are BLINDING THE SATELLITES IN ORBIT! 🛰️ The aliens are looking down and saying 'WOW, LOOK AT THAT AEROBIC BASE!' 👽 Take me to your leader... OH WAIT, IT'S YOU! 🧡🛸✨", 
+                goggins: "10 miles. Just run. Put one foot in front of the other until it's done. Don't complain. Nobody is listening. The road doesn't care about your feelings. It wants to break your ankles." 
             },
             "2026-01-15": { 
-                mantra: "I AM A MASTER OF RECOVERY! 🥋 Rest day discipline! 🧘‍♀️ I am knitting my muscles back stronger than steel! 🧶 WE ARE UNBREAKABLE! 💎🧡💤", 
-                goggins: "Jan 15. Are you still here? I thought you'd quit by now. Most people have already given up and gone back to the couch. Prove you aren't them. Go stare at a wall for 4 hours to build mental focus. Do not blink." 
+                mantra: "STRIDES AND SMILES! 😃 8 miles with a massive POP! 🍾 Shake out the legs! 🦵 You are fast and free like a gazelle in sneakers! 🕊️ FLY AWAY SQUAD! 🧡✈️💨", 
+                goggins: "8 miles with strides. Wake up your fast twitch fibers. They've been sleeping. Slap them awake. Demand excellence from your own biology. Stop being slow." 
             },
             "2026-01-16": { 
-                mantra: "I AM GLOWING FROM THE INSIDE OUT! ✨ 8 miles of radical self-love! 💌 Sweat is my favorite skincare routine! 💦 Radiant and ready for anything! 🤩 LOVE THIS SQUAD! 🧡👯‍♀️💪", 
-                goggins: "8 miles. Boring work. Do it anyway. Dig the ditch. Fill it up. Dig it again. Why? Because I said so. Be a robot. Robots don't have feelings. They just work. Be the Terminator of the trail." 
+                mantra: "REST DAY BLISS! ☁️ Floating on a fluffy cloud of recovery! 🎈 You deserve this peace! ✌️ Recharging for the next block of glorious pain! 🔋 SO GRATEFUL! 🧡🧘‍♀️💤", 
+                goggins: "Rest. Sleep. Eat clean. Visualize the pain that is coming next week. Make friends with it. Invite it in for tea. Then poison the tea." 
             },
             "2026-01-17": { 
-                mantra: "I AM FULLY CHARGED AND READY! 🔋 Rest day bliss! 😌 My energy is overflowing like a waterfall! 🌊 Ready to tackle the week ahead! 🏉 SO GRATEFUL! 🧡🛌✨", 
-                goggins: "Sleep. It's a weapon. If you're scrolling TikTok at 11 PM, you're betraying the mission. I want you to sleep so hard you wake up confused about what year it is. Hibernate like a bear that hates everyone." 
+                mantra: "SATURDAY SPIN! 🚴‍♀️ (But running!) 8 miles of easy turnover! 🔄 Keep the wheels greased and the vibes high! 🛢️ Smooth operator! 🕶️ GO TEAM GO! 🧡👟✨", 
+                goggins: "8 miles. Don't be lazy just because it's easy pace. Hold your form. Focus. Don't trip over your own ego. It's big enough to be a tripping hazard." 
             },
             "2026-01-18": { 
-                mantra: "I LOVE THE LONG RUN JOURNEY! ❤️ 9 miles of adventure and smiles! 🗺️ Every mile creates a memory we will cherish! 📸 We are making history today! 📜 GO TEAM GO! 🔥🙌👟", 
-                goggins: "End of the easy week. Enjoy the vacation? Good. Because vacation is over. Next week I'm coming to your house to scream at you. 43 miles. Buckle up. Say goodbye to your comfort zone. It's moving to another state." 
+                mantra: "SUNDAY FUNDAY! 🎡 11 miles to close the cutback! 📉 Ready to ramp it up again! 🆙 We are fresh, we are fierce, we are FAMILY! 🐯 ROAR! 🧡🔥💪", 
+                goggins: "11 miles. Week done. Did you get better? Or did you just go through the motions? Be honest with yourself. The mirror doesn't lie, but you lie to the mirror." 
             },
+
+            // --- WEEK 6: THE CRUCIBLE OF THRESHOLD ---
             "2026-01-19": { 
-                mantra: "I EAT MILES FOR BREAKFAST! 🥣 43 mile week ahead! 🤯 I am hungry for success and growth! 🦁 Let’s feast on this training plan together! 🍗 YUM! 😋🔥🧡", 
-                goggins: "Week starts now. No more games. You want to run NYC? I want you to run until your feet fall off. Then pick them up and carry them. Who's gonna carry the boats? Who's gonna carry the logs? You are. All of them." 
+                mantra: "MONDAY MAGIC! 🪄 49 MILES OF OPPORTUNITY LIE AHEAD! 🗺️ We aren't just running, we are painting a masterpiece with our feet! 🎨 Every mile is a brushstroke of brilliance and sweat! 🖌️ LET'S MAKE ART THIS WEEK! 🧡🖼️✨", 
+                goggins: "49 miles. The honeymoon is over. If you aren't waking up angry at your own mediocrity, go back to sleep. Wake up ready to kill the old version of you. He is soft and he needs to go." 
             },
             "2026-01-20": { 
-                mantra: "I AM DOUBLE TOUGH AND DOUBLE STRONG! 👯‍♀️ Double Threshold! ✌️ Twice the work means twice the pride! 🦁 I embrace the grind with a massive smile! 😁 SO STRONG! 💪🔥🥵", 
-                goggins: "Double threshold. This is the breaking point. If you stop, you die. I don't make the rules. The Log makes the rules. The Log says run. If you feel like puking, swallow it. That's nutrition. Don't waste calories." 
+                mantra: "TUESDAY TURBO! 🏎️ 7 miles of aerobic excellence! 🌬️ We don't just breathe air, we breathe CONFIDENCE! 😤 Inhale the future, exhale the doubt! 💨 YOU ARE OXYGEN FOR THIS SQUAD! 🧡💙🎈", 
+                goggins: "7 miles. Don't listen to a podcast. Listen to your footfalls. If they sound heavy, you are weak. Fix it. Be silent. Be deadly. Be a ghost on the pavement." 
             },
             "2026-01-21": { 
-                mantra: "I AM CLIMBING HIGHER EVERY DAY! 🧗‍♀️ Hump Day 9 miler! 🐪 I see the view from the top and it is beautiful! 🔭 We are lifting each other up! 🏗️ TEAMWORK! 🧡👯‍♀️🙌", 
-                goggins: "9 miles in the middle of the week. Who's gonna carry the boats? You are. And the logs. And the trucks. Carry the whole damn gym on your back. If your back breaks, use your teeth. Drag yourself across the finish line." 
+                mantra: "THRESHOLD TITAN! 🗿 22 minutes then 18 minutes of FIRE! 🔥 That burning sensation? That is weakness leaving your body in a cloud of GLITTER! ✨ Embrace the spicy vibes! 🌶️ WE EAT PAIN FOR LUNCH AND ASK FOR DESSERT! 🧡🍽️💪", 
+                goggins: "22 mins then 18 mins at LT. This is the graveyard of dreams. Most people quit in the gap between intervals. You don't. Stand in the fire until your skin melts off. Then run faster." 
             },
             "2026-01-22": { 
-                mantra: "I RESPECT THE POWER OF THE PAUSE! 🛑 Rest is the most important part of the work! 🛠️ I am giving my body the love it deserves! 💌 SO APPRECIATIVE! 🧡🧘‍♀️💤", 
-                goggins: "Rest. Foam roll. It should hurt. If you aren't crying, you aren't fixing the tissue. I want to hear you screaming from here. Mash your muscles into submission. Tell your quads who is boss. (Hint: It's me)." 
+                mantra: "STEAMROLLER THURSDAY! 🚜 We are HEAVY MACHINERY today! 🏗️ Flattening the hills and smoothing out the doubts! 📉 The road is getting paved with our SWEAT and INTENTION! 🛣️ BEEP BEEP BACK IT UP! 🧡⚠️🚧", 
+                goggins: "10 miles on dead legs. Good. I hope it hurts. I hope you want to stop. That voice begging you to walk? Strangle it. Bury it under the asphalt. Don't let it breathe." 
             },
             "2026-01-23": { 
-                mantra: "I AM LIGHT ON MY FEET! 🪶 Shakeout run magic! 🕺 I am ready to dance through the miles! 💃 My energy is vibrating at a high frequency! 🫨 WOOHOO! 🥳✨🧡", 
-                goggins: "Shakeout. Don't look sloppy. Every step is an interview with victory. Do you got the job? Or are you getting fired? Tuck your shirt in. Fix your face. You look like you're in pain. Good. Hide it." 
+                mantra: "REST DAY ROYALTY! 👑 You survived the gauntlet! 🛡️ Now treat your body like the precious diamond it is! 💎 Polish your spirit with sleep and hydration! 💧 SHINE BRIGHT LIKE A DIAMOND! 🧡✨💤", 
+                goggins: "Rest. You think you did something? You did what was required. Nothing more. Don't look for a pat on the back. Look for the foam roller and suffer in silence. The job isn't done." 
             },
             "2026-01-24": { 
-                mantra: "I SAVE MY FIRE FOR THE BIG DAY! 🔥 Recovery 5! ✋ I am a coiled spring waiting to launch into greatness! 🚀 Discipline is beautiful! 🤩 SO PROUD OF US! 🧡🐇🤐", 
-                goggins: "Recovery. Run slow. If you run fast today, I will personally come out there and trip you. Discipline is holding back. Cage the beast. If the beast gets out today, I'll put it down. Save it for tomorrow." 
+                mantra: "SHAKEOUT SHIMMER! 💃 7 miles with strides! 🐆 Waking up the nervous system like a bolt of lightning! ⚡️ You are crackling with potential! 🔋 ZAP ZAP! 🧡🔌🔥", 
+                goggins: "7 miles. Don't run sloppy. Every step is an interview with victory. Do you got the job? Or are you getting fired? Tuck your shirt in. Fix your face. Look professional." 
             },
             "2026-01-25": { 
-                mantra: "I AM A BORN RACER! 🏎️ Fred Lebow Half! 🍎 I conquer hills with a smile and fierce determination! 😁 I am the star of my own movie today! 🎥 WE DID IT FRIENDS! 🏆🔥🧡", 
-                goggins: "Fred Lebow. Harlem Hill. It's gonna suck. Good. When your legs burn, laugh. Maniacal laughter. Scare the other runners. Be the psycho on the hill. When others walk, you sprint. Take their souls. Collect them in a jar." 
+                mantra: "FRED LEBOW HALF! 🍎 15 miles of hills and heart! ❤️ Central Park is your stage and you are the LEAD ROLE! 🎭 Perform with passion! 🌹 Throw roses at your own feet! 💐 BRAVO! ENCORE! 🧡👏🏆", 
+                goggins: "Fred Lebow. It's cold. It's hilly. It's miserable. Perfect. 15 miles total. Last 3 at LT. If you don't crush those last 3 miles, don't come home. Leave your soul on Harlem Hill." 
             },
+
+            // --- WEEK 7: NYC TAKEOVER (CONCRETE JUNGLE) ---
             "2026-01-26": { 
-                mantra: "I WEAR MY CROWN EVERYWHERE! 👑 Medal Monday! 🏅 Rest and reflect on how awesome we truly are! 🤩 My legs are absolute legends! 🦵 SO GRATEFUL! 🧡🛀✨", 
-                goggins: "You ran a race. Cool. You want a parade? It's Monday. Back to work. The medal is just a piece of metal. It doesn't love you. The Log loves you. And the Log is hungry. Feed the Log with your suffering." 
+                mantra: "HELLO NEW YORK CITY! 🗽 RECOVERY MONDAY IN THE BIG APPLE! 🍎 The city never sleeps but YOU need to recover! 🛌 Soak up that electric skyline energy! 🌃 We are taking a bite out of life! 🦷 TASTES LIKE VICTORY! 🧡🚕✨", 
+                goggins: "Rest. You're in NYC. The city of distractions. You think because you traveled you get a pass? Wrong. The concrete here is harder. The cold is meaner. Don't get soft just because you're a tourist today." 
             },
             "2026-01-27": { 
-                mantra: "I AM A SPEED MACHINE! 🤖 Race pace work! ⚙️ I lock in and flow like water! 🌊 Fast feels so, so good! 💨 BEEP BEEP SQUAD COMING THROUGH! 🚗🔥🙌", 
-                goggins: "Your legs are tired? Oh, poor baby. Does the pavement care? No. Run fast. If you cramp, punch the cramp. Intimidate your own muscles. Tell your hamstrings that if they fail, you will replace them with titanium." 
+                mantra: "CENTRAL PARK SPEEDWAY! 🌳 1 mile at 10k pace! 🚀 We are dodging pigeons and high-fiving tourists! 🐦 You are faster than a yellow cab in rush hour! 🚖 BEEP BEEP COMING THROUGH! 🧡💨🌭", 
+                goggins: "1 mile at 10k pace. Do it in the park. Let the tourists watch you suffer. They are eating hot dogs; you are eating pain. If you don't scare a horse carriage with your intensity, you aren't running hard enough." 
             },
             "2026-01-28": { 
-                mantra: "I RINSE AND REPEAT EXCELLENCE! 🚿 8 miles of pure dedication! 🫡 I show up for myself every single day no matter what! 🗓️ WE ARE CONSTANT DIAMONDS! 🧡💎🏃‍♀️", 
-                goggins: "8 miles. Grind. There is no glory in this run. Just sweat. And pain. And the sound of your own heavy breathing. It's the best playlist on earth. Listen to the symphony of your own destruction." 
+                mantra: "BRIDGE AND TUNNEL BLISS! 🌉 9 miles of exploring the concrete jungle! 🦁 Lady Liberty is winking at you! 😉 You are the King Kong of cardio! 🦍 CLIMB TO THE TOP! 🧡🧗‍♀️🏙️", 
+                goggins: "9 miles. You're distracted by the skyline. Stop looking up. Look at the ground. It's dirty, it's gritty, and it wants to break your ankles. Respect the pavement or it will destroy you." 
             },
             "2026-01-29": { 
-                mantra: "I FLOAT THROUGH CHALLENGES! 🦋 Recovery 4! ☁️ I am gentle with myself because I am precious! 🫂 Kindness is my strength! 💪 SO THANKFUL FOR EASY DAYS! 🧡🍃✨", 
-                goggins: "Recovery. Don't get injured. If you trip over a curb I will lose my mind. Pay attention. Be a sniper. A sniper who jogs slowly. Every step is a calculated decision to not be an idiot." 
+                mantra: "EMPIRE STATE OF MIND! 🎶 11 miles! 1️⃣1️⃣ We are running these streets like we own them! 🗝️ From the Hudson to the East River, your energy is flowing! 🌊 IMAGINE THE PIZZA AT THE FINISH LINE! 🍕 YUM! 🧡🗽🙌", 
+                goggins: "11 miles. The wind off the Hudson cuts right through you. Good. Freeze. Numb the weakness. If you complain about the cold, you don't deserve the warmth. Be the hardest thing in the city." 
             },
             "2026-01-30": { 
-                mantra: "I ABSOLUTELY OWNED JANUARY! 🗓️ Rest day victory lap! 🏁 First month down, forever to go! ♾️ Celebrating our consistency and hearts! 🥂 CHEERS TEAM! 🧡🛌🎉", 
-                goggins: "Rest. January is gone. Did you get better? Or did you just survive? Survival is for the weak. Thriving is for the savage. Look in the mirror. Are you a savage yet? No. You still look like a domesticated hamster." 
+                mantra: "BAGEL LOADING! 🥯 Rest day zen in the greatest city on earth! 🌍 Visualize the course! 🗺️ You are a Broadway star waiting in the wings! 🎭 CURTAIN UP TOMORROW! 🧡👯‍♀️💤", 
+                goggins: "Rest. You are in the pizza capital of the world. I am watching you. If you eat a slice of pepperoni today, you are fueling failure. Eat clean. Starve the distraction. The rats in the subway are hungrier than you." 
             },
             "2026-01-31": { 
-                mantra: "I AM READY TO SPARKLE AND SHINE! ✨ Shakeout for Manhattan 10k! 🗽 My legs are fresh and my vibes are sky high! 🆙 LET’S GO SQUAD! 🥳🔥🧡", 
-                goggins: "Shakeout. 10k tomorrow. It's a sprint. If you don't taste blood in your throat, you didn't try. Prepare to suffer. Prepare to go to the place where light doesn't exist. I'll see you there." 
+                mantra: "TIMES SQUARE ENERGY! 💡 4 mile shakeout! 👋 You are brighter than the billboards! 📺 The city is buzzing for YOU! 🐝 Shake out the travel legs and get ready to FLY! ✈️ SO HYPE! 🧡🍀✨", 
+                goggins: "4 miles. Shakeout. Don't let the tourists slow you down. Elbow your way through the crowd if you have to. Assert dominance over the sidewalk. You are here to work, not to sightsee." 
+            },
+            "2026-02-01": { 
+                mantra: "MANHATTAN 10K! 🍎 WE OWN THIS PARK! 🌳 Cat Hill? MORE LIKE KITTEN HILL! 🐱 Crush it with a smile! 😁 You are a New York Legend today! 🏆 START SPREADING THE NEWS! 📰 WE DID IT! 🧡🔥🏅", 
+                goggins: "Manhattan 10k. Harlem Hill is waiting to take your soul. It's steep. It's cold. It doesn't care about you. Attack it. If you don't taste blood at the top of the hill, go back down and do it again. Destroy yourself." 
             },
 
-            // --- FEBRUARY ---
-            "2026-02-01": { 
-                mantra: "I LEAVE IT ALL OUT THERE! 💥 Manhattan 10k! 🗽 I run with passion, power, and joy! 🧨 Every step is a celebration of life! 🎉 WE DID IT TEAM! 🏅🔥🧡", 
-                goggins: "10k race. Redline it. From step one. If your heart rate isn't at 200, you're loitering. Vomit at the finish line. If you don't soil yourself, did you even race? Leave your dignity at the start line. Pick it up after you've destroyed everyone else." 
-            },
+            // --- WEEK 8: ENTER THE PAIN CAVE (VO2 MAX) ---
             "2026-02-02": { 
-                mantra: "I LEVEL UP AGAIN! 🆙 Phase 2 begins now! 🎮 I am evolving into a marathon machine! 🦾 Ready for the deep end of the pool! 🏊‍♀️ SO EXCITED! 🧡🌊💪", 
-                goggins: "Phase 2. The training wheels are off. The bike is on fire. You are on fire. Welcome to the deep end. The shark is coming. I am the shark. Swim faster or I will eat you. I can smell your fear. It smells like fabric softener." 
+                mantra: "MONDAY RECHARGE! 🔋 50 MILES OF GLORY AHEAD! 🧱 We are building a skyscraper of fitness and the view from the top is going to be BLINDINGLY BEAUTIFUL! 🏙️ Let the race effort soak in like liquid sunshine! ☀️ YOU ARE A MASTERPIECE IN PROGRESS! 🧡🎨✨", 
+                goggins: "50 miles. The race is over. The medal is already tarnishing in your drawer. Nobody cares what you did yesterday. What are you willing to suffer for today? Get back to work. The rent is due every morning." 
             },
             "2026-02-03": { 
-                mantra: "I AM A WORKHORSE OF JOY! 🐴 Aerobic miles build the massive engine! 🚂 I am relentless in my pursuit of happy miles! 😤 Keeping the positive momentum flowing! 🎢 GO TEAM! 🧡🏃‍♀️🔥", 
-                goggins: "No days off. You raced Sunday? Who cares. Here's 8 miles. Swallow it. Don't chew. Your legs don't get a vote. I am the dictator of your legs. I have declared martial law on your quads. March soldier. March until you drop." 
+                mantra: "AEROBIC FLUSH! 🚽 7 miles to scrub the legs squeaky clean! 🧼 Fresh blood, fresh oxygen, fresh ATTITUDE! 🌬️ We are so fresh and so clean! 🧴 YOU ARE A DIAMOND BEING POLISHED! 🧡💎🚿", 
+                goggins: "7 miles. Flush the legs. Stop limping. You look pathetic. Pain is just a sensation sending a signal to your brain. Your brain is trying to trick you into being soft. Don't listen. Override the signal." 
             },
             "2026-02-04": { 
-                mantra: "I LOVE THE GRIND AND THE PROCESS! 🛠️ 10 miles mid-week! 🗓️ I am building a masterpiece of fitness today! 🖼️ SO PROUD OF THE WORK WE DO! 🤩🎨🙌", 
-                goggins: "10 miles. Mid-week grind. While your friends are watching TV, I want you to run until you forget what a TV is. Become the entertainment. Entertain the pavement with your sweat. The road is thirsty. Hydrate the road with your tears." 
+                mantra: "VO2 MAX PARTY! 🎈 3x1200 + 3x1000! 📉 We are expanding our engines to SUPERCAR STATUS! 🏎️ Hard work pays off with massive compound interest! 💰 CA-CHING! WE ARE RICH IN FITNESS! 🧡💵🔥", 
+                goggins: "VO2 Max. 3x1200, 3x1000. This is the hurt locker. Enter it willingly. Lock the door. Swallow the key. If you don't taste pennies in your mouth, you're jogging. If you don't see stars, push harder." 
             },
             "2026-02-05": { 
-                mantra: "I LISTEN TO MY BODY WITH LOVE! 👂 Rest day wisdom! 🦉 I am smart about my training because I am in this for the long haul! 🧠 Recovery is key! 🔑 SO GRATEFUL! 🧡🧘‍♀️💤", 
-                goggins: "Quiet before the storm. Tomorrow is VO2 Max. It's going to hurt. A lot. Make peace with your god. You're going to meet him on the track. He's bringing a stopwatch and he looks disappointed in your splits. Don't let him down." 
+                mantra: "ELEVEN MILE GRIND! ⚙️ Tired legs build IMMENSE character! 🎭 You are the lead actor in your own blockbuster success story! 🌟 AND THE OSCAR GOES TO... YOU! 🧡🎬🙌", 
+                goggins: "11 miles. Your legs are tired from yesterday? Good. Run on tired legs. That's how you win. Drag yourself if you have to. Crawl if you must. Just don't stop moving. Be a cockroach. Unkillable." 
             },
             "2026-02-06": { 
-                mantra: "I HAVE LUNGS OF STEEL! 🫁 VO2 Max time! 🎈 I expand my limits with every single breath! 😮‍💨 I am powerful beyond measure! 📏 AMAZING EFFORT TEAM! 🔥💪🌟", 
-                goggins: "VO2 Max. 1000 meter repeats. This is the soul taker. If you don't have a vision of the afterlife on rep 5, you're jogging. Die on the track. I'll bring the shovel. We will bury the old you. The soft you. The you that likes cupcakes." 
+                mantra: "REST DAY LOVE LETTER! 💌 You earned this downtime! 📉 Write a poem to your muscles! ✍️ Be kind to yourself! 🫂 You are doing hard things and winning! 🧱 SO PROUD OF US! 🧡💗💤", 
+                goggins: "Rest. Foam roll until you cry. Recover harder than you train. If you aren't whimpering while you roll out your IT band, you aren't fixing the tissue. Dig deeper. Find the knot and destroy it." 
             },
             "2026-02-07": { 
-                mantra: "I BOUNCE BACK LIKE MAGIC! 🏀 Recovery 4! 🐇 I am resilient and ready for more! 🛡️ Shaking out the legs with a huge smile! 😃 LOVE THIS COMMUNITY! 🧡👯‍♀️✨", 
-                goggins: "Recovery. Don't run fast. I swear if you run fast I will haunt your Strava. Slow down. Run backwards if you have to. If you pass a squirrel, apologize to it. You are the lowest life form today. A recovering slug." 
+                mantra: "HILLS AND THRILLS! 🎢 7 miles with speed! 🐆 Waking up the fast twitch fibers! ⚡️ You are snappy and happy! 🫰 SNAP CRACKLE POP! 🥣 WE ARE EXPLOSIVE! 🧡🐊✨", 
+                goggins: "Hills and sprints. Explosive power. Don't be slow. Be violent with the ground. Scorch the earth so nothing ever grows where you stepped again. Leave a trail of destruction." 
             },
             "2026-02-08": { 
-                mantra: "I RUN WITH INFINITE LOVE! 💌 14 miles for Valentine's Week! 💘 My heart pumps joy and glitter! 💓 I am in love with the run! 💍 WE ARE UNSTOPPABLE! 🧡🌹🏃‍♀️", 
-                goggins: "14 miles. You're tired? Good. Fatigue is a lie. Your mind is trying to protect you. Don't let it. Override the governor. Break the dashboard. Drive the car off the cliff. Then climb back up the cliff carrying the car." 
-            },
-            "2026-02-09": { 
-                mantra: "I AM A MILEAGE MILLIONAIRE! 💸 47 miles deposited in the bank! 🏦 Investing in myself pays the best dividends! 📈 Rest day rewards! 🎁 SO RICH IN HEALTH! 🧡💎🛌", 
-                goggins: "47 miles. Not bad. But can you do 50? We'll see. Don't get cocky. You're still one donut away from being a couch potato. I'm watching you eat. Stop it. Put the fork down. Pick up the Log. The Log is your only friend." 
-            },
-            "2026-02-10": { 
-                mantra: "I AM ELECTRIC AND ALIVE! ⚡️ 150m repeats! 🔌 Sparks fly when I run past! 🎇 I am pure energy in motion! 🌪️ ZAP ZAP TEAM! ⚡️🐆🔥", 
-                goggins: "Speed work on dead legs. This is the test. When your hamstrings scream, scream back. Louder. Assert dominance over your own anatomy. Tell your muscles you hate them. Tell them they are weak. Bully your own body into getting faster." 
-            },
-            "2026-02-11": { 
-                mantra: "I CREATE MAGIC ON THE PAVEMENT! 🪄 11 miles on a Wednesday! 🎩 I turn sweat into dreams! 💭 Abracadabra legs! 🐇 SO PROUD OF US! 🧡✨🙌", 
-                goggins: "11 miles. It's dark. It's cold. You're alone. Perfect. No one to hear you whimper. Keep moving. If you stop, the weakness wins. The weakness is following you. It's right behind you. Run faster. It has a knife." 
-            },
-            "2026-02-12": { 
-                mantra: "I AM SWEET TO MYSELF! 🍫 Rest day treats! 🍭 I deserve this recovery and self-care! 💆‍♀️ Filling my cup with self-love! ☕️ SO THANKFUL! 🧡🥰💤", 
-                goggins: "Rest day. Don't get soft. The world is soft. Be a rock. A rock that doesn't eat sugar. Put the candy down. It looks like poison to me. If you eat that chocolate I will telepathically make it taste like ash." 
-            },
-            "2026-02-13": { 
-                mantra: "I MAKE MY OWN LUCK TODAY! 🍀 Friday 13th? 🐈‍⬛ I am lucky just to be able to run! 🏃‍♀️ Good vibes only allowed here! 🧿 SHIELDED BY POSITIVITY! 🛡️🧡🔥", 
-                goggins: "Friday. Everyone is checking out. You're checking in. Into the asylum. 8 miles. Lock the door behind you. You don't leave until you're insane. I want you to talk to the mailboxes. I want you to bark at the dogs." 
-            },
-            "2026-02-14": { 
-                mantra: "I AM MY OWN VALENTINE! 💝 5 miles of romance with the open road! 🛣️ Sending love to every muscle fiber! 💌 YOU ARE BEAUTIFUL! 😻🧡🌹", 
-                goggins: "Valentine's Day. Love is pain. Running is pain. Therefore, running is love. Go run 5 miles and think about how lonely the top is. It's just you and the wind. Hug the wind. The wind is the only lover that won't leave you." 
-            },
-            "2026-02-15": { 
-                mantra: "I FINISH FASTER THAN I START! 🏁 15 mile progression run! 🏎️ I am a closer! 🚪 Shutting the door on doubt and pain! 🚫 WE DID IT FRIENDS! 🥳🔥🧡", 
-                goggins: "15 miles. Fast finish. When you want to quit at mile 13, remember: No one cares. Suffer in silence. Make the last mile your fastest or it doesn't count. Break your own heart. Then stomp on the pieces with your running shoes." 
-            },
-            "2026-02-16": { 
-                mantra: "I AM AT THE PEAK OF MY POWERS! 🏔️ 50 mile week! 🤯 The air is rare up here! 🦅 Breathing in confidence and exhaling doubt! 😤 WE ARE KINGS AND QUEENS! 👑🧡🙌", 
-                goggins: "50 mile week. This is the peak. The air is thin here. Can you breathe? Or are you choking? Don't choke. Swallow the panic. Eat it. Digest it. Poop out excellence. This is where we separate the humans from the gods." 
-            },
-            "2026-02-17": { 
-                mantra: "I AM MADE OF GRIT AND GLITTER! 🧱 8 miles on tired legs! 🦵 I find joy in the hardest parts of the grind! 😃 GRATEFUL FOR THE CHALLENGE! 🧡🙏💪", 
-                goggins: "Monday of Peak Week. You better be ready. The volume is going to crush you if you're weak. Are you weak? We're about to find out. The compactor is turning on. I'm pressing the button. Try not to get squished." 
-            },
-            "2026-02-18": { 
-                mantra: "I AM AN ENDURANCE BEAST! 🦍 12 miles like it’s absolutely nothing! 🤷‍♀️ I am stronger than I ever imagined! 🧠 ROAR TEAM! 🦁🔥🧡", 
-                goggins: "12 miles. Callus the mind. Every step is a brick in the wall of your fortress. Don't use cheap bricks. Use pain. Use blood. Build it high. Build it so high that no one can hear you crying inside. That is your sanctuary." 
-            },
-            "2026-02-19": { 
-                mantra: "I REST HARD SO I CAN RACE HARD! 🛌 Storing energy for the big workout! 🔋 I am a bear in hibernation mode! 🐻 Cozy and fierce! 🧣 LOVE THE RECOVERY! 🧡💤☕️", 
-                goggins: "Rest. VO2 Max tomorrow. It's complex. It's nasty. If you aren't scared, you're stupid. Fear is fuel. Fill the tank. Drink the fear. Gargle it. Spit it in the face of destiny." 
-            },
-            "2026-02-20": { 
-                mantra: "I AM COMPLEX AND CAPABLE! 🧩 VO2 Max Complex! 🫁 I solve problems with speed and heart! ⚡️ Genius level effort today! 🧠 SO IMPRESSED WITH US! 🧡🎓🔥", 
-                goggins: "2x1200 + 800. Two sets. It's a math problem where the answer is suffering. Solve for X, where X is the contents of your stomach. If you don't hallucinate a wizard on the final lap, you didn't run hard enough. Find the wizard." 
-            },
-            "2026-02-21": { 
-                mantra: "I AM GENTLE POWER! 🌸 Recovery 5! 🍃 I move with grace and ease! 🦢 Respecting the body’s needs is strength! 🤝 SO THANKFUL FOR HEALTH! 🧡🙏✨", 
-                goggins: "Recovery. Just get it done. Don't look at me. I'm disgusted by how slow you're going. But do it anyway. Don't you dare speed up. If you break a sweat I will break your spirit." 
-            },
-            "2026-02-22": { 
-                mantra: "I CONQUERED THE PEAK WEEK! 🏔️ 15 miles to finish strong! 🏁 I am standing on top of the world! 🌍 VICTORY LAP FOR THE SQUAD! 🏆🔥🧡", 
-                goggins: "15 miles. End of peak week. You're tired? Your legs are heavy? Good. Run on stumps. Drag yourself if you have to. Crawl. Just finish. If you die, make sure you die across the finish line so it counts on Strava." 
-            },
-            "2026-02-23": { 
-                mantra: "I ABSORB THE WORK! 🧽 Down week begins now! 📉 I let the strength settle deep into my bones! 🧱 I am solid! 🗿 SO PROUD OF US! 🧡🙌✨", 
-                goggins: "Mileage drops. Focus goes up. Don't celebrate. The war isn't over. You just won a battle. Stay sharp. Sharpen the knife. The knife is your mind. Cut away the excuses. Cut away the fat. Be a scalpel." 
-            },
-            "2026-02-24": { 
-                mantra: "I HAVE GEARS! ⚙️ 8 miles + Strides! 🐆 I switch from cruise to kick in a heartbeat! 🦵 Versatile and vibrant athlete! 🌈 LOVE THE SPEED! 🧡🏎️💨", 
-                goggins: "Strides. Don't look like a sack of potatoes. Form is everything. Chest up. Eyes up. Look at the horizon. Hunt the prey. Eat the prey. Digest the prey. Become the prey. Wait, no. Become the predator." 
-            },
-            "2026-02-25": { 
-                mantra: "I CRUISE WITH TOTAL CONFIDENCE! 😎 9 miles of steady state joy! 🛳️ I am the captain of this ship! 👩‍✈️ AHOY TEAM! ⚓️🧡🌊", 
-                goggins: "9 miles. Just work. Nothing special. Being special is a myth. Work is the reality. Be a worker. Dig the hole. Live in the hole. Decorate the hole with your failures. Then climb out." 
-            },
-            "2026-02-26": { 
-                mantra: "I AM TOTAL ZEN! 🎋 Recovery 5! 🧘‍♀️ I find peace in the pace! ☮️ Meditation in motion! 🏃‍♀️ OM SHANTI FRIENDS! 🧡🕉️✨", 
-                goggins: "Recovery. Boring. I know. Do it anyway. Callus your patience. Boredom is part of the game. Stare at the paint drying. Watch the grass grow. Hate the grass. Intimidate the lawn." 
-            },
-            "2026-02-27": { 
-                mantra: "I AM AGING LIKE FINE WINE! 🍷 Rest before Napa! 🍇 Getting better every single day! 🗓️ Vintage performance loading! 🍾 CHEERS! 🧡🥂💤", 
-                goggins: "Rest. Napa Half. Don't get distracted by the wine. The wine is for winners. Are you a winner? Not yet. Sunday determines that. Until then, you drink water and disappointment." 
-            },
-            "2026-02-28": { 
-                mantra: "I AM RIPE FOR SUCCESS! 🍇 Shakeout run! 🏃‍♀️ Ready to crush grapes and PRs tomorrow! 🦶 LET’S GO NAPA SQUAD! 🍷🔥🧡", 
-                goggins: "Shakeout. Visualize the course. Visualize the pain cave. It has a nice wine cellar. Go there and lock yourself in. Throw away the key. Drink the vintage bottle of suffering. It has notes of oak and agony." 
+                mantra: "FIFTEEN MILE SUNDAY! 🕍 The church of the long run is officially in session! 🏃‍♀️ 15 miles of pure gratitude! 🙏 We are endurance warriors! ⚔️ VICTORY IS OURS TODAY! 🧡🛡️🏅", 
+                goggins: "15 miles. Long run. Get it done. Don't look for shortcuts. There are none. Carry the boat. Carry the log. Carry your excuses to the trash compactor and crush them." 
             },
 
-            // --- MARCH ---
-            "2026-03-01": { 
-                mantra: "I AM FULL BODIED STRENGTH! 🍷 Napa Half Marathon! 🍇 I run with notes of grit, glory, and joy! 🏆 SAVOR THE FINISH LINE! 😋 WE DID IT! 🏅🔥🧡", 
-                goggins: "Napa Half. Last 6 miles at Goal Pace. If you fade, you're weak. Crush the grapes with your feet. Make wine out of your suffering. Drink the cup of pain. DRINK IT ALL. I want you to run so hard that you age in reverse. Finish the race as a baby." 
+            // --- WEEK 9: THE VOLUME TRAP ---
+            "2026-02-09": { 
+                mantra: "MONDAY MISSION CRITICAL! 🚀 53 MILES! 🆙 We are entering the STRATOSPHERE of fitness! 🌌 The air is rare up here and it smells like VICTORY! 👃 WE ARE CAPABLE OF THE IMPOSSIBLE! 🧠 BELIEVE IT! 🧡✨💪", 
+                goggins: "53 miles. The volume is creeping up. The air is getting thin. Most people suffocate here. They break. You? You grow gills. Breathe in the discomfort. Stay hard." 
             },
+            "2026-02-10": { 
+                mantra: "TUESDAY TICK TOCK! ⏰ 7 miles of hypnotic rhythm! 😵‍💫 You are a human metronome of excellence! 🎼 CLICK CLACK! 🥁 Your heart is a drum beating for GLORY! 💗 KEEP THE BEAT SQUAD! 🧡🎵🏃‍♀️", 
+                goggins: "7 miles. Just run. Don't think. Thinking is for people who negotiate with themselves. You don't negotiate with terrorists, and your brain is a terrorist trying to hijack your potential. Shut it down." 
+            },
+            "2026-02-11": { 
+                mantra: "THRESHOLD MONSTER! 👹 38 minutes of complex, beautiful WORK! 🤯 4 min reps, 2 min reps! 📉 We are chopping wood for the fire of SUCCESS! 🪓 BURN BABY BURN! 🔥 TIMBER! 🧡🌲🌡️", 
+                goggins: "38 minutes of threshold. Complex intervals designed to confuse you. Pay attention. Don't fade. If you fade, you fail. Be a machine. Machines don't have feelings. Machines don't get tired. Be the machine." 
+            },
+            "2026-02-12": { 
+                mantra: "AEROBIC KINGDOM THURSDAY! 🏰 We aren't building a house, we are terraforming a PLANET of endurance! 🪐 Every step is a continent of capacity! 🌍 The map of your potential just got BIGGER! 🗺️ EXPLORE IT! 🧡🧭🚀", 
+                goggins: "12 miles. Mid-week long run. It's supposed to suck. That's the point. Embrace the suck. Live in the suck. Buy real estate in the suck and raise a family of calluses there." 
+            },
+            "2026-02-13": { 
+                mantra: "FRIDAY REST! 🍟 FRI-NALLY! 😅 Put your feet up high! 🦶 You are a recovery QUEEN! 👸 Treat your body like the precious cargo it is! 📦 SO DESERVED! 🧡💅💤", 
+                goggins: "Rest. You feel good? That’s your body lying to you. It’s plotting a rebellion. Crush the rebellion with foam rolling. Make your fascia scream so your legs learn who is in charge." 
+            },
+            "2026-02-14": { 
+                mantra: "VALENTINE'S STRIDES! 💘 8 miles of RADICAL SELF LOVE! 💝 Run with your heart on your sleeve! ❤️ You are beautiful, strong, and FAST! 🌹 KISSES TO THE SQUAD! 🧡💋✨", 
+                goggins: "8 miles. Valentine's Day. The road is your valentine. It treats you rough, it beats you down, but it makes you better. Love the pain. Marry the pain. Til death do you part." 
+            },
+            "2026-02-15": { 
+                mantra: "PROGRESSION POWER! 🔋 16 miles of pure ADRENALINE! 🤯 Last 3 miles at LT! ⚡️ Finishing fast because we CAN and we WILL! 🤩 You are a superhero in sneakers! 🦸‍♀️ POW! 🧡💥🥊", 
+                goggins: "16 miles. Progression. If you don't run the last 3 miles fast, you wasted the first 13. Finish the fight. Put the enemy down. Stand over the body of your former self and scream." 
+            },
+
+            // --- WEEK 10: PEAK WEEK (MAXIMUM HYPE) ---
+            "2026-02-16": { 
+                mantra: "PEAK WEEK HAS ARRIVED! 🏔️ 55 MILES OF MAJESTY! 🦅 We are soaring at high altitude where the air is rare! ✈️ This is the week where CHAMPIONS ARE MINTED! 🪙 Breathe in the confidence, exhale the doubt! 😤 LET’S GO TEAM! 🧡🙌🔥", 
+                goggins: "55 miles. Peak week. This is the test. The final exam. If you break now, you were never real to begin with. Show me your heart. Cut it out and show it to me." 
+            },
+            "2026-02-17": { 
+                mantra: "AEROBIC FOUNDATION! 🏛️ 7 miles to support the massive work ahead! 🏗️ Strong foundation, strong runner! 🏋️‍♀️ We are solid as a ROCK and light as a FEATHER! 🪶 WE ARE SOLID GOLD! 🧡🗿✨", 
+                goggins: "7 miles. You are walking on a tightrope over a pit of spikes. The spikes are your past failures. One slip, one moment of mental weakness, and you fall back into mediocrity. Don't look down. Don't blink. Walk." 
+            },
+            "2026-02-18": { 
+                mantra: "THE PFITZ SPECIAL! 🍽️ 6x1200m OF GLORY! 🤯 This is the legendary workout that changes lives! 📜 We are writing history with our sweat today! ✍️ BE ABSOLUTELY LEGENDARY! 🧡🦄🔥", 
+                goggins: "6x1200. This is the workout that separates the contenders from the pretenders. Go to the dark place. Lock the door. Throw away the key. If you come out smiling, go back in." 
+            },
+            "2026-02-19": { 
+                mantra: "TWELVE MILE RECOVERY! 🩹 (Sort of!) 😅 Just keep moving forward like a relentless zombie of joy! 🧟‍♀️ One foot in front of the other! 🦶 YOU ARE RESILIENT! YOU ARE TOUGH! 🧡🌵🙌", 
+                goggins: "12 miles on dead legs. This is where the magic happens. Callus the mind. Your legs don't get a vote. I cast the only vote, and the vote is suffering." 
+            },
+            "2026-02-20": { 
+                mantra: "REST DAY HALLELUJAH! 🙌 You survived the gauntlet! ⚔️ Now sleep like a grizzly bear in winter! 🐻 Recovery is your full-time job today! 💼 YOU EARNED THIS NAP! 🧡💤🛌", 
+                goggins: "Rest. Eat. Sleep. Repeat. Don't you dare enjoy your day off. You are recovering for war. Stay vigilant. The enemy doesn't sleep." 
+            },
+            "2026-02-21": { 
+                mantra: "EASY NINE! 9️⃣ 9 miles of shaking it out! 💃 Getting ready for the big long run! 🏔️ We are peaking and we look GOOD doing it! 📈 SO HIGH ON LIFE! 🧡🪁✨", 
+                goggins: "9 miles. Focus. Don't let your mind wander. The enemy is watching. He's hoping you trip. He's praying for a cramp. Don't give him the satisfaction." 
+            },
+            "2026-02-22": { 
+                mantra: "SIXTEEN MILE VICTORY LAP! 🏁 Longest run of the plan! 📏 You have climbed the mountain and the view is INCREDIBLE! 🧗‍♀️ SO PROUD OF US! TEARS OF JOY! 🧡🥲🏆", 
+                goggins: "16 miles. End of peak week. Empty the tank. Leave nothing left. If you have energy to shower afterwards, you didn't run hard enough. Crawl to the shower." 
+            },
+
+            // --- WEEK 11: NAPA TUNE UP (VINTAGE PERFORMANCE) ---
+            "2026-02-23": { 
+                mantra: "MONDAY MERLOT RECOVERY! 🍷 48 miles! 📉 We are fermenting our fitness into something BOLD and BEAUTIFUL! 🍇 Letting the strength age to perfection! ⏳ A FINE VINTAGE YEAR FOR YOU! 🧡🍾✨", 
+                goggins: "Mileage drops. Focus sharpens. Do not celebrate yet. You haven't earned the wine. You haven't even earned the water. Stay thirsty. The war isn't over." 
+            },
+            "2026-02-24": { 
+                mantra: "CHAMPAGNE POP STRIDES! 🍾 8 miles with fizz! 🥂 Your legs are bubbling over with energy! 🫧 POP THE CORK AND FLY! ✈️ You are sparkling! ✨ CHEERS TO SPEED! 🧡🥂💨", 
+                goggins: "8 miles with strides. I want to see you stomp the ground like you are crushing grapes for wine. Stomp until there is nothing left but juice and skin. Be violent with the earth." 
+            },
+            "2026-02-25": { 
+                mantra: "FULL BODIED AEROBIC! 🍷 9 miles of complex notes! 📝 Hints of grit, sweat, and glory! 🏆 This blend is AWARD WINNING! 🥇 Drink it in, team! 🥤 DELICIOUS! 🧡😋🙌", 
+                goggins: "9 miles. The grind. Don't look at the scenery. I don't care if it's a beautiful vineyard. Stare at the asphalt. The asphalt is your master. Serve it." 
+            },
+            "2026-02-26": { 
+                mantra: "THE LONG FINISH! 🏁 11 miles! 1️⃣1️⃣ Like a great Cabernet, we finish STRONG and SMOOTH! 🍷 Say goodbye to the grind and hello to the TASTING ROOM OF VICTORY! 🏰 ALMOST THERE! 🧡🍇🤩", 
+                goggins: "11 miles. You are thinking about the wine. Stop it. Think about the grape. It spends its whole life in the dirt, getting scorched by the sun, just to be crushed. Be the grape. Accept the crushing. It's the only way to become something worth consuming." 
+            },
+            "2026-02-27": { 
+                mantra: "REST DAY SOMMELIER! 🤵‍♀️ Sniffing out the PRs! 👃 Visualize the rolling hills of Napa! 🏔️ You are the finest grape on the vine! 🍇 RIPENING FOR GLORY! ☀️ SO READY! 🧡🧘‍♀️💤", 
+                goggins: "Rest. You are heading to wine country. I know what you're thinking. 'A little glass won't hurt.' WRONG. Alcohol is poison for the weak. Drink water. Stay sober. Stay dangerous." 
+            },
+            "2026-02-28": { 
+                mantra: "SHAKEOUT IN THE VINEYARDS! 🌿 4 miles! 🏃‍♀️ Run through the rows of greatness! 🍇 The air tastes like sugar and success! 🍬 SQUEEZE THE DAY! 🍋 GO TIME SQUAD! 🧡⏰🔥", 
+                goggins: "4 miles. Shakeout. Look at the vines. They struggle to grow through the dirt. They suffer to become something worth drinking. Be the vine. Embrace the struggle." 
+            },
+            "2026-03-01": { 
+                mantra: "NAPA VALLEY HALF! 🍷 16 miles total! 🍇 CRUSH IT LIKE A GRAPE! 🦶 Make wine out of your sweat! 💦 Last 10k at Goal Pace! 🎯 SAVOR EVERY SIP OF PAIN! 😋 YOU ARE A RESERVE BLEND! 🧡🏅🏁", 
+                goggins: "Napa Half. It's a workout, but run it hard. Last 10k at goal pace. If you can't hold it, you aren't ready. Stomp the competition. Bottle their tears. Drink them." 
+            },
+
+            // --- WEEK 12: TAPER MADNESS (PSYCHOLOGICAL WARFARE) ---
             "2026-03-02": { 
-                mantra: "I TRAVEL IN STYLE! ✈️ Rest day jetsetter! 🌍 Recovering like a pro! 💼 Taking my medal for a walk around town! 🏅 SO FANCY! 🧡💅💤", 
-                goggins: "Rest. You sore? Good. That means you tried. Now recover. Don't eat airport food. It's poison. Fast until you get home. Sit in the uncomfortable chair and think about your splits. If you missed a split, punish yourself by not reclining the seat." 
+                mantra: "TAPER TIME BABY! 🛌 35 miles! 📉 We are respecting the REST! 🫡 The 'Taper Crazies' just mean you are FULL OF LIFE! 🤪 You are a race horse trapped in the stable! 🐎 KICKING THE STALL DOOR! 🚪 LET ME OUT! 🧡😤🔥", 
+                goggins: "Rest. The mileage drops. The mind wanders. You think you've earned a break? You've earned nothing. If you gain one ounce of fat this week, you are disrespecting the pavement. Starve the weakness." 
             },
             "2026-03-03": { 
-                mantra: "I AM WIDE AWAKE! ☀️ Speed injection! 💉 Waking up the legs with snap! 🦵 I am sharp and fast! 🐊 SNAP SNAP! 🤌🔥🧡", 
-                goggins: "Speed. Wake the legs up. They want to sleep. Don't let them. Splash cold water on your hamstrings. Slap your quads. Wake up. The war isn't over. The war is never over. The enemy is regrouping. He's doing pushups in your driveway." 
+                mantra: "SHORT, SWEET, AND SPARKLY! 🍬 5 miles easy! 🍭 We are saving all the glitter for the Big Apple! 🍎 Enjoy the extra time to meditate on your GREATNESS! 🧘‍♀️ OM SHANTI SQUAD! 🧡📚✨", 
+                goggins: "5 miles. You think this is a break? Wrong. This is where the mind drifts. This is where you get soft. Stay locked in. If you mentally check out for even one second, you've already lost the war. Do not blink." 
             },
             "2026-03-04": { 
-                mantra: "I TRUST THE TAPER MAGIC! 📉 I am a tightly coiled spring waiting to pop! 🌀 Saving all the glitter for race day! ✨ PATIENCE IS POWER! 🧘‍♀️🧡💣", 
-                goggins: "Taper. You feel fat? Good. That's stored violence. Don't burn it on anxiety. Sit still. I am living in your walls. I can hear you blinking. Stop blinking so loud. Conserve the energy for the kill. Be a viper waiting in the grass." 
+                mantra: "FINAL TUNE UP! 🎻 2x1200 + 4x800! 🎼 We are fine-tuning the Ferrari! 🏎️ The engine is purring! 🐈 The paint is fresh! 💅 You are ready to SCREAM down the highway! 🛣️ VROOM VROOM! 🧡🎶🔥", 
+                goggins: "VO2 Max. Sharpen the blade. It should feel fast. It should feel dangerous. Remind your body what violence feels like. Taste the iron in your throat one last time before the show." 
             },
             "2026-03-05": { 
-                mantra: "I AM A CHRYSALIS! 🐛 Rest day transformation! 🦋 Preparing to fly on race day! 🪽 Wings are loading... ⏳ SO MAGICAL! 🧡🧚‍♀️💤", 
-                goggins: "Rest. Don't do chores. Don't walk the dog. The dog can walk itself. You are a weapon in storage. Stay on the shelf. Dust yourself off. Be ready to kill. If anyone asks you to do anything, stare at them until they leave. You are busy existing." 
+                mantra: "BUBBLE WRAP MODE! 🧼 4 miles of gentle movement! 🛁 Protect the asset! 🛡️ You are a Faberge Egg of fitness! 🥚 Precious, beautiful, and ready to hatch a PR! 🐣 SO DELICATE YET SO STRONG! 🧡🎨🙌", 
+                goggins: "4 miles. Recovery. Don't be the idiot who twists an ankle during taper. Walk on eggshells. Be paranoid. The sidewalk is trying to sabotage you. Don't let it." 
             },
             "2026-03-06": { 
-                mantra: "I AM SHARP AS A TACK! 🔪 Final VO2 Max! 🩸 One last taste of speed before the big day! 👅 I am dangerous! ⚠️ WATCH OUT NYC! 🍎🔥🧡", 
-                goggins: "Last hard session. Empty the tank. If you leave anything on the track, you're a coward. Burn it all. I want to smell burning rubber and desperation. Make the track afraid of you. Scorch the earth so nothing ever grows there again." 
+                mantra: "HALLUCINATION STATION! 😵‍💫 I want you to literally SEE the finish line tape breaking across your chest! 🎀 TASTE THE SWEAT OF VICTORY! 👅 It’s salty and DELICIOUS! 🧂 SO REAL! 🧡🔮💤", 
+                goggins: "Rest. Stay off your feet. I am living in your walls. I can hear you breathing. Stop breathing so loud. Conserve every ounce of energy. Become a statue of discipline." 
             },
             "2026-03-07": { 
-                mantra: "I AM BUBBLY AND LIGHT! 🍾 3 miles of giggles! 🤭 Saving the legs, fueling the soul! ⛽️ I am ready to POP! 💥 CHEERS FRIENDS! 🧡🥂✨", 
-                goggins: "3 miles. Don't trip. I'm serious. If you roll an ankle today, you're fired from life. I will personally revoke your runner card. Walk on eggshells. Be paranoid. The sidewalk is trying to kill you. Don't let it." 
+                mantra: "NERVOUS SYSTEM WAKE UP CALL! ☎️ 5 miles with strides! 🐆 Hello legs? Are you there? 📞 YES WE ARE! 🗣️ Crisp, clean, and ready to careen! 🎢 POP POP POP! 🍿 🧡🗡️✨", 
+                goggins: "5 miles. Strides. Don't burn the fuel. Just light the match to make sure it works. Then blow it out. Be a viper waiting in the tall grass. Silent. Deadly." 
             },
             "2026-03-08": { 
-                mantra: "I AM THE MAIN CHARACTER OF MY LIFE! 🎬 10 miles! 🔟 The final rehearsal! 🎭 I am ready for the big stage! 🏟️ BROADWAY BOUND! 🍎🔥🧡", 
-                goggins: "10 miles. Keep it honest. Don't sleepwalk. Focus. The big dance is in one week. Are you ready? Or are you scared? You should be terrified. Harness the terror. Feed it raw meat. Keep the beast in the cage hungry. Poke it with a stick." 
+                mantra: "LAST LONG RUN! 🔚 11 miles! 1️⃣1️⃣ One week to go! 🗓️ The hay is in the barn and the barn is LOCKED! 🔒 You are ready to harvest the crops of glory! 🌾 CORN! WHEAT! VICTORY! 🌽 SO PROUD! 🧡👩‍🌾🙌", 
+                goggins: "11 miles. Last long run. Don't get injured. But don't run slow. Run with purpose. The finish line is calling your name. It's whispering 'suffer'. Answer the call." 
             },
+
+            // --- WEEK 13: RACE WEEK (NYC TAKEOVER) ---
             "2026-03-09": { 
-                mantra: "I AM VIBRATING WITH EXCITEMENT! 🫨 Race Week is HERE! 🚨 The energy is real! ⚡️ I am a tuning fork of joy! 🍴 BZZZZT! 🐝 SO HYPED! 🧡🥳🔥", 
-                goggins: "Race week. Lock in. Cut off your friends. Cut off your family. They are distractions. It's just you and the asphalt now. Go into the bunker. Weld the door shut. Eat MREs. Sharpen your bayonet. The battle is coming." 
+                mantra: "WELCOME TO THE CONCRETE JUNGLE! 🗽 33 miles! 📉 WHERE DREAMS ARE MADE OF! 🎶 There’s nothing you can’t do! 🤩 The city lights will inspire you! 💡 LET’S HEAR IT FOR NEW YORK! 🍎👏🚕", 
+                goggins: "Race week. You are in the city that never sleeps. So wake up. The skyscrapers don't care about your feelings. The pavement is harder here. The cold is meaner. Lock in. Be the hardest thing in Manhattan." 
             },
             "2026-03-10": { 
-                mantra: "I LOOK GOOD RUNNING FAST! 💅 Dress Rehearsal! 👗 2 miles at race pace! 🏎️ I am a supermodel of speed! 📸 POSE FOR THE CAMERAS! 👯‍♀️🔥🧡", 
-                goggins: "Race pace. Feel it. Memorize it. This is the pace of pain. Get comfortable being uncomfortable. Live there. Decorate the walls of the pain cave with your own blood. Hang curtains made of sweat. Make it home." 
+                mantra: "CENTRAL PARK CATWALK! 📸 7 miles with 2 at HMP! 💅 Strut your speed like it’s Fashion Week! 👠 The tourists are watching! 🕶️ Give them a show! 🎭 YOU ARE A SUPERMODEL OF SPEED! 🧡💃🔥", 
+                goggins: "Race pace. 2 miles. Central Park is not a playground; it is a battlefield. Don't dodge the tourists; run through their souls. Make the horse carriages nervous with your intensity. Own the pace." 
             },
             "2026-03-11": { 
-                mantra: "I AM LIGHT AS A FEATHER! 🪶 5 miles easy! 🌬️ Floating on confidence and clouds! ☁️ I am weightless! 🎈 SO READY! 🧡🧘‍♀️✨", 
-                goggins: "Easy run. Visualize the finish line. Visualize the demons trying to stop you. Visualize punching them in the throat. Rip their hearts out. Eat them. Demons are high in protein. You need the fuel for Sunday." 
+                mantra: "THE BAGEL LOADING CHAMPIONSHIP! 🥯 Rest day! 🧴 Eat the bagel! 🥖 Be the bagel! 🧘‍♀️ Fueling the machine with NYC’s finest carbs! 🍕 (Maybe one slice!) 😋 YUM! 🧡🍽️💤", 
+                goggins: "Rest. Hydrate. Eat clean. I see you eyeing that dollar slice pizza. Don't do it. That is poison. You are a Ferrari, not a garbage truck. Put premium fuel in the tank or don't show up." 
             },
             "2026-03-12": { 
-                mantra: "I HAVE DONE THE WORK AND I AM READY! 📚 4 miles! 🎓 Graduation is Sunday! 🎓 I trust my training implicitly! 🤝 SO PROUD! 🧡🎓🔥", 
-                goggins: "4 miles. Don't run fast. Save the rage. Bottle it up. Let it ferment into pure hatred for the competition. Let the pressure build until you burst. Be a pipe bomb of athleticism. Tick tock." 
+                mantra: "LADY LIBERTY FLOW! 🗽 5 miles easy! 🌊 Torch is held high! 🔥 We are burning bright but saving the explosion for Sunday! 🧨 You are a beacon of hope and cardio! 🔦 SHINE ON! 🧡🕯️✨", 
+                goggins: "5 miles. Look at the steam coming out of the manholes. That's the city sweating. You think you're working hard? The sewer system is working harder than you. The subway rats are hustling harder than you. Respect the grime. Be the steam." 
             },
             "2026-03-13": { 
-                mantra: "I AM CARB LOADING CHAMPION! 🍝 Rest day feast! 🥖 I am turning pasta into power! 💥 Noodle arms, strong legs! 🍜 YUM! 🧡🥯💤", 
-                goggins: "Rest. Eat clean. Hydrate. Sleep. If you mess this up now, it's on you. No excuses. The log is waiting. The boat is waiting. The abyss is staring back. Don't blink. If you blink, you miss the moment. Stare into the sun." 
+                mantra: "BROADWAY BOUND! 🎭 Rest day focus! 🧘‍♀️ You have the lead role in 'The Fast and The Fabulous'! 🎬 The curtain goes up in 48 hours! 🎟️ GET YOUR POPCORN READY! 🍿 SO DRAMATIC! 🧡🤩💤", 
+                goggins: "Rest. Stay off your feet. The rats in the subway are hustling harder than you right now. Sit in the dark. Sharpen your mind. Sunday is a street fight. Bring your knuckles." 
             },
             "2026-03-14": { 
-                mantra: "I LOVE NY AND NY LOVES ME! 🍎 Shakeout in the city! 🏙️ The energy is electric! ⚡️ I am part of the skyline today! 🌆 LET’S DO THIS TEAM! 🧡🗽🥳", 
-                goggins: "Shakeout. Central Park. The enemy is here. He's waiting. Look him in the eye. Tell him you're taking his soul tomorrow. Sharpen your elbows. Sharpen your teeth. I want you to bite the air. Taste the victory." 
+                mantra: "TIMES SQUARE ENERGY! 💡 4 mile shakeout! 👋 The billboards are bright but YOU are brighter! 📺 The city is buzzing for YOU! 🐝 Shake out the nerves and inhale the magic! 🪄 IT’S SHOWTIME! 🧡🍎🔥", 
+                goggins: "Shakeout. 4 miles. Look the city in the eye. Tell it you aren't afraid. Assert dominance over the sidewalk. If you trip today, don't bother showing up tomorrow. Focus." 
             },
             "2026-03-15": { 
-                mantra: "I AM A LEGEND IN THE MAKING! 🌟 NYC HALF! 🗽 This is MY moment! 🕰️ I sparkle, I sweat, I shine, I conquer! ✨ UNSTOPPABLE! 🚀 WE DID IT!!! 🏅🔥🧡", 
-                goggins: "GAME DAY. NYC HALF. NO MERCY. RUN UNTIL YOUR HEART STOPS. THEN RUN MORE. I want you to run so hard your future grandchildren feel tired. SOIL YOURSELF FOR GLORY. CARRY THE BOATS. CARRY THE CITY. BE THE SAVAGE." 
+                mantra: "NYC HALF MARATHON! 🗽 THIS IS IT! 🎆 FROM BROOKLYN TO MANHATTAN! 🌉 TEAR UP TIMES SQUARE! 🏃‍♀️ THE CITY IS YOURS! 🔑 YOU ARE A LEGEND! 🌟 WE LOVE YOU! 🧡🏅🏆", 
+                goggins: "GAME DAY. NYC HALF. NO MERCY. TAKE SOULS IN TIMES SQUARE. LEAVE YOUR HEART IN CENTRAL PARK. RUN UNTIL YOUR LEGS FALL OFF, THEN CRAWL. CARRY THE BOATS. FINISH." 
             },
+
+            // --- WEEK 14: THE SHAMROCK SHUFFLE (CHICAGO HOMECOMING) ---
             "2026-03-16": { 
-                mantra: "I AM GOLDEN! 🏆 Medal Monday! 🥇 It matches my soul perfectly! 💛 I wear it everywhere today! 🚽 SO PROUD OF US! 🧡🙌✨", 
-                goggins: "Race over. Good job. You finished. Now what? You gonna retire? Get back to work. The boat doesn't carry itself. The log is rotting. Pick it up. The demons are back. They want a rematch. Don't give them a break." 
+                mantra: "MEDAL MONDAY IN THE CHI! 🏅 We are back home! 🏡 Wear that NYC medal to work! 💼 Wear it to the grocery store! 🛒 You are a bicoastal running SENSATION! ✈️ CHICAGO MISSED YOU! 🧡🏙️😍", 
+                goggins: "Race over. You're back in Chicago. Nobody cares about your NYC medal here. Put it in a drawer. The wind is blowing, the lake is cold, and the work isn't done. Get back to the grind." 
             },
             "2026-03-17": { 
-                mantra: "I AM LUCKY TO MOVE MY BODY! 🍀 St. Patrick's Recovery! 🎩 My body is a literal pot of gold! 🍯 Treasuring the movement! 🌈 SO GRATEFUL! 🧡💚🧚‍♀️", 
-                goggins: "St. Patty's. Don't drink the green beer. It's poison for the weak. Drink water. Your liver needs to recover too. Don't undo the work for a cheap buzz. You're better than that. Be the saint of sobriety and suffering." 
+                mantra: "ST. PATRICK'S DAY EXTRAVAGANZA! ☘️ The river is GREEN! 🟢 The vibes are GOLDEN! 🪙 Rest and recover with the luck of the Irish! 🇮🇪 You are the pot of gold at the end of the rainbow! 🌈 CHEERS TEAM! 🧡💚🍻", 
+                goggins: "St. Patrick's Day. The amateur drinkers are out. They are poisoning themselves with green beer. You? Drink water. Be the designated driver of discipline. Watch them get weak while you stay hard." 
             },
             "2026-03-18": { 
-                mantra: "I AM BACK AT IT! 🔙 8 miles! ☕️ The grind never looked so good! 💅 Happy to be sweating again! 💦 GO TEAM GO! 🧡🏃‍♀️🔥", 
-                goggins: "8 miles. The party is over. Reality is back. And reality is 8 miles of pavement. Strap your shoes on. We go again. Forever. There is no finish line. Only more logs. More boats. More darkness. Welcome home." 
+                mantra: "WINDY CITY WEDNESDAY! 🌬️ 8 miles along the Lakefront! 🌊 The wind is just Mother Nature giving you a high five... in the face! 🖐️ LEAN INTO IT! 📐 We are Chicago Tough! 🌭 MUSTARD ONLY! 🧡🌭💪", 
+                goggins: "8 miles. Lakefront Trail. The wind is in your face? Good. It's resistance training. Don't hide behind a runner in front of you. Take the wind like a man. Eat the headwind for breakfast." 
             },
             "2026-03-19": { 
-                mantra: "I AM SMOOTH LIKE BUTTER! 🧈 Recovery 5! 🥞 Gliding through the week! ⛸️ Easy does it! 🤫 LOVE THE FLOW! 🧡🌊✨", 
-                goggins: "Recovery. Flush the legs. Stop limping. You look pathetic. Pain is just a sensation. Ignore it. Your legs don't get a vote. I cast the only vote. The vote is 'move forward.'" 
+                mantra: "FLUSH THE LEGS! 🚽 5 miles easy! 🧸 We are getting ready to SHUFFLE! 🃏 The skyline is winking at you! 😉 You are the heartbeat of this city! 💓 THUMP THUMP! 🧡🏙️✨", 
+                goggins: "5 miles. Recovery. Flush the soreness. You're sore from the plane ride? You're sore from the half marathon? I don't care. Pain is just weakness leaving the body. Evict it." 
             },
             "2026-03-20": { 
-                mantra: "I AM READY FOR CHICAGO! 🏙️ Rest day vibes! 🌬️ The Windy City is calling our names! 📞 One last push to finish strong! 😤 SO EXCITED! 🧡🍕💤", 
-                goggins: "Rest. One last weekend of work. Finish the season. Don't fade. Finish. Be the savage. Finish the drill. Then, maybe, you can have a blueberry. One blueberry. Don't enjoy it." 
+                mantra: "REST BEFORE THE SHUFFLE! 🃏 Grant Park is calling! 📞 One last race to cap the season! 🏁 You are a machine of speed and sparkles! 🤖 BEEP BOOP READY TO ZOOM! 🧡✨💤", 
+                goggins: "Rest. Get ready for Sunday. It's an 8k. That's a sprint. If you plan on pacing yourself, stay home. This is a street fight in running shoes. Sharpen your elbows." 
             },
             "2026-03-21": { 
-                mantra: "I AM A HUMAN ROCKET! 🚀 Shamrock Mile! ☘️ All gas, no brakes! 🛑 I leave flames on the track! 🔥 ZOOM! 🏎️🧡🙌", 
-                goggins: "1 Mile. All out. Vomit at the finish. If you don't puke, you didn't try. Clean up on aisle 4. Leave your spleen on the track. I want to see internal organs. Show me your heart. Literally." 
+                mantra: "SHAKE OUT THE SHAMROCKS! ☘️ 4 miles with strides! 🐆 Run past The Bean and check your reflection! 🪞 LOOKIN' GOOD! 😎 We are green machines ready to go! 🟢 GO SQUAD! 🧡🏃‍♀️🔥", 
+                goggins: "4 miles. Shakeout. Look at The Bean. It's shiny. You should be polished steel. Don't get distracted by the tourists. You are here to take souls on Columbus Drive." 
             },
             "2026-03-22": { 
-                mantra: "I AM THE GRANDE FINALE! 🎆 Shamrock Shuffle! 🏃‍♀️ 8k of pure unadulterated fun! 🤩 Closing the season with a BANG! 💥 WE DID IT TEAM! 🥂🔥🧡", 
-                goggins: "Shamrock Shuffle. It's a race. Beat everyone. Take their souls. Then, and only then, can you have a donut. Maybe. Probably not. Just eat the hole of the donut. The emptiness is the flavor of success." 
+                mantra: "SHAMROCK SHUFFLE 8K! ☘️ GREEN RIVER, GREEN LIGHT! 🚦 GO GO GO! 🔫 SPRINT THROUGH GRANT PARK! 🌳 START THE SEASON WITH A BANG! 💥 WE LOVE CHICAGO! 🧡💚🏙️", 
+                goggins: "SHAMROCK SHUFFLE. It's 4.97 miles of pain. Redline the engine. If you aren't tasting vomit by mile 2, you are jogging. Scorch the earth. Make the river turn red with your effort. DOMINATE." 
             }
         };
 
         let selectedDate = new Date().toISOString().split('T')[0];
         let phaseIndex = 0;
         let isGogginsMode = false;
-        const today = new Date().toISOString().split('T')[0];
+
+        // Date Helpers to handle local time correctly
+        function getLocalFromStr(str) {
+            const [y, m, d] = str.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function getStrFromLocal(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        const today = getStrFromLocal(new Date());
+        
+        // Initialize selectedDate to today
+        selectedDate = today;
 
         // --- FUNCTIONS ---
 
         function init() {
             // Determine initial phase
-            const todayDate = new Date();
+            const todayDate = getLocalFromStr(today);
             const idx = PHASES.findIndex(p => {
-                const start = new Date(p.start);
-                const end = new Date(p.end);
+                const start = getLocalFromStr(p.start);
+                const end = getLocalFromStr(p.end);
                 return todayDate >= start && todayDate <= end;
             });
             if (idx !== -1) phaseIndex = idx;
+            else if (todayDate < getLocalFromStr(PHASES[0].start)) phaseIndex = 0;
+            else phaseIndex = PHASES.length - 1;
 
             // Render initial state
             renderCalendar();
@@ -718,8 +785,8 @@
         function getDaysInPhase() {
             const days = [];
             const currentPhase = PHASES[phaseIndex];
-            const start = new Date(currentPhase.start);
-            const end = new Date(currentPhase.end);
+            const start = getLocalFromStr(currentPhase.start);
+            const end = getLocalFromStr(currentPhase.end);
             
             // Adjust start to Monday
             const startDay = start.getDay(); // 0 is Sun
@@ -742,8 +809,8 @@
         }
 
         function getCountdown() {
-            const raceDay = new Date("2026-03-15");
-            const todayDate = new Date();
+            const raceDay = getLocalFromStr("2026-03-15");
+            const todayDate = getLocalFromStr(today);
             const diff = raceDay - todayDate;
             const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
             return days > 0 ? days : 0;
@@ -780,7 +847,7 @@
 
             // Update Selected Workout
             const workout = TRAINING_DATA[selectedDate];
-            const dateObj = new Date(selectedDate + 'T12:00:00');
+            const dateObj = getLocalFromStr(selectedDate);
             
             document.getElementById('workout-card-title').innerText = (selectedDate === today) ? "Today's Workout" : "Selected";
             document.getElementById('selected-date-display').innerText = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -832,11 +899,13 @@
             const days = getDaysInPhase();
             
             days.forEach(dateObj => {
-                const dateStr = dateObj.toISOString().split('T')[0];
+                const dateStr = getStrFromLocal(dateObj);
                 const workout = TRAINING_DATA[dateStr];
                 
                 // Check if in phase range (to hide padding days)
-                const isInPhase = dateStr >= currentPhase.start && dateStr <= currentPhase.end;
+                const phaseStart = getLocalFromStr(currentPhase.start);
+                const phaseEnd = getLocalFromStr(currentPhase.end);
+                const isInPhase = dateObj >= phaseStart && dateObj <= phaseEnd;
                 
                 if (!isInPhase) {
                     const placeholder = document.createElement('div');
